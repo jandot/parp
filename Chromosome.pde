@@ -37,19 +37,19 @@ class Chromosome {
   }
   
   void draw() {
-    stroke(0);
+    buffer.noFill();
+    buffer.stroke(0);
     if ( this.number % 2 == 0 ) {
-      strokeWeight(5);
+      buffer.strokeWeight(5);
     } else {
-      strokeWeight(3);
+      buffer.strokeWeight(3);
     }
-    arc(0,0, DIAMETER, DIAMETER, this.start_rad, this.stop_rad);
+    buffer.arc(0,0, DIAMETER, DIAMETER, this.start_rad, this.stop_rad);
     
-    fill(0);
-    strokeWeight(0.5);
-    text(this.number, (RADIUS+15)*cos((this.start_rad + this.stop_rad)/2), (RADIUS+15)*sin((this.start_rad + this.stop_rad)/2));
+    buffer.fill(0);
+    buffer.strokeWeight(0.5);
+    buffer.text(this.number, (RADIUS+15)*cos((this.start_rad + this.stop_rad)/2), (RADIUS+15)*sin((this.start_rad + this.stop_rad)/2));
     
-    ellipse(RADIUS*cos(this.centr_rad), RADIUS*sin(this.centr_rad),10,10);
-    noFill();
+    buffer.ellipse(RADIUS*cos(this.centr_rad), RADIUS*sin(this.centr_rad),10,10);
   }
 }

@@ -7,13 +7,15 @@ float PANEL_SIZE = WHOLE_SIZE;
 float DIAMETER = 3*PANEL_SIZE/4;
 float RADIUS = DIAMETER/2;
 
+PGraphics buffer;
+PImage img;
 PFont font;
 
 void setup() {
   size(WHOLE_SIZE,WHOLE_SIZE);
   
-
-  textFont(createFont("SansSerif", 16));
+  font = createFont("SansSerif", 16);
+  textFont(font);
   loadChromosomes();
   loadReadPairs();
 
@@ -21,13 +23,34 @@ void setup() {
 
   smooth();
   noLoop();
+  
+  drawStaticParts();
+}
+
+void drawStaticParts() {
+  buffer = createGraphics(WHOLE_SIZE,WHOLE_SIZE,JAVA2D);
+  buffer.beginDraw();
+  buffer.background(255);
+  buffer.smooth();
+  buffer.strokeCap(SQUARE);
+  buffer.textFont(font);
+
+  buffer.translate(PANEL_SIZE/2, PANEL_SIZE/2);
+  buffer.strokeWeight(3);
+  buffer.stroke(0);
+  drawChromosomes();
+  buffer.noFill();
+  drawReadPairs();
+  buffer.translate(-PANEL_SIZE/2, -PANEL_SIZE/2);
+
+  img = buffer.get(0, 0, buffer.width, buffer.height);
 }
 
 void draw() {
   background(255);
+  image(img, 0, 0);
   translate(PANEL_SIZE/2, PANEL_SIZE/2);
-  drawChromosomes();
-  drawReadPairs();
+  drawHighlightedReadPairs();
   translate(-PANEL_SIZE/2, -PANEL_SIZE/2);
 }
 
@@ -46,8 +69,6 @@ void loadChromosomes() {
 }
 
 void loadReadPairs() {
-  strokeWeight(1);
-  stroke(0,50);
   String[] rows = loadStrings("tmp.csv");
   for ( int i = 0; i < rows.length; i++ ) {
     String[] fields = split(rows[i], TAB);
@@ -58,8 +79,6 @@ void loadReadPairs() {
 }
 
 void drawChromosomes() {
-  strokeWeight(3);
-  stroke(0);
   for ( int i = 1; i <= 24; i++ ) {
     Chromosome chr = (Chromosome) chromosomes.get(i);
     chr.draw();
@@ -67,9 +86,17 @@ void drawChromosomes() {
 }
 
 void drawReadPairs() {
-  noFill();
   for ( int i = 0; i < read_pairs.length; i++ ) {
     read_pairs[i].draw();
+  }
+}
+
+void drawHighlightedReadPairs() {
+  noFill();
+  for ( int i = 0; i < read_pairs.length; i++ ) {
+    if ( read_pairs[i].activated ) {
+      read_pairs[i].draw_highlighted();
+    }
   }
 }
 

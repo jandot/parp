@@ -51,10 +51,6 @@ class ReadPair {
     this.bezier1_y = (RADIUS-30)*sin(this.pos1_rad);
     this.bezier2_x = (RADIUS-30)*cos(this.pos2_rad);
     this.bezier2_y = (RADIUS-30)*sin(this.pos2_rad);
-//    this.bezier1_x = RADIUS*cos(this.pos1_rad);
-//    this.bezier1_y = RADIUS*sin(this.pos1_rad);
-//    this.bezier2_x = RADIUS*cos(this.pos2_rad);
-//    this.bezier2_y = RADIUS*sin(this.pos2_rad);
     this.x2 = RADIUS*cos(this.pos2_rad);
     this.y2 = RADIUS*sin(this.pos2_rad);
 
@@ -70,18 +66,14 @@ class ReadPair {
   }
 
   void draw() {
-    if ( this.activated ) {
-      stroke(255,0,0);
-      strokeWeight(0.5);
-    } else {
-      stroke(this.colour, 5);
-      strokeWeight(0.5);
-    }
-    bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
-//    bezier(RADIUS*cos(this.pos1_rad), RADIUS*sin(this.pos1_rad),
-//          (RADIUS-50)*cos(this.pos1_rad), (RADIUS-50)*sin(this.pos1_rad),
-//          (RADIUS-50)*cos(this.pos2_rad), (RADIUS-50)*sin(this.pos2_rad),
-//          RADIUS*cos(this.pos2_rad), RADIUS*sin(this.pos2_rad));
+    buffer.stroke(this.colour, 5);
+    buffer.strokeWeight(0.5);
+    buffer.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
   }
- 
+
+  void draw_highlighted() {
+    stroke(255,0,0,25);
+    strokeWeight(2);
+    bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+  } 
 }
