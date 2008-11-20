@@ -4,20 +4,25 @@ ReadPair[] read_pairs = new ReadPair[0];
 int WIDTH = 1200;
 int HEIGHT = 400;
 
+int CHR_NUMBER = 17;
+Chromosome chr;
+
 int qual_cutoff = 0;
 
 PGraphics buffer;
 PImage img;
+PImage ideogram;
 PFont font;
 
 void setup() {
-  size(WIDTH, HEIGHT);
+  size(1200, 400);
   
   font = createFont("SansSerif", 10);
   textFont(font);
 
   rectMode(CORNERS);
   loadChromosomes();
+  chr = (Chromosome) chromosomes.get(CHR_NUMBER);
   loadReadPairs();
   smooth();
   noLoop();
@@ -26,13 +31,21 @@ void setup() {
 }
 
 void drawStaticParts() {
-  buffer = createGraphics(WIDTH, HEIGHT,JAVA2D);
+  buffer = createGraphics(WIDTH, HEIGHT, JAVA2D);
   
   buffer.beginDraw();
   buffer.background(255);
   buffer.smooth();
   buffer.strokeCap(SQUARE);
   buffer.textFont(font);
+
+  // Draw the ideogram
+  ideogram = loadImage("ideograms/chr" + CHR_NUMBER + ".png");
+  buffer.image(ideogram,0,0);
+  
+  // Draw the chromosome name and some characteristics
+  buffer.fill(0);
+  buffer.text("Chromosome " + CHR_NUMBER + " (" + nf(chr.len/1000000,0,2) + " Mb)", 5, 50 );
 
   // Draw the line representing the chromosome
   buffer.line(0,buffer.height/2,buffer.width, buffer.height/2);
@@ -59,6 +72,16 @@ void draw() {
   strokeWeight(1);
   stroke(0,255,0,50);
   line(mouseX, 0, mouseX, height);
+  
+  // Draw green line on ideogram
+  float ideogram_line_x = map(mouseX, 0, width, 0, ideogram.width);
+  strokeWeight(2);
+  stroke(0,255,0,200);
+  line(ideogram_line_x, 0, ideogram_line_x, 50);
+  
+  // Draw position
+  fill(0);
+  text("Position: " + nfc(int(map(mouseX, 0, width, 0, chr.len)),0) + " bp", width/2, 20);
 }
 
 void loadChromosomes() {

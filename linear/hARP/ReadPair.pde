@@ -19,7 +19,7 @@ class ReadPair {
     this.pos2 = pos2;
     this.qual = qual;
     this.code = code;
-    if ( chr1 == chr2 ) {
+    if ( chr1.equals(chr2) ) {
       intrachromosomal = true;
     } else {
       intrachromosomal = false;
@@ -37,12 +37,16 @@ class ReadPair {
   }
   
   void draw() {
-    buffer.bezier(x1, buffer.height/2, x1, this.bezier_y, x2, this.bezier_y, x2, buffer.height/2);
+    if ( this.intrachromosomal && this.chr1.number == CHR_NUMBER ) {
+      buffer.bezier(x1, buffer.height/2, x1, this.bezier_y, x2, this.bezier_y, x2, buffer.height/2);
+    }
   }
   
   void draw_highlighted() {
-    if ( this.qual >= qual_cutoff ) {
-      bezier(x1, height/2, x1, this.bezier_y, x2, this.bezier_y, x2, height/2);
+    if ( this.intrachromosomal && this.chr1.number == CHR_NUMBER ) {
+      if ( this.qual >= qual_cutoff ) {
+        bezier(x1, height/2, x1, this.bezier_y, x2, this.bezier_y, x2, height/2);
+      }
     }
   }
   
