@@ -14,7 +14,7 @@ PImage img;
 PFont font;
 
 void setup() {
-  size(WHOLE_SIZE,WHOLE_SIZE);
+  size(800,800);
   
   font = createFont("SansSerif", 16);
   textFont(font);
