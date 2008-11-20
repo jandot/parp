@@ -12,6 +12,7 @@ class ReadPair {
   float bezier2_x;
   float bezier2_y;
   String code;
+  int qual;
   color colour;
   boolean intrachromosomal;
   
@@ -25,11 +26,12 @@ class ReadPair {
   float pos2_bezier;
   boolean activated;
   
-  ReadPair(String chr1, int pos1, String chr2, int pos2, String code) {
+  ReadPair(String chr1, int pos1, String chr2, int pos2, int qual, String code) {
     this.chr1 = (Chromosome) chromosomes.get(int(chr1));
     this.pos1 = pos1;
     this.chr2 = (Chromosome) chromosomes.get(int(chr2));
     this.pos2 = pos2;
+    this.qual = qual;
     this.code = code;
     if ( chr1 == chr2 ) {
       intrachromosomal = true;
@@ -66,14 +68,18 @@ class ReadPair {
   }
 
   void draw() {
-    buffer.stroke(this.colour, 5);
-    buffer.strokeWeight(0.5);
-    buffer.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+    if ( this.qual >= qual_cutoff ) {
+      buffer.stroke(this.colour, 5);
+      buffer.strokeWeight(0.5);
+      buffer.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+    }
   }
 
   void draw_highlighted() {
-    stroke(255,0,0,25);
-    strokeWeight(2);
-    bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+    if ( this.qual >= qual_cutoff ) {
+      stroke(255,0,0,25);
+      strokeWeight(2);
+      bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+    }
   } 
 }
