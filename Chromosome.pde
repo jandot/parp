@@ -38,11 +38,11 @@ class Chromosome {
   
   void draw() {
     buffer.noFill();
-    buffer.stroke(0);
+    buffer.strokeWeight(5);
     if ( this.number % 2 == 0 ) {
-      buffer.strokeWeight(5);
+      buffer.stroke(0);
     } else {
-      buffer.strokeWeight(3);
+      buffer.stroke(150);
     }
     buffer.arc(0,0, DIAMETER, DIAMETER, this.start_rad, this.stop_rad);
     
