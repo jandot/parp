@@ -113,7 +113,7 @@ void drawReadPairs() {
 
 void drawHighlightedReadPairs() {
   noFill();
-  stroke(255,0,0,25);
+  stroke(255,0,0,50);
   strokeWeight(2);
   for ( int i = 0; i < read_pairs.length; i++ ) {
     if ( read_pairs[i].activated ) {
