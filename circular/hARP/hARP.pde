@@ -40,8 +40,6 @@ void drawStaticParts() {
 
   // Draw the chromosomes and read pairs
   buffer.translate(PANEL_SIZE/2, PANEL_SIZE/2);
-  buffer.strokeWeight(3);
-  buffer.stroke(0);
   drawChromosomes();
   buffer.noFill();
   drawReadPairs();
@@ -98,6 +96,8 @@ void loadReadPairs() {
 }
 
 void drawChromosomes() {
+  buffer.strokeWeight(3);
+  buffer.stroke(0);
   for ( int i = 1; i <= 24; i++ ) {
     Chromosome chr = (Chromosome) chromosomes.get(i);
     chr.draw();
@@ -105,6 +105,7 @@ void drawChromosomes() {
 }
 
 void drawReadPairs() {
+  buffer.strokeWeight(0.5);
   for ( int i = 0; i < read_pairs.length; i++ ) {
     read_pairs[i].draw();
   }
@@ -112,6 +113,8 @@ void drawReadPairs() {
 
 void drawHighlightedReadPairs() {
   noFill();
+  stroke(255,0,0,25);
+  strokeWeight(2);
   for ( int i = 0; i < read_pairs.length; i++ ) {
     if ( read_pairs[i].activated ) {
       read_pairs[i].draw_highlighted();

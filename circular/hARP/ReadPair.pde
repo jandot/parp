@@ -70,15 +70,12 @@ class ReadPair {
   void draw() {
     if ( this.qual >= qual_cutoff ) {
       buffer.stroke(this.colour, 5);
-      buffer.strokeWeight(0.5);
       buffer.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
     }
   }
 
   void draw_highlighted() {
     if ( this.qual >= qual_cutoff ) {
-      stroke(255,0,0,25);
-      strokeWeight(2);
       bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
     }
   } 
