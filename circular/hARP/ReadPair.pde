@@ -69,8 +69,8 @@ class ReadPair {
 
   void draw() {
     if ( this.qual >= qual_cutoff ) {
-      buffer.stroke(this.colour, 5);
-      buffer.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
+      buffer_circular.stroke(this.colour, 5);
+      buffer_circular.bezier(x1,y1,bezier1_x,bezier1_y,bezier2_x,bezier2_y,x2,y2);
     }
   }
 
