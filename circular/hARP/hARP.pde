@@ -11,6 +11,8 @@ int qual_cutoff = 0;
 
 PGraphics buffer_circular;
 PImage img_circular;
+PGraphics buffer_linear;
+PImage img_linear;
 PGraphics buffer_qualcutoffslider;
 PImage img_qualcutoffslider;
 
@@ -56,7 +58,11 @@ void drawStaticCircular() {
   
   img_circular = buffer_circular.get(0, 0, buffer_circular.width, buffer_circular.height);
 }
+
+void drawStaticLinear() {
   
+}
+
 void drawStaticQualCutoffSlider() {
   buffer_qualcutoffslider = createGraphics(int(PANEL_SIZE),int(PANEL_SIZE),JAVA2D);
   
@@ -66,6 +72,7 @@ void drawStaticQualCutoffSlider() {
   buffer_qualcutoffslider.textFont(font);
   
   // Draw  cutoff slider (note: slider itself will be drawn in draw() itself!!)
+  buffer_qualcutoffslider.fill(0);
   buffer_qualcutoffslider.text("Quality cutoff", 50, buffer_qualcutoffslider.height - 100 - textAscent());
   buffer_qualcutoffslider.fill(225);
   buffer_qualcutoffslider.strokeCap(ROUND);
