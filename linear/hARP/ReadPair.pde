@@ -19,6 +19,14 @@ class ReadPair {
     this.pos2 = pos2;
     this.qual = qual;
     this.code = code;
+    if ( this.code.equals("DIST") ) {
+      this.colour = color(0,0,0);
+    } else if ( this.code.equals("FF") ) {
+      this.colour = color(0,255,0);
+    } else if ( this.code.equals("RR") ) {
+      this.colour = color(0,0,255);
+    }
+    
     if ( chr1.equals(chr2) ) {
       intrachromosomal = true;
     } else {
@@ -29,7 +37,7 @@ class ReadPair {
     this.x1 = map(this.pos1, 0, this.chr1.len, 0, width);
     this.x2 = map(this.pos2, 0, this.chr2.len, 0, width);
     
-    if ( code.equals("2") ) {
+    if ( code.equals("DIST") ) {
       this.bezier_y = height/2 - 80 + random(-10,10);
     } else {
       this.bezier_y = height/2 + 80 + random(-10,10);
@@ -38,7 +46,10 @@ class ReadPair {
   
   void draw() {
     if ( this.intrachromosomal && this.chr1.number == CHR_NUMBER ) {
-      buffer.bezier(x1, buffer.height/2, x1, this.bezier_y, x2, this.bezier_y, x2, buffer.height/2);
+      if ( this.qual >= qual_cutoff ) {
+        buffer.stroke(this.colour);
+        buffer.bezier(x1, buffer.height/2, x1, this.bezier_y, x2, this.bezier_y, x2, buffer.height/2);
+      }
     }
   }
   
@@ -48,6 +59,11 @@ class ReadPair {
         bezier(x1, height/2, x1, this.bezier_y, x2, this.bezier_y, x2, height/2);
       }
     }
+  }
+
+  void update_x() {
+    this.x1 = map(this.pos1, left_border, left_border + area, 0, width);
+    this.x2 = map(this.pos2, left_border, left_border + area, 0, width);
   }
   
 }
