@@ -4,7 +4,7 @@ ReadPair[] read_pairs = new ReadPair[0];
 int WIDTH = 1200;
 int HEIGHT = 400;
 
-int CHR_NUMBER = 16;
+int CHR_NUMBER = 17;
 Chromosome chr;
 
 int ideogram_x1 = 3;
@@ -145,7 +145,7 @@ void loadChromosomes() {
 }
 
 void loadReadPairs() {
-  String[] rows = loadStrings("data_melanesian.tsv");
+  String[] rows = loadStrings("data.tsv");
   for ( int i = 0; i < rows.length; i++ ) {
     String[] fields = split(rows[i], TAB);
     
