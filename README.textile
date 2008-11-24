@@ -1,5 +1,9 @@
 h1. hARP -- Human Abnormal ReadPair Visualization
 
-A tool for visualizing abnormal read pairs (i.e. too far apart, forward-forward or reverse-reverse)
+A tool for visualizing abnormal read pairs (i.e. too far apart, forward-forward or reverse-reverse).
 
-!picture.png!
+!circular/hARP/picture.png!
+
+One of the ways to identify *structural variation* in a genome is to look at mapping of a read-pair library on a reference genome. Any read-pair (i.e. the ends of the same clone) normally maps in a forward-reverse orientation at a distance from each other that corresponds to the insert size of the clone library. Structural variation between the reference genome used for mapping and the genome used to create the clone library will cause the reads to map in the wrong orientation (i.e. forward-forward or reverse-reverse; indicating an inversion) or at too large or too small a distance (indicating an insertion or deletion in the sample, respectively).
+
+hARP basically displays raw read pair mapping data and does not make any assumptions on models as might be required when doing a statistical analysis of the same data. By showing a birds' eye view it helps in interpreting what structural variations are present.
