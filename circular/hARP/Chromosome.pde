@@ -36,7 +36,7 @@ class Chromosome {
     
   }
   
-  void draw() {
+  void draw_circular() {
     buffer_circular.noFill();
     buffer_circular.strokeWeight(5);
     if ( this.number % 2 == 0 ) {
