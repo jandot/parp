@@ -8,11 +8,26 @@ class Chromosome {
   float stop_whole_genome;
   float start_rad;
   float stop_rad;
+  ReadPair[] intrachromosomal_read_pairs = new ReadPair[0]; //array with all intrachromosomal read pairs
+  Hashtable interchromosomal_read_pairs = new Hashtable(); // hash with all interchromosomal read pair (key = other_chr, value = array with read pairs)
   
   Chromosome(int number, int len, int centr_start, int centr_stop) {
     this.number = number;
     this.len = len/1000; // in kb
     this.centr = (centr_start/1000 + centr_stop/1000)/2;
+    for ( int i = this.number + 1; i <= 24; i++ ) {
+      this.interchromosomal_read_pairs.put(i, new ReadPair[0]);
+    }
+  }
+
+  void addReadPair(ReadPair rp) {
+    if ( rp.intrachromosomal ) {
+      this.intrachromosomal_read_pairs = ( ReadPair[] ) append(this.intrachromosomal_read_pairs, rp);
+    } else {
+      ReadPair[] rps = ( ReadPair[] ) this.interchromosomal_read_pairs.get(rp.chr2.number);
+      rps = ( ReadPair[] ) append(rps, rp);
+      this.interchromosomal_read_pairs.put(rp.chr2.number, rps);
+    }
   }
 
   void calculateRadians() {
@@ -49,6 +64,8 @@ class Chromosome {
     buffer_circular.fill(0);
     buffer_circular.strokeWeight(0.5);
     buffer_circular.text(this.number, (RADIUS+15)*cos((this.start_rad + this.stop_rad)/2), (RADIUS+15)*sin((this.start_rad + this.stop_rad)/2));
+    
+    chromosome_labels = ( Label[] ) append(chromosome_labels, new Label(int((RADIUS+15)*cos((this.start_rad + this.stop_rad)/2)+WIDTH/4), int((RADIUS+15)*sin((this.start_rad + this.stop_rad)/2) - textAscent() + HEIGHT/4), int(textWidth(str(this.number))), int(textAscent()), this.number));
     
     buffer_circular.ellipse(RADIUS*cos(this.centr_rad), RADIUS*sin(this.centr_rad),10,10);
   }

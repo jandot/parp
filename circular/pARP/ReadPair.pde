@@ -30,10 +30,17 @@ class ReadPair {
   boolean activated;
   
   ReadPair(String chr1, int pos1, String chr2, int pos2, String code, int qual) {
+    //TODO: sort by number: chr1 should be the bigger chr
+    if ( int(chr1) > int(chr2) ) {
+      String tmp = chr1;
+      chr1 = chr2;
+      chr2 = tmp;
+    }
     this.chr1 = (Chromosome) chromosomes.get(int(chr1));
     this.pos1 = pos1;
     this.chr2 = (Chromosome) chromosomes.get(int(chr2));
     this.pos2 = pos2;
+        
     this.qual = qual;
     this.code = code;
     if ( this.chr1.number == this.chr2.number ) {
@@ -72,11 +79,20 @@ class ReadPair {
       this.colour = color(0,0,255);
       this.linear_bezier_y = HEIGHT/8 + 40 + random(-5,5);
     }
+    
+    if ( chr1 == chr2 ) {
+      this.chr1.intrachromosomal_read_pairs = ( ReadPair[] ) append(this.chr1.intrachromosomal_read_pairs, this);
+    } else {
+//      println(chr1 + " " + chr2);
+//      ReadPair[] inter = ( ReadPair[] ) this.chr1.interchromosomal_read_pairs.get(chr2);
+//      inter = ( ReadPair[] ) append(inter, this);
+//      this.chr1.interchromosomal_read_pairs.put(chr2, inter);
+    }
   }
 
   void draw_circular() {
     if ( this.qual >= qual_cutoff && this.intrachromosomal == false) {
-      buffer_circular.stroke(this.colour, 5);
+      buffer_circular.stroke(this.colour, 1);
       buffer_circular.bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
     }
   }
@@ -97,20 +113,19 @@ class ReadPair {
   }
 
   void draw_linear_intrachromosomal_highlighted(Chromosome chr, String position) {
-    if ( ( this.chr1.number == chr.number || this.chr2.number == chr.number ) && this.intrachromosomal && this.activated ) {
-      stroke(255,0,0);
-      float y;
-      if ( position == "top" ) {
-        y = HEIGHT/8;
-      } else {
-        y = 3*HEIGHT/8;
-      }
-      bezier(this.linear_x1, y, this.linear_x1, HEIGHT/2 + linear_bezier_y, this.linear_x2, HEIGHT/2 + linear_bezier_y, this.linear_x2, y);
-    }
-    
+//    if ( ( this.chr1.number == chr.number || this.chr2.number == chr.number ) && this.intrachromosomal && this.activated ) {
+//      stroke(255,0,0);
+//      float y;
+//      if ( position == "top" ) {
+//        y = HEIGHT/8;
+//      } else {
+//        y = 3*HEIGHT/8;
+//      }
+//      bezier(this.linear_x1, y, this.linear_x1, HEIGHT/2 + linear_bezier_y, this.linear_x2, HEIGHT/2 + linear_bezier_y, this.linear_x2, y);
+//    }
   }
   
-  void draw_linear_interchromosomal(PGraphics buffer, Chromosome chr1, Chromosome chr2) {
-    
-  }
+//  void draw_linear_interchromosomal(PGraphics buffer, Chromosome chr1, Chromosome chr2) {
+//    
+//  }
 }
