@@ -20,9 +20,6 @@ PImage img_linear_panel;
 PGraphics buffer_qualcutoffslider;
 PImage img_qualcutoffslider;
 
-//ReadPair[] top_chromosome_intrachromosomal_read_pairs;
-//ReadPair[] bottom_chromosome_intrachromosomal_read_pairs;
-
 PFont font;
 
 int active_panel = 0; // 1 = circular panel; 2 = top linear; 3 = bottom linear
@@ -44,7 +41,6 @@ void setup() {
   
   loadChromosomes();
   loadReadPairs();
-//  addReadPairsToChromosomes();
 
   chr1 = (Chromosome) chromosomes.get(chr_number_1);
   chr2 = (Chromosome) chromosomes.get(chr_number_2);

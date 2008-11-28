@@ -27,10 +27,3 @@ void loadReadPairs() {
   }
 }
 
-//
-//void addReadPairsToChromosomes() {
-//  for ( int i = 0; i < read_pair_counter; i++ ) {
-//    Chromosome chr = ( Chromosome ) chromosomes.get(read_pairs[i].chr1.number);
-//    chr.addReadPair(read_pairs[i]);
-//  }
-//}
