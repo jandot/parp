@@ -89,59 +89,54 @@ class ReadPair {
 
   }
 
-  void draw_circular() {
+  void drawBufferCircularAll() {
     if ( this.qual >= qual_cutoff && this.intrachromosomal == false) {
-      buffer_circular.stroke(this.colour, 1);
-      buffer_circular.bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
+      buffer_circular_all.stroke(this.colour, 1);
+      buffer_circular_all.bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
     }
   }
 
-  void draw_circular_highlighted() {
+  void drawBufferCircularHighlighted() {
     if ( this.qual >= qual_cutoff && this.intrachromosomal  == false) {
-      bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
+      buffer_circular_highlighted.bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
     }
   }
   
-  void draw_linear_intrachromosomal(PGraphics buffer, int line_y, String position) {
-    if ( this.intrachromosomal ) {
-      if ( this.qual >= qual_cutoff ) {
-        float linear_bezier_y;
-        int dy;
-        if ( position == "top" ) {
-          dy = 40;
-        } else {
-          dy = -40;
-        }
-        if ( this.code.equals("DIST") ) {
-          linear_bezier_y = line_y - dy + this.bezier_random;
-        } else {
-          linear_bezier_y = line_y + dy + this.bezier_random;
-        }
-
-        buffer.stroke(this.colour);
-        buffer.bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
+  void drawBufferLinearZoom(int line_y, String position) {
+    if ( this.qual >= qual_cutoff ) {
+      float linear_bezier_y;
+      int dy;
+      if ( position == "top" ) {
+        dy = 20;
+      } else {
+        dy = -20;
       }
+      if ( this.code.equals("DIST") ) {
+        linear_bezier_y = line_y - dy + this.bezier_random;
+      } else {
+        linear_bezier_y = line_y + dy + this.bezier_random;
+      }
+      buffer_linear_zoom.stroke(this.colour);
+      buffer_linear_zoom.bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
     }
   }
   
-  void draw_linear_intrachromosomal_highlighted(int line_y, String position) {
-      if ( this.qual >= qual_cutoff && this.activated ) {
-        float linear_bezier_y;
-        int dy;
-        if ( position == "top" ) {
-          dy = 40;
-        } else {
-          dy = -40;
-        }
-        if ( this.code.equals("DIST") ) {
-          linear_bezier_y = line_y - dy + this.bezier_random;
-        } else {
-          linear_bezier_y = line_y + dy + this.bezier_random;
-        }
-
-        stroke(255,0,0);
-        strokeWeight(0.5);
-        bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
+  void drawBufferLinearHighlighted(int line_y, String position) {
+    if ( this.qual >= qual_cutoff ) {
+      float linear_bezier_y;
+      int dy;
+      if ( position == "top" ) {
+        dy = 20;
+      } else {
+        dy = -20;
       }
+      if ( this.code.equals("DIST") ) {
+        linear_bezier_y = line_y - dy + this.bezier_random;
+      } else {
+        linear_bezier_y = line_y + dy + this.bezier_random;
+      }
+      buffer_linear_highlighted.bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
+    }
   }
+
 }

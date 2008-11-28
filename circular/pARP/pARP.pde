@@ -13,8 +13,17 @@ int qual_cutoff = 0;
 
 int read_pair_counter = 0;
 
-PGraphics buffer_circular;
-PImage img_circular;
+PGraphics buffer_circular_all;
+PImage img_circular_all;
+PGraphics buffer_circular_highlighted;
+PImage img_circular_highlighted;
+PGraphics buffer_linear_ideograms;
+PImage img_linear_ideograms;
+PGraphics buffer_linear_zoom;
+PImage img_linear_zoom;
+PGraphics buffer_linear_highlighted;
+PImage img_linear_highlighted;
+
 PGraphics buffer_linear_panel;
 PImage img_linear_panel;
 PGraphics buffer_qualcutoffslider;
@@ -38,6 +47,7 @@ void setup() {
   size(WIDTH, HEIGHT);
   
   font = createFont("SansSerif", 16);
+  textFont(font);
   
   loadChromosomes();
   loadReadPairs();
@@ -51,29 +61,39 @@ void setup() {
   smooth();
   noLoop();
 
-  drawStaticParts();
+  drawInitialBuffers();
+}
+
+void drawInitialBuffers() {
+  drawBufferCircularAll();
+  drawBufferCircularHighlighted();
+  drawBufferLinearIdeograms();
+  drawBufferLinearZoom();
+  drawBufferLinearHighlighted();
 }
 
 void draw() {
   background(255);
 
-  // First all the static stuff
-  image(img_qualcutoffslider, WIDTH/2, 0);
-  image(img_circular, 0, 0);
-  image(img_linear_panel, 0, HEIGHT/2);
+  image(img_circular_highlighted, 0, 0);
+  translate(0,HEIGHT/2);
+  image(img_linear_highlighted,0,0);
   
-  // Highlight readpairs
-  translate(WIDTH/4, HEIGHT/4);
-  drawCircularHighlightedReadPairs();
-  translate(-WIDTH/4, -HEIGHT/4);
-
-  drawLinearHighlightedReadPairs();
-
-  // Draw quality score cutoff
-  float y_qual_cutoff = map(qual_cutoff, 0, 40, HEIGHT/2 - 95, HEIGHT/2 - 55);
-  stroke(0);
-  strokeWeight(2);
-  fill(0);
-  line(WIDTH/2 + 55, y_qual_cutoff, WIDTH/2 + 65, y_qual_cutoff);
-  text(qual_cutoff, WIDTH/2 + 55, HEIGHT/2 - 20);
+  translate(0,-HEIGHT/2);
+//  image(img_linear_panel, 0, HEIGHT/2);
+//  
+//  // Highlight readpairs
+//  translate(WIDTH/4, HEIGHT/4);
+//  drawCircularHighlightedReadPairs();
+//  translate(-WIDTH/4, -HEIGHT/4);
+//
+//  drawLinearHighlightedReadPairs();
+//
+//  // Draw quality score cutoff
+//  float y_qual_cutoff = map(qual_cutoff, 0, 40, HEIGHT/2 - 95, HEIGHT/2 - 55);
+//  stroke(0);
+//  strokeWeight(2);
+//  fill(0);
+//  line(WIDTH/2 + 55, y_qual_cutoff, WIDTH/2 + 65, y_qual_cutoff);
+//  text(qual_cutoff, WIDTH/2 + 55, HEIGHT/2 - 20);
 }

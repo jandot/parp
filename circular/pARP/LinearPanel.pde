@@ -13,50 +13,92 @@ class LinearPanel {
     this.interchromosomal_read_pair_ids = ( int[] ) top_chromosome.chr.interchromosomal_read_pair_ids.get(chr2);
   }
 
-  void drawStatic() {
-    buffer_linear_panel = createGraphics(WIDTH, this.height, JAVA2D);
-    buffer_linear_panel.beginDraw();
-    buffer_linear_panel.background(255);
-    buffer_linear_panel.smooth();
-    buffer_linear_panel.strokeCap(SQUARE);
-    buffer_linear_panel.rectMode(CORNERS);
-    buffer_linear_panel.textFont(font);
-    this.top_chromosome.draw();
-    this.bottom_chromosome.draw();
-    buffer_linear_panel.stroke(0);
-    drawInterChromosomalStatic();
+  void drawBufferLinearIdeograms() {
+    buffer_linear_ideograms = createGraphics(WIDTH, this.height, JAVA2D);
+    buffer_linear_ideograms.beginDraw();
+    buffer_linear_ideograms.background(255);
+    buffer_linear_ideograms.smooth();
+    buffer_linear_ideograms.strokeCap(SQUARE);
+    buffer_linear_ideograms.rectMode(CORNERS);
+    buffer_linear_ideograms.textFont(font);
+    this.top_chromosome.drawBufferLinearIdeograms();
+    this.bottom_chromosome.drawBufferLinearIdeograms();
+    buffer_linear_ideograms.endDraw();
   }
-  
-  void drawIntraChromosomalDynamic() {
-    translate(0, HEIGHT/2);
-    this.top_chromosome.drawHighlightedReadPairs();
-    this.bottom_chromosome.drawHighlightedReadPairs();
-    translate(0, -HEIGHT/2);
-  }
-  
-  void drawInterChromosomalStatic() {
+
+  void drawBufferLinearZoom() {
+    buffer_linear_zoom = createGraphics(WIDTH, this.height, JAVA2D);
+    buffer_linear_zoom.beginDraw();
+    buffer_linear_zoom.background(img_linear_ideograms);
+    buffer_linear_zoom.smooth();
+    buffer_linear_zoom.strokeCap(SQUARE);
+    buffer_linear_zoom.rectMode(CORNERS);
+    buffer_linear_zoom.textFont(font);
+    
+    // First draw the zoom highlight box and intrachromosomal readpairs
+    this.top_chromosome.drawBufferLinearZoom();
+    this.bottom_chromosome.drawBufferLinearZoom();
+    
+    // Then draw the interchromosomal readpairs
+    buffer_linear_zoom.stroke(0);
     if ( this.interchromosomal_read_pair_ids != null ) {
       for ( int i = 0; i < this.interchromosomal_read_pair_ids.length; i++ ) {
         ReadPair rp = ( ReadPair ) read_pairs.get(this.interchromosomal_read_pair_ids[i]);
         if ( rp.qual >= qual_cutoff ) {
-          buffer_linear_panel.bezier(rp.linear_x1, top_chromosome.line_y, rp.linear_x1, top_chromosome.line_y + 25, rp.linear_x2, bottom_chromosome.line_y - 25, rp.linear_x2, bottom_chromosome.line_y);
+          float top_x;
+          float bottom_x;
+          if ( rp.chr1 == top_chromosome.chr ) {
+            top_x = rp.linear_x1;
+            bottom_x = rp.linear_x2;
+          } else {
+            top_x = rp.linear_x2;
+            bottom_x = rp.linear_x1;
+          }
+          buffer_linear_zoom.bezier(top_x, top_chromosome.line_y, top_x, top_chromosome.line_y + 25, bottom_x, bottom_chromosome.line_y - 25, bottom_x, bottom_chromosome.line_y);
         }
       }
     }
+    
+    buffer_linear_zoom.endDraw();
   }
   
-  void drawInterChromosomalDynamic() {
-    translate(0, HEIGHT/2);
+  void drawBufferLinearHighlighted() {
+    buffer_linear_highlighted = createGraphics(WIDTH, this.height, JAVA2D);
+    buffer_linear_highlighted.beginDraw();
+    buffer_linear_highlighted.background(img_linear_zoom);
+    buffer_linear_highlighted.smooth();
+    buffer_linear_highlighted.strokeCap(SQUARE);
+    buffer_linear_highlighted.rectMode(CORNERS);
+    buffer_linear_highlighted.textFont(font);
+    buffer_linear_highlighted.strokeWeight(1);
+    buffer_linear_highlighted.stroke(255,0,0);
+    buffer_linear_highlighted.noFill();
+    
+    // First draw the zoom highlight box and intrachromosomal readpairs
+    this.top_chromosome.drawBufferLinearHighlighted();
+    this.bottom_chromosome.drawBufferLinearHighlighted();
+    
+    // Then draw the interchromosomal readpairs
     if ( this.interchromosomal_read_pair_ids != null ) {
       stroke(255,0,0);
       for ( int i = 0; i < this.interchromosomal_read_pair_ids.length; i++ ) {
         ReadPair rp = ( ReadPair ) read_pairs.get(this.interchromosomal_read_pair_ids[i]);
         if ( rp.activated && rp.qual >= qual_cutoff ) {
-          bezier(rp.linear_x1, top_chromosome.line_y, rp.linear_x1, top_chromosome.line_y + 25, rp.linear_x2, bottom_chromosome.line_y - 25, rp.linear_x2, bottom_chromosome.line_y);
+          float top_x;
+          float bottom_x;
+          if ( rp.chr1 == top_chromosome.chr ) {
+            top_x = rp.linear_x1;
+            bottom_x = rp.linear_x2;
+          } else {
+            top_x = rp.linear_x2;
+            bottom_x = rp.linear_x1;
+          }
+          buffer_linear_highlighted.bezier(top_x, top_chromosome.line_y, top_x, top_chromosome.line_y + 25, bottom_x, bottom_chromosome.line_y - 25, bottom_x, bottom_chromosome.line_y);
         }
       }
     }
-    translate(0, -HEIGHT/2);
+    
+    buffer_linear_highlighted.endDraw();
   }
-
+  
 }

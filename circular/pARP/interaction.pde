@@ -18,6 +18,18 @@ void mouseMoved() {
       read_pairs.put(rp.id, rp);
     }
   } else if ( active_panel == 2 ) {
+    linearPanel.top_chromosome.zoom_box_left_activated = false;
+    linearPanel.top_chromosome.zoom_box_right_activated = false;
+    if ( ( mouseY >= HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 && mouseY <= HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 + linearPanel.top_chromosome.ideogram.height) ) {
+      strokeWeight(5);
+      stroke(50);
+      if ( abs( mouseX - linearPanel.top_chromosome.zoom_box_ideogram_x1 ) < 5 ) {
+        linearPanel.top_chromosome.zoom_box_left_activated = true;
+      } else if ( abs(mouseX - linearPanel.top_chromosome.zoom_box_ideogram_x2 ) < 5 ) {
+        linearPanel.top_chromosome.zoom_box_right_activated = true;
+      }
+    }
+    
     for ( int i = 0; i < linearPanel.top_chromosome.chr.intrachromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.top_chromosome.chr.intrachromosomal_read_pair_ids[i]);
       if ( abs(rp.linear_x1 - mouseX) < 5 || abs(rp.linear_x2 - mouseX) < 5 ) {
@@ -61,6 +73,8 @@ void mouseMoved() {
       read_pairs.put(rp.id, rp);
     }
   }
+  drawBufferCircularHighlighted();
+  drawBufferLinearHighlighted();
   redraw();
 }
 
@@ -78,25 +92,12 @@ void mouseClicked() {
       }
     }
     linearPanel = new LinearPanel(chr_number_1, chr_number_2);
-    drawStaticLinearPanel();
+    drawBufferLinearIdeograms();
+    drawBufferLinearZoom();
+    drawBufferLinearHighlighted();
     redraw();
   }
 }
-
-void mouseDragged() {
-  if ( mouseX >= WIDTH/2 + 50 && mouseX <= WIDTH/2 + 70 ) {
-    if ( mouseY >= HEIGHT/2 - 95 && mouseY <= HEIGHT/2 - 55 ) {
-      qual_cutoff = int(map(mouseY, HEIGHT/2 - 95, HEIGHT/2 - 55, 0, 40));
-      drawStaticCircularPanel();
-      linearPanel = new LinearPanel(chr_number_1, chr_number_2);
-      drawStaticLinearPanel();
-    }
-  }
-
-
-  redraw();
-}
-
 
 void keyPressed() {
   if ( key == 's' ) {

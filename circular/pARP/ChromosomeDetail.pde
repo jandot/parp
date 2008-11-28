@@ -35,34 +35,53 @@ class ChromosomeDetail {
 
   }
   
-  void draw() {
-    buffer_linear_panel.image(this.ideogram, this.ideogram_x1, this.ideogram_y1);
+  void drawBufferLinearIdeograms() {
+    buffer_linear_ideograms.image(this.ideogram, this.ideogram_x1, this.ideogram_y1);
     
-    buffer_linear_panel.fill(0,255,0,50);
-    buffer_linear_panel.stroke(0);
-    buffer_linear_panel.strokeWeight(1);
-    buffer_linear_panel.rect(this.zoom_box_ideogram_x1, this.ideogram_y1, this.zoom_box_ideogram_x2, this.ideogram_y1 + this.ideogram.height);
+    buffer_linear_ideograms.fill(0);
+    buffer_linear_ideograms.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
+    buffer_linear_ideograms.line(0, this.line_y, buffer_linear_ideograms.width, this.line_y);
     
-    buffer_linear_panel.fill(0);
-    buffer_linear_panel.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
-    buffer_linear_panel.line(0, this.line_y, buffer_linear_panel.width, this.line_y);
-    
-    buffer_linear_panel.noFill();
-    buffer_linear_panel.strokeWeight(0.5);
+    buffer_linear_ideograms.noFill();
+    buffer_linear_ideograms.strokeWeight(0.5);
 
+
+//    
+//    if ( this.zoom_box_left_activated ) {
+//      println("hi");
+//      buffer_linear_panel.strokeWeight(5);
+//      buffer_linear_panel.stroke(100);
+//      buffer_linear_panel.line(this.zoom_box_ideogram_x1, this.ideogram_y1, this.zoom_box_ideogram_x1, this.ideogram.height + 2*this.ideogram_y1);
+//    } else if ( this.zoom_box_right_activated ) {
+//      buffer_linear_panel.strokeWeight(5);
+//      buffer_linear_panel.stroke(100);
+//      buffer_linear_panel.line(this.zoom_box_ideogram_x2, this.ideogram_y1, this.zoom_box_ideogram_x2, this.ideogram.height + 2*this.ideogram_y1);
+//    }
+  }
+  
+  void drawBufferLinearZoom() {
+    // Draw the zoom box
+    buffer_linear_zoom.fill(0,255,0,50);
+    buffer_linear_zoom.stroke(0);
+    buffer_linear_zoom.strokeWeight(1);
+    buffer_linear_zoom.rect(this.zoom_box_ideogram_x1, this.ideogram_y1, this.zoom_box_ideogram_x2, this.ideogram_y1 + this.ideogram.height);
+    buffer_linear_zoom.noFill();
+    
+    // Draw the intrachromosomal readpairs
+    buffer_linear_zoom.strokeWeight(0.5);
     for ( int i = 0; i < this.chr.intrachromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
-      rp.draw_linear_intrachromosomal(buffer_linear_panel, this.line_y, this.panel);
+      rp.drawBufferLinearZoom(this.line_y, this.panel);
     }
   }
   
-  void drawHighlightedReadPairs() {
-    if ( this.chr.intrachromosomal_read_pair_ids != null ) {
-      for ( int i = 0; i < this.chr.intrachromosomal_read_pair_ids.length; i++ ) {
-        ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
-        rp.draw_linear_intrachromosomal_highlighted(this.line_y, this.panel);
+  void drawBufferLinearHighlighted() {
+    for ( int i = 0; i < this.chr.intrachromosomal_read_pair_ids.length; i++ ) {
+      ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
+      if ( rp.activated ) {
+        rp.drawBufferLinearHighlighted(this.line_y, this.panel);
       }
     }
-
   }
+
 }
