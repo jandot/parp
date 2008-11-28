@@ -23,14 +23,14 @@ void loadReadPairs() {
     } else {
       rp = new ReadPair(fields[0], int(fields[1]), fields[2], int(fields[3]), fields[4], int(fields[5]));
     }
-    read_pairs = (ReadPair[]) append(read_pairs, rp);
+    read_pairs.put(rp.id, rp);
   }
 }
 
-
-void addReadPairsToChromosomes() {
-  for ( int i = 0; i < read_pairs.length; i++ ) {
-    Chromosome chr = ( Chromosome ) chromosomes.get(read_pairs[i].chr1.number);
-    chr.addReadPair(read_pairs[i]);
-  }
-}
+//
+//void addReadPairsToChromosomes() {
+//  for ( int i = 0; i < read_pair_counter; i++ ) {
+//    Chromosome chr = ( Chromosome ) chromosomes.get(read_pairs[i].chr1.number);
+//    chr.addReadPair(read_pairs[i]);
+//  }
+//}

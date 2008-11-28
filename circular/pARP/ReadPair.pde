@@ -1,4 +1,5 @@
 class ReadPair {
+  int id;
   Chromosome chr1;
   int pos1;
   float circular_x1;
@@ -17,7 +18,7 @@ class ReadPair {
   boolean intrachromosomal;
   float linear_x1;
   float linear_x2;
-  float linear_bezier_y;
+  float bezier_random;
   
   float pos1_whole_genome;
   float pos2_whole_genome;
@@ -30,7 +31,8 @@ class ReadPair {
   boolean activated;
   
   ReadPair(String chr1, int pos1, String chr2, int pos2, String code, int qual) {
-    //TODO: sort by number: chr1 should be the bigger chr
+    this.id = read_pair_counter;
+    read_pair_counter++;
     if ( int(chr1) > int(chr2) ) {
       String tmp = chr1;
       chr1 = chr2;
@@ -40,6 +42,7 @@ class ReadPair {
     this.pos1 = pos1;
     this.chr2 = (Chromosome) chromosomes.get(int(chr2));
     this.pos2 = pos2;
+    this.bezier_random = random(-5,5);
         
     this.qual = qual;
     this.code = code;
@@ -71,23 +74,19 @@ class ReadPair {
     
     if ( this.code.equals("DIST") ) {
       this.colour = color(0,0,0);
-      this.linear_bezier_y = HEIGHT/8 - 40 + random(-5,5);
     } else if ( this.code.equals("FF") ) {
       this.colour = color(0,255,0);
-      this.linear_bezier_y = HEIGHT/8 + 40 + random(-5,5);
     } else if ( this.code.equals("RR") ) {
       this.colour = color(0,0,255);
-      this.linear_bezier_y = HEIGHT/8 + 40 + random(-5,5);
     }
     
-    if ( chr1 == chr2 ) {
-      this.chr1.intrachromosomal_read_pairs = ( ReadPair[] ) append(this.chr1.intrachromosomal_read_pairs, this);
+    if ( this.intrachromosomal ) {
+      this.chr1.addReadPair(this);
     } else {
-//      println(chr1 + " " + chr2);
-//      ReadPair[] inter = ( ReadPair[] ) this.chr1.interchromosomal_read_pairs.get(chr2);
-//      inter = ( ReadPair[] ) append(inter, this);
-//      this.chr1.interchromosomal_read_pairs.put(chr2, inter);
+      this.chr2.addReadPair(this, this.chr1);
+      this.chr1.addReadPair(this, this.chr2);
     }
+
   }
 
   void draw_circular() {
@@ -103,29 +102,46 @@ class ReadPair {
     }
   }
   
-  void draw_linear_intrachromosomal(PGraphics buffer, Chromosome chr) {
-    if ( this.chr1.number == chr.number && this.intrachromosomal ) {
+  void draw_linear_intrachromosomal(PGraphics buffer, int line_y, String position) {
+    if ( this.intrachromosomal ) {
       if ( this.qual >= qual_cutoff ) {
+        float linear_bezier_y;
+        int dy;
+        if ( position == "top" ) {
+          dy = 40;
+        } else {
+          dy = -40;
+        }
+        if ( this.code.equals("DIST") ) {
+          linear_bezier_y = line_y - dy + this.bezier_random;
+        } else {
+          linear_bezier_y = line_y + dy + this.bezier_random;
+        }
+
         buffer.stroke(this.colour);
-        buffer.bezier(this.linear_x1, buffer.height/2, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, buffer.height/2);
+        buffer.bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
       }
     }
   }
-
-  void draw_linear_intrachromosomal_highlighted(Chromosome chr, String position) {
-//    if ( ( this.chr1.number == chr.number || this.chr2.number == chr.number ) && this.intrachromosomal && this.activated ) {
-//      stroke(255,0,0);
-//      float y;
-//      if ( position == "top" ) {
-//        y = HEIGHT/8;
-//      } else {
-//        y = 3*HEIGHT/8;
-//      }
-//      bezier(this.linear_x1, y, this.linear_x1, HEIGHT/2 + linear_bezier_y, this.linear_x2, HEIGHT/2 + linear_bezier_y, this.linear_x2, y);
-//    }
-  }
   
-//  void draw_linear_interchromosomal(PGraphics buffer, Chromosome chr1, Chromosome chr2) {
-//    
-//  }
+  void draw_linear_intrachromosomal_highlighted(int line_y, String position) {
+      if ( this.qual >= qual_cutoff && this.activated ) {
+        float linear_bezier_y;
+        int dy;
+        if ( position == "top" ) {
+          dy = 40;
+        } else {
+          dy = -40;
+        }
+        if ( this.code.equals("DIST") ) {
+          linear_bezier_y = line_y - dy + this.bezier_random;
+        } else {
+          linear_bezier_y = line_y + dy + this.bezier_random;
+        }
+
+        stroke(255,0,0);
+        strokeWeight(0.5);
+        bezier(this.linear_x1, line_y, this.linear_x1, linear_bezier_y, this.linear_x2, linear_bezier_y, this.linear_x2, line_y);
+      }
+  }
 }

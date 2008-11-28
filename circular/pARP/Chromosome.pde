@@ -8,26 +8,30 @@ class Chromosome {
   float stop_whole_genome;
   float start_rad;
   float stop_rad;
-  ReadPair[] intrachromosomal_read_pairs = new ReadPair[0]; //array with all intrachromosomal read pairs
-  Hashtable interchromosomal_read_pairs = new Hashtable(); // hash with all interchromosomal read pair (key = other_chr, value = array with read pairs)
+  int[] intrachromosomal_read_pair_ids = new int[0]; //array with IDs of all intrachromosomal read pairs
+  Hashtable interchromosomal_read_pair_ids = new Hashtable(); // hash with all interchromosomal read pair (key = other_chr, value = array with read pairs)
   
   Chromosome(int number, int len, int centr_start, int centr_stop) {
     this.number = number;
     this.len = len/1000; // in kb
     this.centr = (centr_start/1000 + centr_stop/1000)/2;
     for ( int i = this.number + 1; i <= 24; i++ ) {
-      this.interchromosomal_read_pairs.put(i, new ReadPair[0]);
+      this.interchromosomal_read_pair_ids.put(i, new int[0]);
     }
   }
 
   void addReadPair(ReadPair rp) {
-    if ( rp.intrachromosomal ) {
-      this.intrachromosomal_read_pairs = ( ReadPair[] ) append(this.intrachromosomal_read_pairs, rp);
-    } else {
-      ReadPair[] rps = ( ReadPair[] ) this.interchromosomal_read_pairs.get(rp.chr2.number);
-      rps = ( ReadPair[] ) append(rps, rp);
-      this.interchromosomal_read_pairs.put(rp.chr2.number, rps);
+    this.intrachromosomal_read_pair_ids = ( int[] ) append(this.intrachromosomal_read_pair_ids, rp.id);
+  }
+  
+  void addReadPair(ReadPair rp, Chromosome other_chr) {
+    int[] rp_ids;
+    rp_ids = (int[]) this.interchromosomal_read_pair_ids.get(other_chr.number);
+    if ( rp_ids == null ) {
+      rp_ids = new int[0];
     }
+    rp_ids = ( int[] ) append(rp_ids, rp.id);
+    this.interchromosomal_read_pair_ids.put(other_chr.number, rp_ids);
   }
 
   void calculateRadians() {
