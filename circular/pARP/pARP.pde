@@ -93,27 +93,18 @@ void draw() {
   }
 
   // Draw vertical green line
-  if ( active_panel == 2 ) {
+  if ( active_panel == 2 || active_panel == 3 ) {
     noFill();
     strokeWeight(2);
     stroke(0,255,0,50);
-    line(mouseX, HEIGHT/2 + linearPanel.top_chromosome.line_y - 50, mouseX, HEIGHT/2 + linearPanel.top_chromosome.line_y + 50);
+    line(mouseX, HEIGHT/2 + linearPanel.top_chromosome.line_y - 50, mouseX, HEIGHT/2 + linearPanel.bottom_chromosome.line_y + 50);
     
     // Draw green line on ideogram
+    strokeWeight(2);
+    stroke(0,255,0,200);
     float ideogram_line_x = map(mouseX, 0, width, linearPanel.top_chromosome.zoom_box_ideogram_x1, linearPanel.top_chromosome.zoom_box_ideogram_x2);
-    strokeWeight(2);
-    stroke(0,255,0,200);
     line(ideogram_line_x, HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 - 2, ideogram_line_x, HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 + linearPanel.top_chromosome.ideogram.height + 4);
-  } else if ( active_panel == 3 ) {
-    noFill();
-    strokeWeight(2);
-    stroke(0,255,0,50);
-    line(mouseX, HEIGHT/2 + linearPanel.bottom_chromosome.line_y - 50, mouseX, HEIGHT/2 + linearPanel.bottom_chromosome.line_y + 50);
-    
-    // Draw green line on ideogram
-    float ideogram_line_x = map(mouseX, 0, width, linearPanel.bottom_chromosome.zoom_box_ideogram_x1, linearPanel.bottom_chromosome.zoom_box_ideogram_x2);
-    strokeWeight(2);
-    stroke(0,255,0,200);
+    ideogram_line_x = map(mouseX, 0, width, linearPanel.bottom_chromosome.zoom_box_ideogram_x1, linearPanel.bottom_chromosome.zoom_box_ideogram_x2);
     line(ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 - 2, ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 + linearPanel.bottom_chromosome.ideogram.height + 4);
   }
 }

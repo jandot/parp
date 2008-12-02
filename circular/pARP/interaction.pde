@@ -17,19 +17,8 @@ void mouseMoved() {
       }
       read_pairs.put(rp.id, rp);
     }
-  } else if ( active_panel == 2 ) {
-    linearPanel.top_chromosome.zoom_box_left_activated = false;
-    linearPanel.top_chromosome.zoom_box_right_activated = false;
-    if ( ( mouseY >= HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 && mouseY <= HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 + linearPanel.top_chromosome.ideogram.height) ) {
-      strokeWeight(5);
-      stroke(50);
-      if ( abs( mouseX - linearPanel.top_chromosome.zoom_box_ideogram_x1 ) < 5 ) {
-        linearPanel.top_chromosome.zoom_box_left_activated = true;
-      } else if ( abs(mouseX - linearPanel.top_chromosome.zoom_box_ideogram_x2 ) < 5 ) {
-        linearPanel.top_chromosome.zoom_box_right_activated = true;
-      }
-    }
-    
+  } else if ( active_panel == 2 || active_panel == 3 ) {
+    // Highlight read pairs around cursor for top chromosome
     for ( int i = 0; i < linearPanel.top_chromosome.chr.intrachromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.top_chromosome.chr.intrachromosomal_read_pair_ids[i]);
       if ( abs(rp.linear_x1 - mouseX) < 5 || abs(rp.linear_x2 - mouseX) < 5 ) {
@@ -50,7 +39,8 @@ void mouseMoved() {
       
       read_pairs.put(rp.id, rp);
     }
-  } else if ( active_panel == 3 ) {
+
+    // Highlight read pairs around cursor for bottom chromosome    
     for ( int i = 0; i < linearPanel.bottom_chromosome.chr.intrachromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.bottom_chromosome.chr.intrachromosomal_read_pair_ids[i]);
       if ( abs(rp.linear_x1 - mouseX) < 5 || abs(rp.linear_x2 - mouseX) < 5 ) {
@@ -60,7 +50,6 @@ void mouseMoved() {
       }
       
       read_pairs.put(rp.id, rp);
-
     }
     for ( int i = 0; i < linearPanel.interchromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
@@ -74,6 +63,7 @@ void mouseMoved() {
     }
   }
   
+  // Show grey drag bar at side of ideogram
   if ( active_panel == 2 ) {
     linearPanel.top_chromosome.zoom_box_left_activated = false;
     linearPanel.top_chromosome.zoom_box_right_activated = false;
