@@ -44,7 +44,7 @@ Chromosome chr1;
 Chromosome chr2;
 
 void setup() {
-  size(WIDTH, HEIGHT);
+  size(1200, 600);
   
   font = createFont("SansSerif", 12);
   textFont(font);
