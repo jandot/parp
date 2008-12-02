@@ -14,6 +14,7 @@ float DIAMETER = 3*HEIGHT/8;
 float RADIUS = DIAMETER/2;
 
 int qual_cutoff = 0;
+float max_qual;
 
 int read_pair_counter = 0;
 
@@ -84,14 +85,6 @@ void draw() {
   image(img_linear_highlighted,0,0);
   translate(0,-HEIGHT/2);
   
-  if ( active_panel == 2 ) {
-    float bp_position = map(mouseX, 0, width, linearPanel.top_chromosome.left_border/1000000, (linearPanel.top_chromosome.left_border + linearPanel.top_chromosome.area)/1000000);//20.00, 32.00);
-    text("Basepair position: " + bp_position + " Mb", width/2, 20);
-  } else if ( active_panel == 3 ) {
-    float bp_position = map(mouseX, 0, width, linearPanel.bottom_chromosome.left_border/1000000, (linearPanel.bottom_chromosome.left_border + linearPanel.bottom_chromosome.area)/1000000);//20.00, 32.00);
-    text("Basepair position: " + bp_position + " Mb", width/2, 20);
-  }
-
   // Draw vertical green line
   if ( active_panel == 2 || active_panel == 3 ) {
     noFill();
@@ -107,4 +100,8 @@ void draw() {
     ideogram_line_x = map(mouseX, 0, width, linearPanel.bottom_chromosome.zoom_box_ideogram_x1, linearPanel.bottom_chromosome.zoom_box_ideogram_x2);
     line(ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 - 2, ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 + linearPanel.bottom_chromosome.ideogram.height + 4);
   }
+
+  // Show current quality score cutoff
+  fill(0);
+  text("Quality score cutoff: " + qual_cutoff, WIDTH/2, 50);
 }

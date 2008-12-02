@@ -144,6 +144,20 @@ void mouseDragged() {
 void keyPressed() {
   if ( key == 's' ) {
     save("picture.png");
+  } else if ( key == CODED ) {
+    if ( keyCode == UP ) {
+      if ( qual_cutoff < max_qual ) {
+        qual_cutoff += 1;
+      }
+    } else if ( keyCode == DOWN ) {
+      if ( qual_cutoff > 0 ) {
+        qual_cutoff -= 1;
+      }
+    }
+    drawBufferCircularAll();
+    drawBufferCircularHighlighted();
+    drawBufferLinearZoom();
+    drawBufferLinearHighlighted();
+    redraw();
   }
-  
 }
