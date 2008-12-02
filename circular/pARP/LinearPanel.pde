@@ -44,7 +44,7 @@ class LinearPanel {
     if ( this.interchromosomal_read_pair_ids != null ) {
       for ( int i = 0; i < this.interchromosomal_read_pair_ids.length; i++ ) {
         ReadPair rp = ( ReadPair ) read_pairs.get(this.interchromosomal_read_pair_ids[i]);
-        if ( rp.qual >= qual_cutoff ) {
+        if ( rp.qual >= qual_cutoff && rp.visible) {
           float top_x;
           float bottom_x;
           if ( rp.chr1 == top_chromosome.chr ) {
@@ -54,7 +54,7 @@ class LinearPanel {
             top_x = rp.linear_x2;
             bottom_x = rp.linear_x1;
           }
-          buffer_linear_zoom.bezier(top_x, top_chromosome.line_y, top_x, top_chromosome.line_y + 25, bottom_x, bottom_chromosome.line_y - 25, bottom_x, bottom_chromosome.line_y);
+          buffer_linear_zoom.bezier(top_x, this.top_chromosome.line_y, top_x, this.top_chromosome.line_y + 25, bottom_x, this.bottom_chromosome.line_y - 25, bottom_x, this.bottom_chromosome.line_y);
         }
       }
     }
@@ -83,7 +83,7 @@ class LinearPanel {
       stroke(255,0,0);
       for ( int i = 0; i < this.interchromosomal_read_pair_ids.length; i++ ) {
         ReadPair rp = ( ReadPair ) read_pairs.get(this.interchromosomal_read_pair_ids[i]);
-        if ( rp.activated && rp.qual >= qual_cutoff ) {
+        if ( rp.activated && rp.qual >= qual_cutoff && rp.visible ) {
           float top_x;
           float bottom_x;
           if ( rp.chr1 == top_chromosome.chr ) {
@@ -93,7 +93,7 @@ class LinearPanel {
             top_x = rp.linear_x2;
             bottom_x = rp.linear_x1;
           }
-          buffer_linear_highlighted.bezier(top_x, top_chromosome.line_y, top_x, top_chromosome.line_y + 25, bottom_x, bottom_chromosome.line_y - 25, bottom_x, bottom_chromosome.line_y);
+          buffer_linear_highlighted.bezier(top_x, this.top_chromosome.line_y, top_x, this.top_chromosome.line_y + 25, bottom_x, this.bottom_chromosome.line_y - 25, bottom_x, this.bottom_chromosome.line_y);
         }
       }
     }

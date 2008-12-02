@@ -13,8 +13,8 @@ class Chromosome {
   
   Chromosome(int number, int len, int centr_start, int centr_stop) {
     this.number = number;
-    this.len = len/1000; // in kb
-    this.centr = (centr_start/1000 + centr_stop/1000)/2;
+    this.len = len;
+    this.centr = (centr_start + centr_stop)/2;
     for ( int i = this.number + 1; i <= 24; i++ ) {
       this.interchromosomal_read_pair_ids.put(i, new int[0]);
     }

@@ -3,7 +3,7 @@ String INPUT_FILE = "data.tsv";
 Hashtable chromosomes = new Hashtable();
 Hashtable read_pairs = new Hashtable();
 
-int GENOME_SIZE = 3080419; // in kb
+long GENOME_SIZE = 3080419000L;
 int WIDTH = 1200;
 int HEIGHT = 600;
 float DIAMETER = 3*HEIGHT/8;
@@ -80,20 +80,15 @@ void draw() {
   image(img_linear_highlighted,0,0);
   
   translate(0,-HEIGHT/2);
-//  image(img_linear_panel, 0, HEIGHT/2);
-//  
-//  // Highlight readpairs
-//  translate(WIDTH/4, HEIGHT/4);
-//  drawCircularHighlightedReadPairs();
-//  translate(-WIDTH/4, -HEIGHT/4);
-//
-//  drawLinearHighlightedReadPairs();
-//
-//  // Draw quality score cutoff
-//  float y_qual_cutoff = map(qual_cutoff, 0, 40, HEIGHT/2 - 95, HEIGHT/2 - 55);
-//  stroke(0);
-//  strokeWeight(2);
-//  fill(0);
-//  line(WIDTH/2 + 55, y_qual_cutoff, WIDTH/2 + 65, y_qual_cutoff);
-//  text(qual_cutoff, WIDTH/2 + 55, HEIGHT/2 - 20);
+  
+  fill(0);
+  text(mouseX + ";" + mouseY, width-100, 50);
+  
+  if ( active_panel == 2 ) {
+    float bp_position = map(mouseX, 0, width, linearPanel.top_chromosome.left_border/1000000, (linearPanel.top_chromosome.left_border + linearPanel.top_chromosome.area)/1000000);//20.00, 32.00);
+    text("Basepair position: " + bp_position + " Mb", width/2, 20);
+  } else if ( active_panel == 3 ) {
+    float bp_position = map(mouseX, 0, width, linearPanel.bottom_chromosome.left_border/1000000, (linearPanel.bottom_chromosome.left_border + linearPanel.bottom_chromosome.area)/1000000);//20.00, 32.00);
+    text("Basepair position: " + bp_position + " Mb", width/2, 20);
+  }
 }

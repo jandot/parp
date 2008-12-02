@@ -73,6 +73,31 @@ void mouseMoved() {
       read_pairs.put(rp.id, rp);
     }
   }
+  
+  if ( active_panel == 2 ) {
+    linearPanel.top_chromosome.zoom_box_left_activated = false;
+    linearPanel.top_chromosome.zoom_box_right_activated = false;
+    
+    if ( pmouseY >= HEIGHT/2 + 5 && pmouseY <= HEIGHT/2 + linearPanel.top_chromosome.ideogram.height + 5 ) {
+      if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x1) < 5 ) {
+        linearPanel.top_chromosome.zoom_box_left_activated = true;
+      } else if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x2) < 5 ) {
+        linearPanel.top_chromosome.zoom_box_right_activated = true;
+      }
+    }
+  } else if ( active_panel == 3 ) {
+    linearPanel.bottom_chromosome.zoom_box_left_activated = false;
+    linearPanel.bottom_chromosome.zoom_box_right_activated = false;
+    
+    if ( pmouseY <= HEIGHT - 5 && pmouseY >= HEIGHT - linearPanel.bottom_chromosome.ideogram.height - 5 ) {
+      if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x1) < 5 ) {
+        linearPanel.bottom_chromosome.zoom_box_left_activated = true;
+      } else if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x2) < 5 ) {
+        linearPanel.bottom_chromosome.zoom_box_right_activated = true;
+      }
+    }
+  }
+  
   drawBufferCircularHighlighted();
   drawBufferLinearHighlighted();
   redraw();
@@ -97,6 +122,33 @@ void mouseClicked() {
     drawBufferLinearHighlighted();
     redraw();
   }
+}
+
+void mouseDragged() {
+  if ( active_panel == 2 ) {
+    if ( pmouseY >= HEIGHT/2 + 5 && pmouseY <= HEIGHT/2 + linearPanel.top_chromosome.ideogram.height + 5 ) {
+      if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x1) < 5 ) {
+        linearPanel.top_chromosome.zoom("left");
+      } else if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x2) < 5 ) {
+        linearPanel.top_chromosome.zoom("right");
+      } else if ( pmouseX > linearPanel.top_chromosome.zoom_box_ideogram_x1 + 5 && pmouseX < linearPanel.top_chromosome.zoom_box_ideogram_x2 - 5 ) {
+        linearPanel.top_chromosome.pan();
+      }
+    }
+  } else if ( active_panel == 3 ) {
+    if ( pmouseY <= HEIGHT - 5 && pmouseY >= HEIGHT - linearPanel.bottom_chromosome.ideogram.height - 5 ) {
+      if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x1) < 5 ) {
+        linearPanel.bottom_chromosome.zoom("left");
+      } else if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x2) < 5 ) {
+        linearPanel.bottom_chromosome.zoom("right");
+      } else if ( pmouseX > linearPanel.bottom_chromosome.zoom_box_ideogram_x1 + 5 && pmouseX < linearPanel.bottom_chromosome.zoom_box_ideogram_x2 - 5 ) {
+        linearPanel.bottom_chromosome.pan();
+      }
+    }
+  }
+  drawBufferLinearZoom();
+  drawBufferLinearHighlighted();
+  redraw();
 }
 
 void keyPressed() {
