@@ -39,8 +39,8 @@ class ChromosomeDetail {
   void drawBufferLinearIdeograms() {
     buffer_linear_ideograms.image(this.ideogram, this.ideogram_x1, this.ideogram_y1);
 
-    buffer_linear_ideograms.fill(0);
-    buffer_linear_ideograms.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
+//    buffer_linear_ideograms.fill(0);
+//    buffer_linear_ideograms.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
     buffer_linear_ideograms.line(0, this.line_y, buffer_linear_ideograms.width, this.line_y);
 
     buffer_linear_ideograms.noFill();
@@ -61,6 +61,7 @@ class ChromosomeDetail {
       ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
       rp.drawBufferLinearZoom(this.line_y, this.panel);
     }
+
   }
 
   void drawBufferLinearHighlighted() {
@@ -85,6 +86,11 @@ class ChromosomeDetail {
         rp.drawBufferLinearHighlighted(this.line_y, this.panel);
       }
     }
+    
+    buffer_linear_highlighted.fill(0);
+//    buffer_linear_highlighted.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
+    buffer_linear_highlighted.text("Chromosome " + this.chr.number + " (" + formatter.format(this.chr.len/1000) + "kb). Cursor position: " + formatter.format(map(mouseX, 0, buffer_linear_highlighted.width, this.left_border, this.left_border + this.area)) + "bp", this.ideogram.width + 10, this.ideogram_y1 + textAscent());
+    buffer_linear_highlighted.noFill();
   }
 
   void zoom(String border) {

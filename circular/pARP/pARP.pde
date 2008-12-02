@@ -1,4 +1,8 @@
+import java.text.NumberFormat;
+
 String INPUT_FILE = "data.tsv";
+
+NumberFormat formatter = new DecimalFormat(",###");
 
 Hashtable chromosomes = new Hashtable();
 Hashtable read_pairs = new Hashtable();
@@ -46,7 +50,7 @@ Chromosome chr2;
 void setup() {
   size(WIDTH, HEIGHT);
   
-  font = createFont("SansSerif", 16);
+  font = createFont("SansSerif", 12);
   textFont(font);
   
   loadChromosomes();
@@ -78,11 +82,7 @@ void draw() {
   image(img_circular_highlighted, 0, 0);
   translate(0,HEIGHT/2);
   image(img_linear_highlighted,0,0);
-  
   translate(0,-HEIGHT/2);
-  
-  fill(0);
-  text(mouseX + ";" + mouseY, width-100, 50);
   
   if ( active_panel == 2 ) {
     float bp_position = map(mouseX, 0, width, linearPanel.top_chromosome.left_border/1000000, (linearPanel.top_chromosome.left_border + linearPanel.top_chromosome.area)/1000000);//20.00, 32.00);
@@ -90,5 +90,30 @@ void draw() {
   } else if ( active_panel == 3 ) {
     float bp_position = map(mouseX, 0, width, linearPanel.bottom_chromosome.left_border/1000000, (linearPanel.bottom_chromosome.left_border + linearPanel.bottom_chromosome.area)/1000000);//20.00, 32.00);
     text("Basepair position: " + bp_position + " Mb", width/2, 20);
+  }
+
+  // Draw vertical green line
+  if ( active_panel == 2 ) {
+    noFill();
+    strokeWeight(2);
+    stroke(0,255,0,50);
+    line(mouseX, HEIGHT/2 + linearPanel.top_chromosome.line_y - 50, mouseX, HEIGHT/2 + linearPanel.top_chromosome.line_y + 50);
+    
+    // Draw green line on ideogram
+    float ideogram_line_x = map(mouseX, 0, width, linearPanel.top_chromosome.zoom_box_ideogram_x1, linearPanel.top_chromosome.zoom_box_ideogram_x2);
+    strokeWeight(2);
+    stroke(0,255,0,200);
+    line(ideogram_line_x, HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 - 2, ideogram_line_x, HEIGHT/2 + linearPanel.top_chromosome.ideogram_y1 + linearPanel.top_chromosome.ideogram.height + 4);
+  } else if ( active_panel == 3 ) {
+    noFill();
+    strokeWeight(2);
+    stroke(0,255,0,50);
+    line(mouseX, HEIGHT/2 + linearPanel.bottom_chromosome.line_y - 50, mouseX, HEIGHT/2 + linearPanel.bottom_chromosome.line_y + 50);
+    
+    // Draw green line on ideogram
+    float ideogram_line_x = map(mouseX, 0, width, linearPanel.bottom_chromosome.zoom_box_ideogram_x1, linearPanel.bottom_chromosome.zoom_box_ideogram_x2);
+    strokeWeight(2);
+    stroke(0,255,0,200);
+    line(ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 - 2, ideogram_line_x, HEIGHT/2 + linearPanel.bottom_chromosome.ideogram_y1 + linearPanel.bottom_chromosome.ideogram.height + 4);
   }
 }
