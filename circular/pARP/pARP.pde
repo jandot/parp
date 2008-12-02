@@ -29,11 +29,6 @@ PImage img_linear_zoom;
 PGraphics buffer_linear_highlighted;
 PImage img_linear_highlighted;
 
-PGraphics buffer_linear_panel;
-PImage img_linear_panel;
-PGraphics buffer_qualcutoffslider;
-PImage img_qualcutoffslider;
-
 PFont font;
 
 int active_panel = 0; // 1 = circular panel; 2 = top linear; 3 = bottom linear
@@ -84,7 +79,7 @@ void draw() {
   translate(0,HEIGHT/2);
   image(img_linear_highlighted,0,0);
   translate(0,-HEIGHT/2);
-  
+
   // Draw vertical green line
   if ( active_panel == 2 || active_panel == 3 ) {
     noFill();

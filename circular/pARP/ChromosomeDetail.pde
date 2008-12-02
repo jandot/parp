@@ -23,11 +23,10 @@ class ChromosomeDetail {
     this.ideogram_x1 = 3;
     if ( this.panel == "top" ) {
       this.ideogram_y1 = 3;
-      this.line_y = HEIGHT/8;
-    } 
-    else {
-      this.ideogram_y1 = HEIGHT/2 - this.ideogram.height - 3;
-      this.line_y = 3*HEIGHT/8;
+      this.line_y = int(height/8);
+    } else {
+      this.ideogram_y1 = height/2 - this.ideogram.height - 3;
+      this.line_y = int(3*height/8);
     }
 
     this.zoom_box_ideogram_x1 = map(this.left_border, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
@@ -39,8 +38,6 @@ class ChromosomeDetail {
   void drawBufferLinearIdeograms() {
     buffer_linear_ideograms.image(this.ideogram, this.ideogram_x1, this.ideogram_y1);
 
-//    buffer_linear_ideograms.fill(0);
-//    buffer_linear_ideograms.text("Chromosome " + this.chr.number, this.ideogram.width + 10, this.ideogram_y1 + textAscent());
     buffer_linear_ideograms.line(0, this.line_y, buffer_linear_ideograms.width, this.line_y);
 
     buffer_linear_ideograms.noFill();

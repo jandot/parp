@@ -20,7 +20,7 @@ void drawBufferCircularAll() {
 
   buffer_circular_all.noFill();
 
-  buffer_circular_all.strokeWeight(0.1);
+  buffer_circular_all.strokeWeight(1);
   for ( int i = 0; i < read_pair_counter; i++ ) {
     ReadPair rp = ( ReadPair ) read_pairs.get(i);
     rp.drawBufferCircularAll();
