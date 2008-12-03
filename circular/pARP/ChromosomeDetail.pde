@@ -34,15 +34,23 @@ class ChromosomeDetail {
     this.zoom_box_ideogram_x2 = map(this.left_border + this.area, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
     this.zoom_box_ideogram_dx = this.zoom_box_ideogram_x2 - this.zoom_box_ideogram_x1;
 
-    Button button = new Button(this, "Complete", "show_complete");
+    Button button = new Button(this, "zoom", "Complete", "show_complete");
     this.buttons = ( Button[] ) append(this.buttons, button);
-    button = new Button(this, "zoom out 10x", "zoom_out_10x");
+    button = new Button(this, "zoom", "zoom out 10x", "zoom_out_10x");
     this.buttons = ( Button[] ) append(this.buttons, button);
-    button = new Button(this, "zoom out 3x", "zoom_out_3x");
+    button = new Button(this, "zoom", "zoom out 3x", "zoom_out_3x");
     this.buttons = ( Button[] ) append(this.buttons, button);
-    button = new Button(this, "zoom in 3x", "zoom_in_3x");
+    button = new Button(this, "zoom", "zoom in 3x", "zoom_in_3x");
     this.buttons = ( Button[] ) append(this.buttons, button);
-    button = new Button(this, "zoom in 10x", "zoom_in_10x");
+    button = new Button(this, "zoom", "zoom in 10x", "zoom_in_10x");
+    this.buttons = ( Button[] ) append(this.buttons, button);
+    button = new Button(this, "pan", "<<", "left_large");
+    this.buttons = ( Button[] ) append(this.buttons, button);
+    button = new Button(this, "pan", "<", "left_small");
+    this.buttons = ( Button[] ) append(this.buttons, button);
+    button = new Button(this, "pan", ">", "right_small");
+    this.buttons = ( Button[] ) append(this.buttons, button);
+    button = new Button(this, "pan", ">>", "right_large");
     this.buttons = ( Button[] ) append(this.buttons, button);
   }
 
@@ -105,7 +113,7 @@ class ChromosomeDetail {
     buffer_linear_highlighted.noFill();
   }
 
-  void zoom(String border) {
+  void zoomByDrag(String border) {
     float x1 = this.zoom_box_ideogram_x1;
     float x2 = this.zoom_box_ideogram_x2;
     if ( border == "left" ) {
@@ -139,16 +147,14 @@ class ChromosomeDetail {
 
   }
 
-  void zoomByFactor(String action) {
+  void zoomByStep(String action) {
     if ( action == "show_complete" ) {
       this.left_border = 0;
       this.area = this.chr.len;
     } else if ( action == "zoom_in_10x" ) {
       this.area = max(this.area/10, 10);
     } else if ( action == "zoom_in_3x" ) {
-      println("before: " + this.area);
       this.area = max(this.area/3, 10);
-      println("after: " + this.area);
     } else if ( action == "zoom_out_3x" ) {
       this.area = min(this.area*3, this.chr.len);
       if ( this.left_border + this.area > this.chr.len ) {
@@ -161,7 +167,6 @@ class ChromosomeDetail {
       }
       
     }
-    println("outside: " + this.area);
     this.zoom_box_ideogram_x1 = map(this.left_border, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
     this.zoom_box_ideogram_x2 = map(this.left_border + this.area, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
     this.zoom_box_ideogram_dx = this.zoom_box_ideogram_x2 - this.zoom_box_ideogram_x1;
@@ -176,7 +181,7 @@ class ChromosomeDetail {
     }
   }
 
-  void pan() {
+  void panByDrag() {
     int dx = mouseX - pmouseX;
     if ( this.zoom_box_ideogram_x1 + dx >= this.ideogram_x1 && this.zoom_box_ideogram_x2 + dx <= this.ideogram_x1 + this.ideogram.width ) {
       this.zoom_box_ideogram_x1 += dx;
@@ -196,5 +201,36 @@ class ChromosomeDetail {
     }
   }
 
+  void panByStep(String action) {
+    if ( action == "left_large" ) {
+      this.left_border = max(this.left_border - this.area,0);
+    } else if ( action == "left_small" ) {
+      this.left_border = max(this.left_border - this.area/2,0);
+    } else if ( action == "right_small" ) {
+      this.left_border = min(this.left_border + this.area/2,(this.chr.len - this.area) - 10);
+    } else if ( action == "right_large" ) {
+      this.left_border = min(this.left_border + this.area,(this.chr.len - this.area) - 10);
+    }
+    this.zoom_box_ideogram_x1 = map(this.left_border, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
+    this.zoom_box_ideogram_x2 = map(this.left_border + this.area, 0, this.chr.len, this.ideogram_x1, this.ideogram_x1 + this.ideogram.width);
+    this.zoom_box_ideogram_dx = this.zoom_box_ideogram_x2 - this.zoom_box_ideogram_x1;
+    
+    for ( int i = 0; i < this.chr.intrachromosomal_read_pair_ids.length; i++ ) {
+      ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
+      rp.update_x(this.chr, this.left_border, this.area);
+    }
+    for ( int i = 0; i < linearPanel.interchromosomal_read_pair_ids.length; i++ ) {
+      ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
+      rp.update_x(this.chr, this.left_border, this.area);
+    }
+  }
+  
+  void applyButton(String type, String action) {
+    if ( type == "zoom" ) {
+      this.zoomByStep(action);
+    } else {
+      this.panByStep(action);
+    }
+  }
 }
 

@@ -2,13 +2,15 @@ class Button {
   ChromosomeDetail chromosome_detail;
   String contents;
   String action;
+  String type;
   float x1;
   float x2;
   float y1;
   float y2;
   
-  Button(ChromosomeDetail chromosome_detail, String contents, String action) {
+  Button(ChromosomeDetail chromosome_detail, String type, String contents, String action) {
     this.chromosome_detail = chromosome_detail;
+    this.type = type;
     this.contents = contents;
     this.action = action;
 

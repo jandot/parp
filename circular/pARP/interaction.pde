@@ -107,8 +107,8 @@ void mouseClicked() {
       }
     }
     linearPanel = new LinearPanel(chr_number_1, chr_number_2);
-    linearPanel.top_chromosome.zoomByFactor("complete");
-    linearPanel.bottom_chromosome.zoomByFactor("complete");
+    linearPanel.top_chromosome.zoomByStep("complete");
+    linearPanel.bottom_chromosome.zoomByStep("complete");
     drawBufferLinearIdeograms();
     drawBufferLinearZoom();
     drawBufferLinearHighlighted();
@@ -116,20 +116,15 @@ void mouseClicked() {
   } else {
     for ( int i = 0; i < linearPanel.top_chromosome.buttons.length; i++ ) {
       if ( mouseX > linearPanel.top_chromosome.buttons[i].x1 && mouseX < linearPanel.top_chromosome.buttons[i].x2 && mouseY > HEIGHT/2 + linearPanel.top_chromosome.buttons[i].y1 && mouseY < HEIGHT/2 + linearPanel.top_chromosome.buttons[i].y2 ) {
-        println("here: " + linearPanel.top_chromosome.area);
-        linearPanel.top_chromosome.zoomByFactor(linearPanel.top_chromosome.buttons[i].action);
-        println("1: " + linearPanel.top_chromosome.area);
+        linearPanel.top_chromosome.applyButton(linearPanel.top_chromosome.buttons[i].type, linearPanel.top_chromosome.buttons[i].action);
         drawBufferLinearZoom();
-        println("2: " + linearPanel.top_chromosome.area);
         drawBufferLinearHighlighted();
-        println("3: " + linearPanel.top_chromosome.area);
         redraw();
-        println("now: " + linearPanel.top_chromosome.area);
       }
     }
     for ( int i = 0; i < linearPanel.bottom_chromosome.buttons.length; i++ ) {
       if ( mouseX > linearPanel.bottom_chromosome.buttons[i].x1 && mouseX < linearPanel.bottom_chromosome.buttons[i].x2 && mouseY > HEIGHT/2 + linearPanel.bottom_chromosome.buttons[i].y1 && mouseY < HEIGHT/2 + linearPanel.bottom_chromosome.buttons[i].y2 ) {
-        linearPanel.bottom_chromosome.zoomByFactor(linearPanel.bottom_chromosome.buttons[i].action);
+        linearPanel.bottom_chromosome.applyButton(linearPanel.bottom_chromosome.buttons[i].type, linearPanel.bottom_chromosome.buttons[i].action);
         drawBufferLinearZoom();
         drawBufferLinearHighlighted();
         redraw();
@@ -142,21 +137,21 @@ void mouseDragged() {
   if ( active_panel == 2 ) {
     if ( pmouseY >= HEIGHT/2 + 5 && pmouseY <= HEIGHT/2 + linearPanel.top_chromosome.ideogram.height + 5 ) {
       if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x1) < 5 ) {
-        linearPanel.top_chromosome.zoom("left");
+        linearPanel.top_chromosome.zoomByDrag("left");
       } else if ( abs(pmouseX - linearPanel.top_chromosome.zoom_box_ideogram_x2) < 5 ) {
-        linearPanel.top_chromosome.zoom("right");
+        linearPanel.top_chromosome.zoomByDrag("right");
       } else if ( pmouseX > linearPanel.top_chromosome.zoom_box_ideogram_x1 + 5 && pmouseX < linearPanel.top_chromosome.zoom_box_ideogram_x2 - 5 ) {
-        linearPanel.top_chromosome.pan();
+        linearPanel.top_chromosome.panByDrag();
       }
     }
   } else if ( active_panel == 3 ) {
     if ( pmouseY <= HEIGHT - 5 && pmouseY >= HEIGHT - linearPanel.bottom_chromosome.ideogram.height - 5 ) {
       if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x1) < 5 ) {
-        linearPanel.bottom_chromosome.zoom("left");
+        linearPanel.bottom_chromosome.zoomByDrag("left");
       } else if ( abs(pmouseX - linearPanel.bottom_chromosome.zoom_box_ideogram_x2) < 5 ) {
-        linearPanel.bottom_chromosome.zoom("right");
+        linearPanel.bottom_chromosome.zoomByDrag("right");
       } else if ( pmouseX > linearPanel.bottom_chromosome.zoom_box_ideogram_x1 + 5 && pmouseX < linearPanel.bottom_chromosome.zoom_box_ideogram_x2 - 5 ) {
-        linearPanel.bottom_chromosome.pan();
+        linearPanel.bottom_chromosome.panByDrag();
       }
     }
   }
