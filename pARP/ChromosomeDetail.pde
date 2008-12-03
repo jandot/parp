@@ -118,7 +118,7 @@ class ChromosomeDetail {
     }
     
     buffer_linear_highlighted.fill(0);
-    buffer_linear_highlighted.text("Chromosome " + this.chr.number + " (" + formatter.format(this.chr.len/1000) + "kb). Cursor position: " + formatter.format(map(mouseX, 0, buffer_linear_highlighted.width, this.left_border, this.left_border + this.area)) + "bp", this.ideogram.width + 10, this.ideogram_y1 + textAscent());
+    buffer_linear_highlighted.text("Chromosome " + this.chr.number + " (" + formatter.format(this.chr.len/1000) + "kb). Cursor position: " + formatter.format(map(mouseX, 0, buffer_linear_highlighted.width, this.left_border, this.left_border + this.area)) + "bp. Showing " + formatter.format(this.left_border) + " to " + formatter.format(( this.left_border + this.area)), this.ideogram.width + 10, this.ideogram_y1 + textAscent());
     buffer_linear_highlighted.noFill();
   }
 
