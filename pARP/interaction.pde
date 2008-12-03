@@ -169,7 +169,7 @@ void keyPressed() {
         qual_cutoff += 1;
       }
     } else if ( keyCode == DOWN ) {
-      if ( qual_cutoff > 0 ) {
+      if ( qual_cutoff > min_qual ) {
         qual_cutoff -= 1;
       }
     }
