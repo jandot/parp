@@ -1,6 +1,8 @@
 import java.text.NumberFormat;
 
-String INPUT_FILE = "data.tsv";
+//String INPUT_FILE = "data.tsv";
+String INPUT_FILE = "NA12878_clustered.tsv";
+//String INPUT_FILE = "NA12878.csv";
 
 NumberFormat formatter = new DecimalFormat(",###");
 
@@ -13,8 +15,9 @@ int HEIGHT = 600;
 float DIAMETER = 3*HEIGHT/8;
 float RADIUS = DIAMETER/2;
 
-int qual_cutoff = 0;
-float max_qual;
+float min_qual = MAX_FLOAT;
+float max_qual = MIN_FLOAT;
+int qual_cutoff;
 
 int read_pair_counter = 0;
 
@@ -98,5 +101,5 @@ void draw() {
 
   // Show current quality score cutoff
   fill(0);
-  text("Quality score cutoff: " + qual_cutoff, WIDTH/2, 50);
+  text("Quality score cutoff: " + qual_cutoff + " (min: " + int(min_qual) + "; max: " + int(max_qual) + ")", WIDTH/2, 50);
 }

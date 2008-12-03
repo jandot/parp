@@ -25,5 +25,6 @@ void loadReadPairs() {
     }
     read_pairs.put(rp.id, rp);
   }
+  qual_cutoff = int(min_qual);
 }
 

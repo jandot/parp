@@ -48,6 +48,7 @@ class ReadPair {
     
     this.qual = qual;
     if ( max_qual < qual ) { max_qual = qual; };
+    if ( min_qual > qual ) { min_qual = qual; };
     this.code = code;
     if ( this.chr1.number == this.chr2.number ) {
       intrachromosomal = true;
