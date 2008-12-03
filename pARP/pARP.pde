@@ -4,10 +4,13 @@ import java.text.NumberFormat;
 String INPUT_FILE = "NA12878_clustered.tsv";
 //String INPUT_FILE = "NA12878.csv";
 
+String FEATURE_FILE = "features.tsv";
+
 NumberFormat formatter = new DecimalFormat(",###");
 
 Hashtable chromosomes = new Hashtable();
 Hashtable read_pairs = new Hashtable();
+Hashtable features = new Hashtable();
 
 long GENOME_SIZE = 3080419000L;
 int WIDTH = 1200;
@@ -20,6 +23,7 @@ float max_qual = MIN_FLOAT;
 int qual_cutoff;
 
 int read_pair_counter = 0;
+int feature_counter = 0;
 
 PGraphics buffer_circular_all;
 PImage img_circular_all;
@@ -54,6 +58,7 @@ void setup() {
   
   loadChromosomes();
   loadReadPairs();
+  loadFeatures();
 
   chr1 = (Chromosome) chromosomes.get(chr_number_1);
   chr2 = (Chromosome) chromosomes.get(chr_number_2);
@@ -102,4 +107,13 @@ void draw() {
   // Show current quality score cutoff
   fill(0);
   text("Quality score cutoff: " + qual_cutoff + " (min: " + int(min_qual) + "; max: " + int(max_qual) + ")", WIDTH/2, 50);
+  
+  fill(0,0,0,25);
+  noStroke();
+  for ( int i = 0; i < chromosome_labels.length; i++ ) {
+    if ( chromosome_labels[i].active ) {
+      Label l = ( Label ) chromosome_labels[i];
+      rect(l.x1 - 2, l.y1 - 2, l.dx + 4, l.dy + 4);
+    }
+  }
 }

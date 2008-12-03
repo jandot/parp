@@ -82,6 +82,15 @@ class ChromosomeDetail {
       ReadPair rp = ( ReadPair ) read_pairs.get(this.chr.intrachromosomal_read_pair_ids[i]);
       rp.drawBufferLinearZoom(this.line_y, this.panel);
     }
+    
+    // Draw features
+    buffer_linear_zoom.fill(255,0,0);
+    buffer_linear_zoom.noStroke();
+    for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+      Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+      f.drawBufferLinearZoom(this.line_y, this.panel);
+    }
+    buffer_linear_zoom.noFill();
 
   }
 
@@ -142,6 +151,10 @@ class ChromosomeDetail {
         ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
         rp.update_x(this.chr, this.left_border, this.area);
       }
+      for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+        Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+        f.update_x(this.chr, this.left_border, this.area);
+      }
 
     }
 
@@ -179,6 +192,10 @@ class ChromosomeDetail {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
       rp.update_x(this.chr, this.left_border, this.area);
     }
+    for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+      Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+      f.update_x(this.chr, this.left_border, this.area);
+    }
   }
 
   void panByDrag() {
@@ -197,6 +214,16 @@ class ChromosomeDetail {
       for ( int i = 0; i < linearPanel.interchromosomal_read_pair_ids.length; i++ ) {
         ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
         rp.update_x(this.chr, this.left_border, this.area);
+      }
+      
+      for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+        Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+        f.update_x(this.chr, this.left_border, this.area);
+      }
+      
+      for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+        Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+        f.update_x(this.chr, this.left_border, this.area);
       }
     }
   }
@@ -222,6 +249,10 @@ class ChromosomeDetail {
     for ( int i = 0; i < linearPanel.interchromosomal_read_pair_ids.length; i++ ) {
       ReadPair rp = ( ReadPair ) read_pairs.get(linearPanel.interchromosomal_read_pair_ids[i]);
       rp.update_x(this.chr, this.left_border, this.area);
+    }
+    for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
+      Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
+      f.update_x(this.chr, this.left_border, this.area);
     }
   }
   

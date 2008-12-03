@@ -144,47 +144,21 @@ class ReadPair {
   }
 
   void update_x(Chromosome chr, float left_border, float area) {
-//    if ( this.intrachromosomal ) {
-//      if ( ( this.pos1 < left_border || this.pos1 > left_border + area ) && ( this.pos2 < left_border || this.pos2 > left_border + area) ) {
-//        this.visible = false;
-//      } else {
-//        this.visible = true;
-//      }
-//    } else {
-//      if ( this.chr1 == chr ) {
-//        if ( ( this.pos1 < linearPanel.top_chromosome.left_border || this.pos1 > linearPanel.top_chromosome.left_border + linearPanel.top_chromosome.area ) && ( this.pos2 < linearPanel.bottom_chromosome.left_border || this.pos2 > linearPanel.bottom_chromosome.left_border + linearPanel.bottom_chromosome.area ) ) {
-//          this.visible = false;
-//        } else {
-//          this.visible = true;
-//        }
-//      } else { // chr2 = topchromosome
-//        if ( ( this.pos2 < linearPanel.top_chromosome.left_border || this.pos2 > linearPanel.top_chromosome.left_border + linearPanel.top_chromosome.area ) && ( this.pos1 < linearPanel.bottom_chromosome.left_border || this.pos1 > linearPanel.bottom_chromosome.left_border + linearPanel.bottom_chromosome.area ) ) {
-//          this.visible = false;
-//        } else {
-//          this.visible = true;
-//        }
-//      }
-//    }
-  
-//    if ( this.visible ) {
-      if ( this.intrachromosomal ) {
+    if ( this.intrachromosomal ) {
+      this.linear_x1 = map(this.pos1, left_border, left_border + area, 0, width);
+      this.linear_x2 = map(this.pos2, left_border, left_border + area, 0, width);
+    } else {
+      if ( this.chr1 == chr ) {
         this.linear_x1 = map(this.pos1, left_border, left_border + area, 0, width);
+      } else {
         this.linear_x2 = map(this.pos2, left_border, left_border + area, 0, width);
-      } else {
-        if ( this.chr1 == chr ) {
-          this.linear_x1 = map(this.pos1, left_border, left_border + area, 0, width);
-        } else {
-          this.linear_x2 = map(this.pos2, left_border, left_border + area, 0, width);
-        }
       }
-      
-      if ( ( this.linear_x1 < 0 || this.linear_x1 > width ) && ( this.linear_x2 < 0 || this.linear_x2 > width ) ) {
-        this.visible = false;
-      } else {
-        this.visible = true;
-      }
-
-//    }
-
+    }
+    
+    if ( ( this.linear_x1 < 0 || this.linear_x1 > width ) && ( this.linear_x2 < 0 || this.linear_x2 > width ) ) {
+      this.visible = false;
+    } else {
+      this.visible = true;
+    }
   }
 }

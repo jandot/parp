@@ -9,6 +9,7 @@ class Chromosome {
   float start_rad;
   float stop_rad;
   int[] intrachromosomal_read_pair_ids = new int[0]; //array with IDs of all intrachromosomal read pairs
+  int[] feature_ids = new int[0];
   Hashtable interchromosomal_read_pair_ids = new Hashtable(); // hash with all interchromosomal read pair (key = other_chr, value = array with read pairs)
   
   Chromosome(int number, int len, int centr_start, int centr_stop) {
@@ -18,10 +19,15 @@ class Chromosome {
     for ( int i = this.number + 1; i <= 24; i++ ) {
       this.interchromosomal_read_pair_ids.put(i, new int[0]);
     }
+    
   }
 
   void addReadPair(ReadPair rp) {
     this.intrachromosomal_read_pair_ids = ( int[] ) append(this.intrachromosomal_read_pair_ids, rp.id);
+  }
+  
+  void addFeature(Feature f) {
+    this.feature_ids = ( int[] ) append(this.feature_ids, f.id);
   }
   
   void addReadPair(ReadPair rp, Chromosome other_chr) {
@@ -55,6 +61,10 @@ class Chromosome {
     
   }
   
+  void addLabel() {
+    chromosome_labels = ( Label[] ) append(chromosome_labels, new Label(int((RADIUS+15)*cos((this.start_rad + this.stop_rad)/2)+WIDTH/4), int((RADIUS+15)*sin((this.start_rad + this.stop_rad)/2) - textAscent() + HEIGHT/4), int(textWidth(str(this.number))), int(textAscent()), this.number));
+  }
+  
   void drawBufferCircularAll() {
     buffer_circular_all.noFill();
     buffer_circular_all.strokeWeight(5);
@@ -69,8 +79,9 @@ class Chromosome {
     buffer_circular_all.strokeWeight(0.5);
     buffer_circular_all.text(this.number, (RADIUS+15)*cos((this.start_rad + this.stop_rad)/2), (RADIUS+15)*sin((this.start_rad + this.stop_rad)/2));
     
-    chromosome_labels = ( Label[] ) append(chromosome_labels, new Label(int((RADIUS+15)*cos((this.start_rad + this.stop_rad)/2)+WIDTH/4), int((RADIUS+15)*sin((this.start_rad + this.stop_rad)/2) - textAscent() + HEIGHT/4), int(textWidth(str(this.number))), int(textAscent()), this.number));
-    
     buffer_circular_all.ellipse(RADIUS*cos(this.centr_rad), RADIUS*sin(this.centr_rad),10,10);
+
+
+
   }
 }

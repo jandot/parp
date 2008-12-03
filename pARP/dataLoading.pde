@@ -9,6 +9,7 @@ void loadChromosomes() {
   for ( int i = 1; i <= 24; i++ ) {
     Chromosome chr = (Chromosome) chromosomes.get(i);
     chr.calculateRadians();
+    chr.addLabel();
   }
 }
 
@@ -26,5 +27,15 @@ void loadReadPairs() {
     read_pairs.put(rp.id, rp);
   }
   qual_cutoff = int(min_qual);
+}
+
+void loadFeatures() {
+  String[] rows = loadStrings(FEATURE_FILE);
+  for ( int i = 0; i < rows.length; i++ ) {
+    String[] fields = split(rows[i], TAB);
+    
+    Feature f = new Feature(fields[0], int(fields[1]), int(fields[2]));
+    features.put(f.id, f);
+  }
 }
 

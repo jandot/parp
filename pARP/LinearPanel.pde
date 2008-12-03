@@ -97,7 +97,7 @@ class LinearPanel {
         }
       }
     }
-    
+
     buffer_linear_highlighted.endDraw();
   }
   

@@ -17,6 +17,15 @@ void mouseMoved() {
       }
       read_pairs.put(rp.id, rp);
     }
+    for ( int i = 0; i < chromosome_labels.length; i++ ) {
+      Label l = chromosome_labels[i];
+      if ( mouseX > l.x1 && mouseX < l.x2 && mouseY > l.y1 && mouseY < l.y2 ) {
+        chromosome_labels[i].active = true;
+      } else {
+        chromosome_labels[i].active = false;
+      }
+    }
+    
   } else if ( active_panel == 2 || active_panel == 3 ) {
     // Highlight read pairs around cursor for top chromosome
     for ( int i = 0; i < linearPanel.top_chromosome.chr.intrachromosomal_read_pair_ids.length; i++ ) {
