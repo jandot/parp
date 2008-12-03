@@ -107,10 +107,34 @@ void mouseClicked() {
       }
     }
     linearPanel = new LinearPanel(chr_number_1, chr_number_2);
+    linearPanel.top_chromosome.zoomByFactor("complete");
+    linearPanel.bottom_chromosome.zoomByFactor("complete");
     drawBufferLinearIdeograms();
     drawBufferLinearZoom();
     drawBufferLinearHighlighted();
     redraw();
+  } else {
+    for ( int i = 0; i < linearPanel.top_chromosome.buttons.length; i++ ) {
+      if ( mouseX > linearPanel.top_chromosome.buttons[i].x1 && mouseX < linearPanel.top_chromosome.buttons[i].x2 && mouseY > HEIGHT/2 + linearPanel.top_chromosome.buttons[i].y1 && mouseY < HEIGHT/2 + linearPanel.top_chromosome.buttons[i].y2 ) {
+        println("here: " + linearPanel.top_chromosome.area);
+        linearPanel.top_chromosome.zoomByFactor(linearPanel.top_chromosome.buttons[i].action);
+        println("1: " + linearPanel.top_chromosome.area);
+        drawBufferLinearZoom();
+        println("2: " + linearPanel.top_chromosome.area);
+        drawBufferLinearHighlighted();
+        println("3: " + linearPanel.top_chromosome.area);
+        redraw();
+        println("now: " + linearPanel.top_chromosome.area);
+      }
+    }
+    for ( int i = 0; i < linearPanel.bottom_chromosome.buttons.length; i++ ) {
+      if ( mouseX > linearPanel.bottom_chromosome.buttons[i].x1 && mouseX < linearPanel.bottom_chromosome.buttons[i].x2 && mouseY > HEIGHT/2 + linearPanel.bottom_chromosome.buttons[i].y1 && mouseY < HEIGHT/2 + linearPanel.bottom_chromosome.buttons[i].y2 ) {
+        linearPanel.bottom_chromosome.zoomByFactor(linearPanel.bottom_chromosome.buttons[i].action);
+        drawBufferLinearZoom();
+        drawBufferLinearHighlighted();
+        redraw();
+      }
+    }
   }
 }
 
