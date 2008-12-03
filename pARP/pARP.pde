@@ -1,7 +1,6 @@
 import java.text.NumberFormat;
 
-//String INPUT_FILE = "data.tsv";
-String INPUT_FILE = "NA12878_clustered.tsv";
+String INPUT_FILE = "data.tsv";
 
 NumberFormat formatter = new DecimalFormat(",###");
 
