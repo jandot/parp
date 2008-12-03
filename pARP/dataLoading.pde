@@ -19,7 +19,7 @@ void loadReadPairs() {
 
     ReadPair rp;
     if ( fields.length == 5 ) {
-      rp = new ReadPair(fields[0], int(fields[1]), fields[2], int(fields[3]), fields[4], int(random(0,40)));
+      rp = new ReadPair(fields[0], int(fields[1]), fields[2], int(fields[3]), fields[4], 0);
     } else {
       rp = new ReadPair(fields[0], int(fields[1]), fields[2], int(fields[3]), fields[4], int(fields[5]));
     }
