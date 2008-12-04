@@ -1,10 +1,9 @@
 import java.text.NumberFormat;
 
-//String INPUT_FILE = "data.tsv";
-String INPUT_FILE = "NA12878_clustered.tsv";
-//String INPUT_FILE = "NA12878.csv";
+String INPUT_FILE = "data.tsv";
 
 String FEATURE_FILE = "features.tsv";
+String READDEPTH_FILE = "read_depth.tsv";
 
 NumberFormat formatter = new DecimalFormat(",###");
 
@@ -14,7 +13,7 @@ Hashtable features = new Hashtable();
 
 long GENOME_SIZE = 3080419000L;
 int WIDTH = 1200;
-int HEIGHT = 600;
+int HEIGHT = 800;
 float DIAMETER = 3*HEIGHT/8;
 float RADIUS = DIAMETER/2;
 
@@ -51,7 +50,7 @@ Chromosome chr1;
 Chromosome chr2;
 
 void setup() {
-  size(1200, 600);
+  size(1200, 800);
   
   font = createFont("SansSerif", 12);
   textFont(font);
@@ -59,6 +58,7 @@ void setup() {
   loadChromosomes();
   loadReadPairs();
   loadFeatures();
+//  loadReadDepth();
 
   chr1 = (Chromosome) chromosomes.get(chr_number_1);
   chr2 = (Chromosome) chromosomes.get(chr_number_2);
@@ -107,6 +107,15 @@ void draw() {
   // Show current quality score cutoff
   fill(0);
   text("Quality score cutoff: " + qual_cutoff + " (min: " + int(min_qual) + "; max: " + int(max_qual) + ")", WIDTH/2, 50);
+  
+  // Show user interface
+  text("* Press UP or DOWN to change quality score cutoff.\n" + 
+       "* Press '1' while clicking on a chromosome number in the circular panel to make that chromosome the \ntop one in the linear panel.\n" + 
+       "* Press '2' while clicking on a chromosome number in the circular panel to make that chromosome the \nbottom one in the linear panel.\n" + 
+       "* Hover over the display to highlight readpairs close to the mouse.\n" + 
+       "* The thin green line in the main linear panel corresponds to the fat green lines in the ideograms.\n" + 
+       "* In the linear display: zoom in by either using one of the buttons or dragging the side of the green \noverlay on the ideogram (you'll see a fat green line appearing on that side).\n" + 
+       "* In the linear display: pan by either using one of the buttons or dragging the middle of the green \noverlay on the ideogram.", WIDTH/2, 75);
   
   fill(0,0,0,25);
   noStroke();

@@ -95,7 +95,7 @@ class ReadPair {
 
   void drawBufferCircularAll() {
     if ( this.qual >= qual_cutoff && this.intrachromosomal == false) {
-      buffer_circular_all.stroke(this.colour, 1);
+      buffer_circular_all.stroke(this.colour, 10);
       buffer_circular_all.bezier(circular_x1,circular_y1,circular_bezier1_x,circular_bezier1_y,circular_bezier2_x,circular_bezier2_y,circular_x2,circular_y2);
     }
   }

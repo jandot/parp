@@ -11,6 +11,7 @@ class Chromosome {
   int[] intrachromosomal_read_pair_ids = new int[0]; //array with IDs of all intrachromosomal read pairs
   int[] feature_ids = new int[0];
   Hashtable interchromosomal_read_pair_ids = new Hashtable(); // hash with all interchromosomal read pair (key = other_chr, value = array with read pairs)
+  ReadDepth[] read_depth_data = new ReadDepth[0];
   
   Chromosome(int number, int len, int centr_start, int centr_stop) {
     this.number = number;
@@ -22,12 +23,27 @@ class Chromosome {
     
   }
 
+  void loadReadDepth() {
+    if ( this.read_depth_data.length == 0 ) {
+      println("Loading read depth for chr " + this.number);
+      String[] rows = loadStrings("read_depth_chr" + this.number + ".tsv");
+      for ( int i = 0; i < rows.length; i++ ) {
+        String[] fields = split(rows[i], TAB);
+        ReadDepth rd = new ReadDepth(fields[0], int(fields[1]), float(fields[2]));
+      }
+    }
+  }
+  
   void addReadPair(ReadPair rp) {
     this.intrachromosomal_read_pair_ids = ( int[] ) append(this.intrachromosomal_read_pair_ids, rp.id);
   }
   
   void addFeature(Feature f) {
     this.feature_ids = ( int[] ) append(this.feature_ids, f.id);
+  }
+  
+  void addReadDepth(ReadDepth rd) {
+    this.read_depth_data = ( ReadDepth[] ) append(this.read_depth_data, rd);
   }
   
   void addReadPair(ReadPair rp, Chromosome other_chr) {

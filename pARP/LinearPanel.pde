@@ -11,6 +11,10 @@ class LinearPanel {
     this.top_chromosome = new ChromosomeDetail(( Chromosome ) chromosomes.get(chr1), "top");
     this.bottom_chromosome = new ChromosomeDetail(( Chromosome ) chromosomes.get(chr2), "bottom");
     this.interchromosomal_read_pair_ids = ( int[] ) top_chromosome.chr.interchromosomal_read_pair_ids.get(chr2);
+    
+    this.top_chromosome.chr.loadReadDepth();
+    this.bottom_chromosome.chr.loadReadDepth();
+    
   }
 
   void drawBufferLinearIdeograms() {

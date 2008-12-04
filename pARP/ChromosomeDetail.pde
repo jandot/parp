@@ -91,6 +91,14 @@ class ChromosomeDetail {
       f.drawBufferLinearZoom(this.line_y, this.panel);
     }
     buffer_linear_zoom.noFill();
+    
+     // Draw read depth
+    buffer_linear_zoom.fill(0,0,0,50);
+    buffer_linear_zoom.noStroke();
+    for ( int i = 0; i < this.chr.read_depth_data.length; i++ ) {
+      this.chr.read_depth_data[i].drawBufferLinearZoom(this.line_y, this.panel);
+    }
+    buffer_linear_zoom.noFill();
 
   }
 
@@ -155,6 +163,9 @@ class ChromosomeDetail {
         Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
         f.update_x(this.chr, this.left_border, this.area);
       }
+      for ( int i = 0; i < this.chr.read_depth_data.length; i++ ) {
+        this.chr.read_depth_data[i].update_x(this.chr, this.left_border, this.area);
+      }
 
     }
 
@@ -196,6 +207,9 @@ class ChromosomeDetail {
       Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
       f.update_x(this.chr, this.left_border, this.area);
     }
+    for ( int i = 0; i < this.chr.read_depth_data.length; i++ ) {
+      this.chr.read_depth_data[i].update_x(this.chr, this.left_border, this.area);
+    }
   }
 
   void panByDrag() {
@@ -225,6 +239,9 @@ class ChromosomeDetail {
         Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
         f.update_x(this.chr, this.left_border, this.area);
       }
+      for ( int i = 0; i < this.chr.read_depth_data.length; i++ ) {
+        this.chr.read_depth_data[i].update_x(this.chr, this.left_border, this.area);
+      }
     }
   }
 
@@ -253,6 +270,9 @@ class ChromosomeDetail {
     for ( int i = 0; i < this.chr.feature_ids.length; i++ ) {
       Feature f = ( Feature ) features.get(this.chr.feature_ids[i]);
       f.update_x(this.chr, this.left_border, this.area);
+    }
+    for ( int i = 0; i < this.chr.read_depth_data.length; i++ ) {
+      this.chr.read_depth_data[i].update_x(this.chr, this.left_border, this.area);
     }
   }
   

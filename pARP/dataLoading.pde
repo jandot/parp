@@ -39,3 +39,10 @@ void loadFeatures() {
   }
 }
 
+//void loadReadDepth() {
+//  String[] rows = loadStrings(READDEPTH_FILE);
+//  for ( int i = 0; i < rows.length; i++ ) {
+//    String[] fields = split(rows[i], TAB);
+//    ReadDepth rd = new ReadDepth(fields[0], int(fields[1]), float(fields[2]));
+//  }
+//}
