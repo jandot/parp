@@ -1,4 +1,4 @@
-h1. pARP -- Processing Abnormal ReadPair Visualization
+h1. pARP -- Abnormal ReadPair Visualization
 
 A tool for visualizing abnormal read pairs (i.e. too far apart, forward-forward or reverse-reverse).
 
