@@ -1,54 +1,47 @@
 require '/usr/local/ruby-processing/ruby-processing'
 require 'yaml'
 
-WIDTH = 800
-HEIGHT = 200
+WIDTH = 1200
+HEIGHT = 600
+
+DIAMETER = HEIGHT - 20
+RADIUS = DIAMETER/2
 
 GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 
 class MySketch < Processing::App
-  attr_accessor :chromosomes, :readpairs, :buffer, :img
+  attr_accessor :chromosomes, :readpairs
+  attr_accessor :buffer_circular_all, :img_circular_all, :buffer_circular_highlighted, :img_circular_highlighted
+  attr_accessor :f
   
   def setup
     hint(ENABLE_NATIVE_FONTS)
-    font = create_font("Monospaced", 66)
-    text_font font, 1.0
+    @f = create_font("Arial", 12)
+    text_font @f, 1.0
     
 
     
     @chromosomes = Hash.new
-    @readpairs = Hash.new
+    @readpairs = Array.new
     self.load_chromosomes
+    @chromosomes.values.each do |chr|
+      chr.calculate_radians
+    end
     self.load_readpairs
     
     smooth
     no_loop
+    
+    self.draw_buffer_circular_all
+    self.draw_buffer_circular_highlighted
   end
 
   def draw
     background(255,255,255)
     
-    @buffer = create_graphics(self.width, self.height, JAVA2D);
-    @buffer.begin_draw
-    @buffer.background(255,255,255)
-    @buffer.fill(0,0,255,50)
-    @buffer.noStroke
-    @buffer.smooth
-    @chromosomes.keys.each do |nr|
-      @chromosomes[nr].draw
-    end
-    @buffer.end_draw
-    @img = @buffer.get(0, 0, @buffer.width, @buffer.height);
-    image(@img,0,0)
-    
-    stroke 0
-    no_fill
-    @readpairs.values.each do |rp|
-      rp.draw
-    end
-    
+    image(@img_circular_highlighted,0,0)
   end
     
   def load_chromosomes
@@ -63,19 +56,66 @@ class MySketch < Processing::App
     File.open('data/data.tsv').each do |l|
       fields = l.chomp.split(/\t/)
       rp = ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
-      @readpairs[@readpairs.length + 1] = rp
+      @readpairs.push(rp)
     end
   end
   
-  def mouse_moved
+  def draw_buffer_circular_all
+    @buffer_circular_all = create_graphics(self.width, self.height, JAVA2D);
+    @buffer_circular_all.begin_draw
+    @buffer_circular_all.background(255)
+    @buffer_circular_all.text_font @f
+    
+    @buffer_circular_all.smooth
+    @buffer_circular_all.strokeCap(SQUARE)
+    
+    @buffer_circular_all.translate(self.width.to_f/2,self.height.to_f/2)
+    @buffer_circular_all.strokeWeight(3)
+    @buffer_circular_all.stroke(0)
     @chromosomes.keys.each do |nr|
-      if ( @chromosomes[nr].covers?(mouseX,mouseY) )
-        @chromosomes[nr].active = true
+      @chromosomes[nr].draw_buffer_circular_all
+    end
+    
+    @buffer_circular_all.noFill
+    @readpairs.select{|rp| ! rp.within_chromosome}.each do |rp|
+      rp.draw_buffer_circular(false)
+    end
+    @buffer_circular_all.translate(-self.width.to_f/2,-self.height.to_f/2)
+    @buffer_circular_all.end_draw
+    
+    @img_circular_all = @buffer_circular_all.get(0, 0, @buffer_circular_all.width, @buffer_circular_all.height)
+  end
+  
+  def draw_buffer_circular_highlighted
+    @buffer_circular_highlighted = create_graphics(self.width, self.height, JAVA2D);
+    @buffer_circular_highlighted.begin_draw
+    @buffer_circular_highlighted.background(@img_circular_all)
+    
+    @buffer_circular_highlighted.smooth
+    
+    @buffer_circular_highlighted.translate(self.width.to_f/2,self.height.to_f/2)
+    
+    @buffer_circular_highlighted.noFill
+    @readpairs.select{|rp| ! rp.within_chromosome and rp.active}.each do |rp|
+      rp.draw_buffer_circular(true)
+    end
+    @buffer_circular_highlighted.translate(-self.width.to_f/2,-self.height.to_f/2)
+    @buffer_circular_highlighted.end_draw
+    
+    @img_circular_highlighted = @buffer_circular_highlighted.get(0, 0, @buffer_circular_highlighted.width, @buffer_circular_highlighted.height)
+  end
+    
+  def mouse_moved
+    @readpairs.select{|rp| !rp.within_chromosome}.each do |rp|
+      if ( ( (rp.circular_x1 - mouse_x + self.width/2).abs < 5 and (rp.circular_y1 - mouse_y + self.height/2).abs < 5 ) or 
+           ( (rp.circular_x2 - mouse_x + self.width/2).abs < 5 and (rp.circular_y2 - mouse_y + self.height/2).abs < 5 ) )
+        rp.active = true
       else
-        @chromosomes[nr].active = false
+        rp.active = false
       end
     end
-    loop
+    self.draw_buffer_circular_highlighted
+    redraw
   end
 end
 
