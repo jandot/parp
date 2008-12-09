@@ -1,21 +1,31 @@
 class Chromosome
   attr_accessor :number, :length, :centromere
-  attr_accessor :within_chromosome_readpairs
+  attr_accessor :within_chromosome_readpairs, :between_chromosome_readpairs
   attr_accessor :centr_whole_genome, :centr_rad, :start_whole_genome, :start_rad, :stop_whole_genome, :stop_rad
   attr_accessor :ideogram, :ideogram_x1, :ideogram_y1, :baseline
   attr_accessor :zoom_box_ideogram_x1, :zoom_box_ideogram_x2, :zoom_box_ideogram_dx
   attr_accessor :left_border, :area
-  attr_accessor :linear_top, :linear_bottom
+  attr_accessor :top_linear, :bottom_linear
+  attr_accessor :zoom_box_left_activated, :zoom_box_right_activated
+  attr_accessor :label
   
   def initialize(nr, length, centromere_start, centromere_stop)
     @number = nr
     @length = length
     @centromere = ( centromere_start + centromere_stop )/2
     @x = MySketch.map(@number, 0, 25, 0, S.width)
-    @linear_top = false
-    @linear_bottom = false
-    @ideogram = S.loadImage("data/ideograms/chr" + @number.to_s + ".png")
+    @top_linear = false
+    @bottom_linear = false
+    @ideogram = S.loadImage("/Users/ja8/LocalDocuments/Projects/pARP/data/ideograms/chr" + @number.to_s + ".png")
+    self.calculate_radians
+    @label = ChromosomeLabel.new(self)
+    S.chromosomes.push(self)
+    
     @within_chromosome_readpairs = Array.new
+    @between_chromosome_readpairs = Hash.new
+    (@number..24).each do |n|
+      @between_chromosome_readpairs[n] = Array.new
+    end
   end
   
   def calculate_radians
@@ -23,7 +33,7 @@ class Chromosome
       @start_whole_genome = 0
       @stop_whole_genome = @length
     else
-      prev_chr = S.chromosomes[@number - 1]
+      prev_chr = S.chromosomes[-1]
       @start_whole_genome = prev_chr.stop_whole_genome
       @stop_whole_genome = @start_whole_genome + @length
     end
@@ -50,9 +60,10 @@ class Chromosome
     
     b.fill(0)
     b.strokeWeight(0.5)
-    b.text(@number, (RADIUS+15)*MySketch.cos((@start_rad + @stop_rad)/2), (RADIUS+15)*MySketch.sin((@start_rad + @stop_rad)/2))
     
     b.ellipse(RADIUS*MySketch.cos(@centr_rad), RADIUS*MySketch.sin(@centr_rad),5,5)
+    
+    b.text(@number, @label.x1, @label.y2)
   end
   
   def draw_buffer_linear_ideograms(b)
@@ -68,22 +79,61 @@ class Chromosome
     
     b.noFill
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
-      rp.draw_buffer_linear(b, :zoom, @baseline, @top_linear)
+      rp.draw_buffer_linear(b, :zoom)
+    end
+    if @top_linear
+      if @number < S.bottom_linear.number
+        @between_chromosome_readpairs[S.bottom_linear.number].select{|rp| rp.visible}.each do |rp|
+          rp.draw_buffer_linear(b, :zoom)
+        end
+      else
+        S.bottom_linear.between_chromosome_readpairs[@number].select{|rp| rp.visible}.each do |rp|
+          rp.draw_buffer_linear(b, :zoom)
+        end
+      end
     end
   end
   
   def draw_buffer_linear_highlighted(b)
+    b.fill 0
+    b.text("Chromosome " + @number.to_s + " (" + (@length/1000).to_i.format + "kb). Cursor position: " + MySketch.map(S.mouse_x, 0, b.width, @left_border, @left_border + @area).to_i.format + "bp. Showing " + @left_border.to_i.format + " to " + (@left_border + @area).to_i.format, @ideogram.width + 10, @ideogram_y1 + S.text_ascent());
+    
+    b.stroke 100
+    b.strokeWeight 5
+    b.strokeCap(MySketch::ROUND)
+    if @zoom_box_left_activated
+      b.line(@zoom_box_ideogram_x1, @ideogram_y1, @zoom_box_ideogram_x1, @ideogram_y1 + @ideogram.height)
+    elsif @zoom_box_right_activated
+      b.line(@zoom_box_ideogram_x2, @ideogram_y1, @zoom_box_ideogram_x2, @ideogram_y1 + @ideogram.height)
+    end
+    
     b.noFill
     @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
-      rp.draw_buffer_linear(b, :highlighted, @baseline, @top_linear)
+      rp.draw_buffer_linear(b, :highlighted)
+    end
+    if @top_linear
+      if @number < S.bottom_linear.number
+        @between_chromosome_readpairs[S.bottom_linear.number].select{|rp| rp.visible and rp.active}.each do |rp|
+          rp.draw_buffer_linear(b, :highlighted)
+        end
+      else
+        S.bottom_linear.between_chromosome_readpairs[@number].select{|rp| rp.visible and rp.active}.each do |rp|
+          rp.draw_buffer_linear(b, :highlighted)
+        end
+      end
     end
   end
   
-  def covers?(x,y)
-    if @x-5 < x and @x + 5 > x and 140 < y and 160 > y
-      return true
-    else
-      return false
+  def activate_zoom_boxes
+    @zoom_box_left_activated = false
+    @zoom_box_right_activated = false
+    
+    if S.pmouse_y >= @ideogram_y1 + S.height/2 and S.pmouse_y <= @ideogram_y1 + @ideogram.height + S.height/2
+      if (S.pmouse_x - @zoom_box_ideogram_x1).abs < 5
+        @zoom_box_left_activated = true
+      elsif (S.pmouse_x - @zoom_box_ideogram_x2).abs < 5
+        @zoom_box_right_activated = true
+      end
     end
   end
   
@@ -98,15 +148,20 @@ class Chromosome
       @within_chromosome_readpairs.each do |rp|
         rp.visible = true
       end
+      unless S.bottom_linear.nil?
+        @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
+          rp.visible = true
+        end
+      end
       
-      S.chromosomes.values.each do |chr|
+      S.chromosomes.each do |chr|
         if ! chr == self
           chr.top_linear = false
         end
       end
       
       S.top_linear = self
-    elsif panel == "bottom"
+    else #panel == "bottom"
       @ideogram_y1 = S.height/2 - @ideogram.height - 3
       @baseline = 3*S.height/8
       @top_linear = false
@@ -114,8 +169,13 @@ class Chromosome
       @within_chromosome_readpairs.each do |rp|
         rp.visible = true
       end
+      unless S.top_linear.nil?
+        S.top_linear.between_chromosome_readpairs[@number].each do |rp|
+          rp.visible = true
+        end
+      end
 
-      S.chromosomes.values.each do |chr|
+      S.chromosomes.each do |chr|
         if ! chr == self
           chr.bottom_linear = false
         end
@@ -123,6 +183,7 @@ class Chromosome
 
       S.bottom_linear = self
     end
+    
     @left_border = 0
     @area = @length
     @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
@@ -149,7 +210,28 @@ class Chromosome
       @area = MySketch.map(@zoom_box_ideogram_dx, @ideogram_x1, @ideogram_x1 + @ideogram.width, 0, @length)
       
       @within_chromosome_readpairs.each do |rp|
-        rp.update_x(@left_border, @area)
+        rp.update_x
+      end
+      if @top_linear
+        if @number < S.bottom_linear.number
+          @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
+        end
+      else
+        if @number < S.top_linear.number
+          @between_chromosome_readpairs[S.top_linear.number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.top_linear.between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
+        end
       end
     end
   end
@@ -162,8 +244,30 @@ class Chromosome
       
       @left_border = MySketch.map(@zoom_box_ideogram_x1, @ideogram_x1, @ideogram_x2, 0, @length)
       @within_chromosome_readpairs.each do |rp|
-        rp.update_x(@left_border, @area)
+        rp.update_x
       end
+      if @top_linear
+        if @number < S.bottom_linear.number
+          @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
+        end
+      else
+        if @number < S.top_linear.number
+          @between_chromosome_readpairs[S.top_linear.number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.top_linear.between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
+        end
+      end
+
     end
   end
 end

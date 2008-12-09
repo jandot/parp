@@ -4,6 +4,9 @@ require 'yaml'
 WIDTH = 1200
 HEIGHT = 800
 
+#WIDTH=800
+#HEIGHT=600
+
 DIAMETER = 3*HEIGHT/8
 RADIUS = DIAMETER/2
 
@@ -11,8 +14,14 @@ GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 
+class Integer
+  def format
+    return self.to_s.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+  end
+end
+
 class MySketch < Processing::App
-  attr_accessor :chromosomes, :readpairs
+  attr_accessor :chromosomes
   attr_accessor :buffer_circular_all, :img_circular_all, :buffer_circular_highlighted, :img_circular_highlighted
   attr_accessor :buffer_linear_ideograms, :img_linear_ideograms
   attr_accessor :buffer_linear_zoom, :img_linear_zoom
@@ -23,20 +32,16 @@ class MySketch < Processing::App
   
   def setup
     @f = create_font("Arial", 12)
-    text_font @f, 1.0
+    text_font @f
     
     @zoomed = false
     
-    @chromosomes = Hash.new
-    @readpairs = Array.new
+    @chromosomes = Array.new
     self.load_chromosomes
-    @chromosomes.values.each do |chr|
-      chr.calculate_radians
-    end
     self.load_readpairs
     
-    @chromosomes.values[0].set_linear("top")
-    @chromosomes.values[1].set_linear("bottom")
+    @chromosomes[0].set_linear("top")
+    @chromosomes[1].set_linear("bottom")
     
     smooth
     no_loop
@@ -51,25 +56,42 @@ class MySketch < Processing::App
   def draw
     background(255,255,255)
     
+    # The circular bit
     image(@img_circular_highlighted,0,0)
+
+    # The linear bit
     translate(0, self.height/2)
     image(@img_linear_highlighted,0,0)
+    
+    # Draw green line on ideogram
+    if ! @active_panel.nil? and @active_panel > 1
+      chr = ( @active_panel == 2 ) ? @top_linear : @bottom_linear
+      noFill
+      strokeWeight 2
+      stroke 0, 255,0,50
+      line(mouse_x, chr.baseline - 50, mouse_x, chr.baseline + 50)
+      
+      strokeWeight 2
+      stroke 0,255,0,200
+      [@top_linear, @bottom_linear].each do |chr|
+        ideogram_line_x = map(mouse_x, 0, self.width, chr.zoom_box_ideogram_x1, chr.zoom_box_ideogram_x2)
+        line(ideogram_line_x, chr.ideogram_y1 - 2, ideogram_line_x, chr.ideogram_y1 + chr.ideogram.height + 4 )
+      end
+    end
     translate(0, -self.height/2)
   end
     
   def load_chromosomes
-    File.open('data/meta_data.tsv').each do |l|
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/meta_data.tsv').each do |l|
       fields = l.chomp.split(/\t/)
-      chr = Chromosome.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i)
-      @chromosomes[chr.number] = chr
+      Chromosome.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i)
     end
   end
   
   def load_readpairs
-    File.open('data/data.tsv').each do |l|
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/data.tsv').each do |l|
       fields = l.chomp.split(/\t/)
-      rp = ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
-      @readpairs.push(rp)
+      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
     end
   end
   
@@ -84,16 +106,17 @@ class MySketch < Processing::App
       b.translate(self.width.to_f/4,self.height.to_f/4)
       b.strokeWeight(3)
       b.stroke(0)
-      @chromosomes.keys.each do |nr|
-        @chromosomes[nr].draw_buffer_circular_all(b)
+      @chromosomes.each do |chr|
+        chr.draw_buffer_circular_all(b)
       end
     
       b.noFill
-      @readpairs.select{|rp| ! rp.within_chromosome}.each do |rp|
-        rp.draw_buffer_circular(b, :all)
+      @chromosomes.each do |chr|
+        chr.between_chromosome_readpairs.values.flatten.each do |rp|
+          rp.draw_buffer_circular(b, :all)
+        end
       end
       b.translate(-self.width.to_f/4,-self.height.to_f/4)
-      b.end_draw
     end
     @img_circular_all = @buffer_circular_all.get(0, 0, @buffer_circular_all.width, @buffer_circular_all.height)
   end
@@ -106,8 +129,14 @@ class MySketch < Processing::App
       b.translate(self.width.to_f/4,self.height.to_f/4)
     
       b.noFill
-      @readpairs.select{|rp| ! rp.within_chromosome and rp.active}.each do |rp|
-        rp.draw_buffer_circular(b, :highlighted)
+      @chromosomes.each do |chr|
+        chr.between_chromosome_readpairs.values.flatten.select{|r| r.active}.each do |rp|
+          rp.draw_buffer_circular(b, :highlighted)
+        end
+      end
+      b.noStroke
+      @chromosomes.select{|c| c.label.active}.each do |c|
+        c.label.draw_buffer_circular(b, :highlighted)
       end
       b.translate(-self.width.to_f/4,-self.height.to_f/4)
     end
@@ -149,13 +178,13 @@ class MySketch < Processing::App
       b.smooth
       b.strokeCap SQUARE
       b.rectMode CORNERS
+      b.text_font @f
       [@top_linear, @bottom_linear].each do |panel|
         panel.draw_buffer_linear_highlighted(b)
       end
     end
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
   end
-  
   
   def mouse_moved
     if mouse_y < self.height/2
@@ -165,14 +194,60 @@ class MySketch < Processing::App
     else
       @active_panel = 3
     end
+    
     if @active_panel == 1
-      @readpairs.each do |rp|
-#      @readpairs.select{|rp| !rp.within_chromosome}.each do |rp|
-        if ( ( (rp.circular_x1 - mouse_x + self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or 
-             ( (rp.circular_x2 - mouse_x + self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
+      @chromosomes.each do |chr|
+        [chr.within_chromosome_readpairs, chr.between_chromosome_readpairs.values.flatten].flatten.each do |rp|
+          if ( ( (rp.circular_x1 - mouse_x + self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or 
+               ( (rp.circular_x2 - mouse_x + self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
+            rp.active = true
+          else
+            rp.active = false
+          end
+        end
+
+        if chr.label.under_mouse?#mouse_x > chr.label.x1 + width/4 and mouse_x < chr.label.x2 + width/4 and mouse_y > chr.label.y1 + height/4 and mouse_y < chr.label.y2 + height/4
+          chr.label.active = true
+        else
+          chr.label.active = false
+        end
+      end
+      
+      self.draw_buffer_circular_highlighted
+      self.draw_buffer_linear_highlighted
+      redraw
+    elsif @active_panel == 2 or @active_panel == 3
+      if @active_panel == 2
+        chr = @top_linear
+        other_chr = @bottom_linear
+      else
+        chr = @bottom_linear
+        other_chr = @top_linear
+      end
+      chr.activate_zoom_boxes
+      chr.within_chromosome_readpairs.select{|r| r.visible}.each do |rp|
+        if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
           rp.active = true
         else
           rp.active = false
+        end
+        
+      end
+      if @active_panel == 2
+        chr.between_chromosome_readpairs[other_chr.number].select{|r| r.visible}.each do |rp|
+          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+            rp.active = true
+          else
+            rp.active = false
+          end
+        end
+      else
+        other_chr.between_chromosome_readpairs[chr.number].select{|r| r.visible}.each do |rp|
+          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+            rp.active = true
+          else
+            rp.active = false
+          end
         end
       end
       self.draw_buffer_circular_highlighted
@@ -207,6 +282,23 @@ class MySketch < Processing::App
         self.draw_buffer_linear_highlighted
         redraw
       end
+    end
+  end
+  
+  def mouse_clicked
+    if key_pressed? and ( key == 49 or key == 50)
+      active_chr = @chromosomes.select{|l| l.label.active}
+      unless active_chr.length == 0
+        if key == 49
+          active_chr[0].set_linear("top")
+        else
+          active_chr[0].set_linear("bottom")
+        end
+      end
+      draw_buffer_linear_ideograms
+      draw_buffer_linear_zoom
+      draw_buffer_linear_highlighted
+      redraw
     end
   end
 end
