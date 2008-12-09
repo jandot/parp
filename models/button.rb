@@ -8,7 +8,7 @@ class Button
     @action = action
     @type = type
     
-    if @chr == S.top_linear
+    if @chr == S.linear_representation[:top]
       if S.buttons[:top].length > 0
         @x1 = S.buttons[:top][S.buttons[:top].length - 1].x2 + 10
       else

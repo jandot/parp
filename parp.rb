@@ -2,7 +2,7 @@ require '/usr/local/ruby-processing/ruby-processing'
 require 'yaml'
 
 WIDTH = 1200
-HEIGHT = 800
+HEIGHT = 600
 
 #WIDTH=800
 #HEIGHT=600
@@ -27,7 +27,7 @@ class MySketch < Processing::App
   attr_accessor :buffer_linear_zoom, :img_linear_zoom
   attr_accessor :buffer_linear_highlighted, :img_linear_highlighted
   attr_accessor :f
-  attr_accessor :top_linear, :bottom_linear
+  attr_accessor :linear_representation
   attr_accessor :active_panel
   attr_accessor :buttons
   
@@ -45,6 +45,7 @@ class MySketch < Processing::App
     @buttons[:top] = Array.new
     @buttons[:bottom] = Array.new
 
+    @linear_representation = Hash.new
     @chromosomes[0].set_linear(:top)
     @chromosomes[1].set_linear(:bottom)
     
@@ -70,7 +71,7 @@ class MySketch < Processing::App
     
     # Draw green line on ideogram
     if ! @active_panel.nil? and @active_panel > 1
-      chr = ( @active_panel == 2 ) ? @top_linear : @bottom_linear
+      chr = ( @active_panel == 2 ) ? @linear_representation[:top] : @linear_representation[:bottom]
       noFill
       strokeWeight 2
       stroke 0, 255,0,50
@@ -78,7 +79,8 @@ class MySketch < Processing::App
       
       strokeWeight 2
       stroke 0,255,0,200
-      [@top_linear, @bottom_linear].each do |chr|
+      [:top, :bottom].each do |panel|
+        chr = @linear_representation[panel]
         ideogram_line_x = map(mouse_x, 0, self.width, chr.zoom_box_ideogram_x1, chr.zoom_box_ideogram_x2)
         line(ideogram_line_x, chr.ideogram_y1 - 2, ideogram_line_x, chr.ideogram_y1 + chr.ideogram.height + 4 )
       end
@@ -94,7 +96,7 @@ class MySketch < Processing::App
   end
   
   def load_readpairs
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/data.tsv').each do |l|
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/NA12878.tsv').each do |l|
       fields = l.chomp.split(/\t/)
       ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
     end
@@ -156,10 +158,9 @@ class MySketch < Processing::App
       b.strokeCap SQUARE
       b.rectMode CORNERS
       b.stroke 0
-      [@top_linear,@bottom_linear].each do |panel|
-        panel.draw_buffer_linear_ideograms(b)
-      end
       [:top, :bottom].each do |panel|
+        chr = @linear_representation[panel]
+        chr.draw_buffer_linear_ideograms(b)
         @buttons[panel].each do |button|
           button.draw(b)
         end
@@ -175,8 +176,15 @@ class MySketch < Processing::App
       b.strokeCap SQUARE
       b.rectMode CORNERS
       b.text_font @f
-      [@top_linear, @bottom_linear].each do |panel|
-        panel.draw_buffer_linear_zoom(b)
+      [:top, :bottom].each do |panel|
+        chr = @linear_representation[panel]
+        chr.draw_buffer_linear_zoom(b)
+      end
+
+      #Draw between-chromosome readpairs
+      start_chr, stop_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}
+      start_chr.between_chromosome_readpairs[stop_chr.number].each do |rp|
+        rp.draw_buffer_linear(b, :zoom)
       end
     end
     @img_linear_zoom = @buffer_linear_zoom.get(0,0,@buffer_linear_zoom.width, @buffer_linear_zoom.height)
@@ -189,8 +197,9 @@ class MySketch < Processing::App
       b.strokeCap SQUARE
       b.rectMode CORNERS
       b.text_font @f
-      [@top_linear, @bottom_linear].each do |panel|
-        panel.draw_buffer_linear_highlighted(b)
+      [:top, :bottom].each do |panel|
+        chr = @linear_representation[panel]
+        chr.draw_buffer_linear_highlighted(b)
       end
     end
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
@@ -228,11 +237,11 @@ class MySketch < Processing::App
       redraw
     elsif @active_panel == 2 or @active_panel == 3
       if @active_panel == 2
-        chr = @top_linear
-        other_chr = @bottom_linear
+        chr = @linear_representation[:top]
+        other_chr = @linear_representation[:bottom]
       else
-        chr = @bottom_linear
-        other_chr = @top_linear
+        chr = @linear_representation[:bottom]
+        other_chr = @linear_representation[:top]
       end
       chr.activate_zoom_boxes
       chr.within_chromosome_readpairs.select{|r| r.visible}.each do |rp|
@@ -244,19 +253,23 @@ class MySketch < Processing::App
         
       end
       if @active_panel == 2
-        chr.between_chromosome_readpairs[other_chr.number].select{|r| r.visible}.each do |rp|
-          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-            rp.active = true
-          else
-            rp.active = false
+        unless chr.between_chromosome_readpairs[other_chr.number].nil?
+          chr.between_chromosome_readpairs[other_chr.number].select{|r| r.visible}.each do |rp|
+            if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+              rp.active = true
+            else
+              rp.active = false
+            end
           end
         end
       else
-        other_chr.between_chromosome_readpairs[chr.number].select{|r| r.visible}.each do |rp|
-          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-            rp.active = true
-          else
-            rp.active = false
+        unless other_chr.between_chromosome_readpairs[chr.number].nil?
+          other_chr.between_chromosome_readpairs[chr.number].select{|r| r.visible}.each do |rp|
+            if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+              rp.active = true
+            else
+              rp.active = false
+            end
           end
         end
       end
@@ -270,12 +283,12 @@ class MySketch < Processing::App
     dragging = false
     if @active_panel == 2 or @active_panel == 3
       if @active_panel == 2
-        panel = @top_linear
+        panel = @linear_representation[:top]
         if pmouse_y >= self.height/2 + 5 and pmouse_y <= self.height/2 + panel.ideogram.height + 5
           dragging = true
         end
       else
-        panel = @bottom_linear
+        panel = @linear_representation[:bottom]
         if pmouse_y <= self.height - 5 and pmouse_y >= self.height - panel.ideogram.height - 5
           dragging = true
         end
@@ -315,9 +328,9 @@ class MySketch < Processing::App
         @buttons[panel].each do |button|
           if button.under_mouse?
             if panel == :top
-              @top_linear.apply_button(button.type, button.action)
+              @linear_representation[:top].apply_button(button.type, button.action)
             else
-              @bottom_linear.apply_button(button.type, button.action)
+              @linear_representation[:bottom].apply_button(button.type, button.action)
             end
             changed = true
           end

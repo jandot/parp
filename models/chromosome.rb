@@ -5,7 +5,7 @@ class Chromosome
   attr_accessor :ideogram, :ideogram_x1, :ideogram_y1, :baseline
   attr_accessor :zoom_box_ideogram_x1, :zoom_box_ideogram_x2, :zoom_box_ideogram_dx
   attr_accessor :left_border, :area
-  attr_accessor :top_linear, :bottom_linear
+  attr_accessor :linear_representation
   attr_accessor :zoom_box_left_activated, :zoom_box_right_activated
   attr_accessor :label
   
@@ -14,8 +14,7 @@ class Chromosome
     @length = length
     @centromere = ( centromere_start + centromere_stop )/2
     @x = MySketch.map(@number, 0, 25, 0, S.width)
-    @top_linear = false
-    @bottom_linear = false
+    @linear_representation = nil
     @ideogram = S.loadImage("/Users/ja8/LocalDocuments/Projects/pARP/data/ideograms/chr" + @number.to_s + ".png")
     self.calculate_radians
     @label = ChromosomeLabel.new(self)
@@ -71,7 +70,7 @@ class Chromosome
     b.image(@ideogram, @ideogram_x1, @ideogram_y1)
     b.stroke(0)
     b.line(0, @baseline, b.width, @baseline)
-    if @top_linear
+    if @linear_representation == :top
       S.buttons[:top].each do |button|
         button.draw(b)
       end
@@ -92,17 +91,6 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
-    if @top_linear
-      if @number < S.bottom_linear.number
-        @between_chromosome_readpairs[S.bottom_linear.number].select{|rp| rp.visible}.each do |rp|
-          rp.draw_buffer_linear(b, :zoom)
-        end
-      else
-        S.bottom_linear.between_chromosome_readpairs[@number].select{|rp| rp.visible}.each do |rp|
-          rp.draw_buffer_linear(b, :zoom)
-        end
-      end
-    end
   end
   
   def draw_buffer_linear_highlighted(b)
@@ -122,13 +110,13 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
       rp.draw_buffer_linear(b, :highlighted)
     end
-    if @top_linear
-      if @number < S.bottom_linear.number
-        @between_chromosome_readpairs[S.bottom_linear.number].select{|rp| rp.visible and rp.active}.each do |rp|
+    if @linear_representation == :top
+      if @number < S.linear_representation[:bottom].number
+        @between_chromosome_readpairs[S.linear_representation[:bottom].number].select{|rp| rp.visible and rp.active}.each do |rp|
           rp.draw_buffer_linear(b, :highlighted)
         end
       else
-        S.bottom_linear.between_chromosome_readpairs[@number].select{|rp| rp.visible and rp.active}.each do |rp|
+        S.linear_representation[:bottom].between_chromosome_readpairs[@number].select{|rp| rp.visible and rp.active}.each do |rp|
           rp.draw_buffer_linear(b, :highlighted)
         end
       end
@@ -152,72 +140,42 @@ class Chromosome
     @ideogram_x1 = 3
     @ideogram_x2 = @ideogram_x1 + @ideogram.width
     if panel == :top
+      other_panel = :bottom
       @ideogram_y1 = 3
       @baseline = S.height/8
-      @top_linear = true
-      @bottom_linear = false
-      @within_chromosome_readpairs.each do |rp|
-        rp.visible = true
-      end
-      unless S.bottom_linear.nil? or @between_chromosome_readpairs[S.bottom_linear.number].nil?
-        @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
-          rp.visible = true
-        end
-      end
-      
-      S.chromosomes.each do |chr|
-        if ! chr == self
-          chr.top_linear = false
-        end
-      end
-      
-      S.top_linear = self
-      
-      S.buttons[:top] = Array.new
-      S.buttons[:top].push(Button.new(self, :zoom, "Complete", :show_complete))
-      S.buttons[:top].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
-      S.buttons[:top].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
-      S.buttons[:top].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
-      S.buttons[:top].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
-      S.buttons[:top].push(Button.new(self, :pan, "<<", :left_large))
-      S.buttons[:top].push(Button.new(self, :pan, "<", :left_small))
-      S.buttons[:top].push(Button.new(self, :pan, ">", :right_small))
-      S.buttons[:top].push(Button.new(self, :pan, ">>", :right_large))
-      
-    else #panel == "bottom"
+    else
+      other_panel = :top
       @ideogram_y1 = S.height/2 - @ideogram.height - 3
       @baseline = 3*S.height/8
-      @top_linear = false
-      @bottom_linear = true
-      @within_chromosome_readpairs.each do |rp|
-        rp.visible = true
-      end
-      unless S.top_linear.nil?
-        S.top_linear.between_chromosome_readpairs[@number].each do |rp|
-          rp.visible = true
-        end
-      end
-
-      S.chromosomes.each do |chr|
-        if ! chr == self
-          chr.bottom_linear = false
-        end
-      end
-
-      S.bottom_linear = self
-      
-      S.buttons[:bottom] = Array.new
-      S.buttons[:bottom].push(Button.new(self, :zoom, "Complete", :show_complete))
-      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
-      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
-      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
-      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
-      S.buttons[:bottom].push(Button.new(self, :pan, "<<", :left_large))
-      S.buttons[:bottom].push(Button.new(self, :pan, "<", :left_small))
-      S.buttons[:bottom].push(Button.new(self, :pan, ">", :right_small))
-      S.buttons[:bottom].push(Button.new(self, :pan, ">>", :right_large))
-      
     end
+    @linear_representation = panel
+    
+    @within_chromosome_readpairs.each do |rp|
+      rp.visible = true
+    end
+
+    @between_chromosome_readpairs.values.flatten.each do |rp|
+      rp.visible = true
+    end
+    
+    S.chromosomes.each do |chr|
+      if ! chr == self
+        chr.linear_representation[panel] = false
+      end
+    end
+    
+    S.linear_representation[panel] = self
+    
+    S.buttons[panel] = Array.new
+    S.buttons[panel].push(Button.new(self, :zoom, "Complete", :show_complete))
+    S.buttons[panel].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
+    S.buttons[panel].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
+    S.buttons[panel].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
+    S.buttons[panel].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
+    S.buttons[panel].push(Button.new(self, :pan, "<<", :left_large))
+    S.buttons[panel].push(Button.new(self, :pan, "<", :left_small))
+    S.buttons[panel].push(Button.new(self, :pan, ">", :right_small))
+    S.buttons[panel].push(Button.new(self, :pan, ">>", :right_large))
     
     @left_border = 0
     @area = @length
@@ -231,23 +189,23 @@ class Chromosome
     @within_chromosome_readpairs.each do |rp|
       rp.update_x
     end
-    if @top_linear
-      if @number < S.bottom_linear.number
-        @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
+    if @linear_representation == :top
+      if @number < S.linear_representation[:bottom].number
+        @between_chromosome_readpairs[S.linear_representation[:bottom].number].each do |rp|
           rp.update_x
         end
       else
-        S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
+        S.linear_representation[:bottom].between_chromosome_readpairs[@number].each do |rp|
           rp.update_x
         end
       end
     else
-      if @number < S.top_linear.number
-        @between_chromosome_readpairs[S.top_linear.number].each do |rp|
+      if @number < S.linear_representation[:top].number
+        @between_chromosome_readpairs[S.linear_representation[:top].number].each do |rp|
           rp.update_x
         end
       else
-        S.top_linear.between_chromosome_readpairs[@number].each do |rp|
+        S.linear_representation[:top].between_chromosome_readpairs[@number].each do |rp|
           rp.update_x
         end
       end

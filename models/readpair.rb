@@ -10,13 +10,13 @@ class ReadPair
   attr_accessor :circular_bezier1_x, :circular_bezier1_y, :circular_bezier2_x, :circular_bezier2_y
   attr_accessor :linear_x1, :linear_x2, :linear_bezier_y, :bezier_random
   attr_accessor :visible
+  attr_accessor :colour
   
   def initialize(chr1, pos1, chr2, pos2, code)
     if chr1 > chr2
       chr1, chr2 = chr2, chr1
       pos1, pos2 = pos2, pos1
     end
-    
     
     @chr1 = S.chromosomes.select{|c| c.number == chr1}[0]
     @pos1 = pos1
@@ -25,6 +25,14 @@ class ReadPair
     @code = code
     @active = false
     @within_chromosome = (chr1 == chr2) ? true : false
+    
+    if @code == 'DIST'
+      @colour = S.color(0,50)
+    elsif @code == 'FF'
+      @colour = S.color(0,0,255,50)
+    elsif @code == 'RR'
+      @colour = S.color(0,255,0,50)
+    end
     
     if @within_chromosome
       @chr1.within_chromosome_readpairs.push(self)
@@ -67,7 +75,7 @@ class ReadPair
   def draw_buffer_linear(b, buffer_type)
     if @visible
       if buffer_type == :zoom
-        b.stroke 0, 50
+        b.stroke @colour
         b.strokeWeight 1
       else #buffer_type == :highlight
         b.stroke 255,0,0
@@ -76,10 +84,10 @@ class ReadPair
       
       if @within_chromosome
         dy = 0
-        if @chr1.top_linear # It's the top of the two
-          dy = 20
+        if @chr1.linear_representation == :top # It's the top of the two
+          dy = 40
         else # It's the bottom of the two
-          dy = -20
+          dy = -40
         end
         if ( @code == 'DIST')
           @linear_bezier_y = @chr1.baseline - dy + @bezier_random
@@ -88,7 +96,11 @@ class ReadPair
         end
         b.bezier(@linear_x1, @chr1.baseline, @linear_x1, @linear_bezier_y, @linear_x2, @linear_bezier_y, @linear_x2, @chr1.baseline)
       else
-        b.bezier(@linear_x1, @chr1.baseline, @linear_x1, @chr1.baseline + 20 + @bezier_random, @linear_x2, @chr2.baseline - 20 + @bezier_random, @linear_x2, @chr2.baseline)
+        if @chr1.linear_representation == :top
+          b.bezier(@linear_x1, @chr1.baseline, @linear_x1, @chr1.baseline + 40 + @bezier_random, @linear_x2, @chr2.baseline - 40 + @bezier_random, @linear_x2, @chr2.baseline)
+        else
+          b.bezier(@linear_x2, @chr2.baseline, @linear_x2, @chr2.baseline + 40 + @bezier_random, @linear_x1, @chr1.baseline - 40 + @bezier_random, @linear_x1, @chr1.baseline)
+        end
       end
     end
   end
