@@ -29,6 +29,7 @@ class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :top_linear, :bottom_linear
   attr_accessor :active_panel
+  attr_accessor :buttons
   
   def setup
     @f = create_font("Arial", 12)
@@ -40,8 +41,12 @@ class MySketch < Processing::App
     self.load_chromosomes
     self.load_readpairs
     
-    @chromosomes[0].set_linear("top")
-    @chromosomes[1].set_linear("bottom")
+    @buttons = Hash.new
+    @buttons[:top] = Array.new
+    @buttons[:bottom] = Array.new
+
+    @chromosomes[0].set_linear(:top)
+    @chromosomes[1].set_linear(:bottom)
     
     smooth
     no_loop
@@ -153,6 +158,11 @@ class MySketch < Processing::App
       b.stroke 0
       [@top_linear,@bottom_linear].each do |panel|
         panel.draw_buffer_linear_ideograms(b)
+      end
+      [:top, :bottom].each do |panel|
+        @buttons[panel].each do |button|
+          button.draw(b)
+        end
       end
     end
     @img_linear_ideograms = @buffer_linear_ideograms.get(0,0,@buffer_linear_ideograms.width, @buffer_linear_ideograms.height)
@@ -290,15 +300,34 @@ class MySketch < Processing::App
       active_chr = @chromosomes.select{|l| l.label.active}
       unless active_chr.length == 0
         if key == 49
-          active_chr[0].set_linear("top")
+          active_chr[0].set_linear(:top)
         else
-          active_chr[0].set_linear("bottom")
+          active_chr[0].set_linear(:bottom)
         end
       end
       draw_buffer_linear_ideograms
       draw_buffer_linear_zoom
       draw_buffer_linear_highlighted
       redraw
+    else
+      changed = false
+      [:top, :bottom].each do |panel|
+        @buttons[panel].each do |button|
+          if button.under_mouse?
+            if panel == :top
+              @top_linear.apply_button(button.type, button.action)
+            else
+              @bottom_linear.apply_button(button.type, button.action)
+            end
+            changed = true
+          end
+        end
+      end
+      if changed
+        draw_buffer_linear_zoom
+        draw_buffer_linear_highlighted
+        redraw
+      end
     end
   end
 end

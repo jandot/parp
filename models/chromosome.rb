@@ -26,6 +26,7 @@ class Chromosome
     (@number..24).each do |n|
       @between_chromosome_readpairs[n] = Array.new
     end
+    
   end
   
   def calculate_radians
@@ -68,7 +69,17 @@ class Chromosome
   
   def draw_buffer_linear_ideograms(b)
     b.image(@ideogram, @ideogram_x1, @ideogram_y1)
+    b.stroke(0)
     b.line(0, @baseline, b.width, @baseline)
+    if @top_linear
+      S.buttons[:top].each do |button|
+        button.draw(b)
+      end
+    else
+      S.buttons[:bottom].each do |button|
+        button.draw(b)
+      end
+    end
   end
   
   def draw_buffer_linear_zoom(b)
@@ -140,7 +151,7 @@ class Chromosome
   def set_linear(panel)
     @ideogram_x1 = 3
     @ideogram_x2 = @ideogram_x1 + @ideogram.width
-    if panel == "top"
+    if panel == :top
       @ideogram_y1 = 3
       @baseline = S.height/8
       @top_linear = true
@@ -148,7 +159,7 @@ class Chromosome
       @within_chromosome_readpairs.each do |rp|
         rp.visible = true
       end
-      unless S.bottom_linear.nil?
+      unless S.bottom_linear.nil? or @between_chromosome_readpairs[S.bottom_linear.number].nil?
         @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
           rp.visible = true
         end
@@ -161,6 +172,18 @@ class Chromosome
       end
       
       S.top_linear = self
+      
+      S.buttons[:top] = Array.new
+      S.buttons[:top].push(Button.new(self, :zoom, "Complete", :show_complete))
+      S.buttons[:top].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
+      S.buttons[:top].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
+      S.buttons[:top].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
+      S.buttons[:top].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
+      S.buttons[:top].push(Button.new(self, :pan, "<<", :left_large))
+      S.buttons[:top].push(Button.new(self, :pan, "<", :left_small))
+      S.buttons[:top].push(Button.new(self, :pan, ">", :right_small))
+      S.buttons[:top].push(Button.new(self, :pan, ">>", :right_large))
+      
     else #panel == "bottom"
       @ideogram_y1 = S.height/2 - @ideogram.height - 3
       @baseline = 3*S.height/8
@@ -182,6 +205,18 @@ class Chromosome
       end
 
       S.bottom_linear = self
+      
+      S.buttons[:bottom] = Array.new
+      S.buttons[:bottom].push(Button.new(self, :zoom, "Complete", :show_complete))
+      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
+      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
+      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
+      S.buttons[:bottom].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
+      S.buttons[:bottom].push(Button.new(self, :pan, "<<", :left_large))
+      S.buttons[:bottom].push(Button.new(self, :pan, "<", :left_small))
+      S.buttons[:bottom].push(Button.new(self, :pan, ">", :right_small))
+      S.buttons[:bottom].push(Button.new(self, :pan, ">>", :right_large))
+      
     end
     
     @left_border = 0
@@ -189,6 +224,34 @@ class Chromosome
     @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
+    
+  end
+  
+  def update_x_readpairs
+    @within_chromosome_readpairs.each do |rp|
+      rp.update_x
+    end
+    if @top_linear
+      if @number < S.bottom_linear.number
+        @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
+          rp.update_x
+        end
+      else
+        S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
+          rp.update_x
+        end
+      end
+    else
+      if @number < S.top_linear.number
+        @between_chromosome_readpairs[S.top_linear.number].each do |rp|
+          rp.update_x
+        end
+      else
+        S.top_linear.between_chromosome_readpairs[@number].each do |rp|
+          rp.update_x
+        end
+      end
+    end
   end
   
   def zoom_by_drag(side)
@@ -208,33 +271,37 @@ class Chromosome
       end
       @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
       @area = MySketch.map(@zoom_box_ideogram_dx, @ideogram_x1, @ideogram_x1 + @ideogram.width, 0, @length)
-      
-      @within_chromosome_readpairs.each do |rp|
-        rp.update_x
+    end
+    self.update_x_readpairs
+  end
+
+  def zoom_by_step(action)
+    if action == :show_complete
+      @left_border = 0
+      @area = @length
+    elsif action == :zoom_in_10x
+      @area = [@area.to_f/10, 10].max
+    elsif action == :zoom_in_3x
+      @area = [@area.to_f/3, 10].max
+    elsif action == :zoom_out_3x
+      @area = [@area*3, @length].min
+      if ( @left_border + @area > @length )
+        @left_border = @length - @area
       end
-      if @top_linear
-        if @number < S.bottom_linear.number
-          @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
-            rp.update_x
-          end
-        else
-          S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
-            rp.update_x
-          end
-        end
-      else
-        if @number < S.top_linear.number
-          @between_chromosome_readpairs[S.top_linear.number].each do |rp|
-            rp.update_x
-          end
-        else
-          S.top_linear.between_chromosome_readpairs[@number].each do |rp|
-            rp.update_x
-          end
-        end
+    elsif action == :zoom_out_10x
+      @area = [@area*10, @length].min
+      if ( @left_border + @area > @length )
+        @left_border = @length - @area
       end
     end
+
+    @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
+    
+    self.update_x_readpairs
   end
+  
   
   def pan_by_drag
     dx = S.mouse_x - S.pmouse_x
@@ -243,31 +310,34 @@ class Chromosome
       @zoom_box_ideogram_x2 += dx
       
       @left_border = MySketch.map(@zoom_box_ideogram_x1, @ideogram_x1, @ideogram_x2, 0, @length)
-      @within_chromosome_readpairs.each do |rp|
-        rp.update_x
-      end
-      if @top_linear
-        if @number < S.bottom_linear.number
-          @between_chromosome_readpairs[S.bottom_linear.number].each do |rp|
-            rp.update_x
-          end
-        else
-          S.bottom_linear.between_chromosome_readpairs[@number].each do |rp|
-            rp.update_x
-          end
-        end
-      else
-        if @number < S.top_linear.number
-          @between_chromosome_readpairs[S.top_linear.number].each do |rp|
-            rp.update_x
-          end
-        else
-          S.top_linear.between_chromosome_readpairs[@number].each do |rp|
-            rp.update_x
-          end
-        end
-      end
+      self.update_x_readpairs
 
+    end
+  end
+  
+  def pan_by_step(action)
+    if action == :left_large
+      @left_border = [@left_border - @area, 0].min
+    elsif action == :left_small
+      @left_border = [@left_border - @area.to_f/2, 0].min
+    elsif action == :right_small
+      @left_border = [@left_border + @area.to_f/2, @length - @area - 10].min
+    elsif action == :right_large
+      @left_border = [@left_border + @area, @length - @area - 10].min
+    end
+    
+    @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
+    
+    self.update_x_readpairs
+  end
+
+  def apply_button(type, action)
+    if type == :zoom
+      self.zoom_by_step(action)
+    else
+      self.pan_by_step(action)
     end
   end
 end
