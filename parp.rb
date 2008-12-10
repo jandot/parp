@@ -71,11 +71,10 @@ class MySketch < Processing::App
     
     # Draw green line on ideogram
     if ! @active_panel.nil? and @active_panel > 1
-      chr = ( @active_panel == 2 ) ? @linear_representation[:top] : @linear_representation[:bottom]
       noFill
       strokeWeight 2
       stroke 0, 255,0,50
-      line(mouse_x, chr.baseline - 50, mouse_x, chr.baseline + 50)
+      line(mouse_x, @linear_representation[:top].baseline - 20, mouse_x, @linear_representation[:bottom].baseline + 20)
       
       strokeWeight 2
       stroke 0,255,0,200
