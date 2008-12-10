@@ -110,17 +110,6 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
       rp.draw_buffer_linear(b, :highlighted)
     end
-    if @linear_representation == :top
-      if @number < S.linear_representation[:bottom].number
-        @between_chromosome_readpairs[S.linear_representation[:bottom].number].select{|rp| rp.visible and rp.active}.each do |rp|
-          rp.draw_buffer_linear(b, :highlighted)
-        end
-      else
-        S.linear_representation[:bottom].between_chromosome_readpairs[@number].select{|rp| rp.visible and rp.active}.each do |rp|
-          rp.draw_buffer_linear(b, :highlighted)
-        end
-      end
-    end
   end
   
   def activate_zoom_boxes
@@ -140,11 +129,9 @@ class Chromosome
     @ideogram_x1 = 3
     @ideogram_x2 = @ideogram_x1 + @ideogram.width
     if panel == :top
-      other_panel = :bottom
       @ideogram_y1 = 3
       @baseline = S.height/8
     else
-      other_panel = :top
       @ideogram_y1 = S.height/2 - @ideogram.height - 3
       @baseline = 3*S.height/8
     end

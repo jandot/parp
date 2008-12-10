@@ -200,6 +200,12 @@ class MySketch < Processing::App
         chr = @linear_representation[panel]
         chr.draw_buffer_linear_highlighted(b)
       end
+
+      #Draw between-chromosome readpairs
+      start_chr, stop_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}
+      start_chr.between_chromosome_readpairs[stop_chr.number].select{|rp| rp.visible and rp.active}.each do |rp|
+        rp.draw_buffer_linear(b, :highlighted)
+      end
     end
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
   end
@@ -249,29 +255,19 @@ class MySketch < Processing::App
         else
           rp.active = false
         end
-        
       end
-      if @active_panel == 2
-        unless chr.between_chromosome_readpairs[other_chr.number].nil?
-          chr.between_chromosome_readpairs[other_chr.number].select{|r| r.visible}.each do |rp|
-            if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-              rp.active = true
-            else
-              rp.active = false
-            end
-          end
-        end
-      else
-        unless other_chr.between_chromosome_readpairs[chr.number].nil?
-          other_chr.between_chromosome_readpairs[chr.number].select{|r| r.visible}.each do |rp|
-            if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-              rp.active = true
-            else
-              rp.active = false
-            end
-          end
+
+      larger_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[0]
+      smaller_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[1]
+
+      larger_chr.between_chromosome_readpairs[smaller_chr.number].select{|r| r.visible}.each do |rp|
+        if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+          rp.active = true
+        else
+          rp.active = false
         end
       end
+
       self.draw_buffer_circular_highlighted
       self.draw_buffer_linear_highlighted
       redraw
