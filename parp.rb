@@ -35,8 +35,6 @@ class MySketch < Processing::App
     @f = create_font("Arial", 12)
     text_font @f
     
-    @zoomed = false
-    
     @chromosomes = Array.new
     self.load_chromosomes
     self.load_readpairs
