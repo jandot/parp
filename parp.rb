@@ -4,12 +4,6 @@ require 'yaml'
 WIDTH = 1200
 HEIGHT = 600
 
-#WIDTH=800
-#HEIGHT=600
-
-DIAMETER = 3*HEIGHT/8
-RADIUS = DIAMETER/2
-
 GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
@@ -30,11 +24,17 @@ class MySketch < Processing::App
   attr_accessor :linear_representation
   attr_accessor :active_panel
   attr_accessor :buttons
+  attr_accessor :diameter, :radius
+  attr_accessor :circular_only
   
   def setup
     @f = create_font("Arial", 12)
     text_font @f
-    
+
+    @circular_only = true
+    @diameter = 7*self.height/8
+    @radius = @diameter/2
+
     @chromosomes = Array.new
     self.load_chromosomes
     self.load_readpairs
@@ -63,26 +63,28 @@ class MySketch < Processing::App
     # The circular bit
     image(@img_circular_highlighted,0,0)
 
-    # The linear bit
-    translate(0, self.height/2)
-    image(@img_linear_highlighted,0,0)
-    
-    # Draw green line on ideogram
-    if ! @active_panel.nil? and @active_panel > 1
-      noFill
-      strokeWeight 2
-      stroke 0, 255,0,50
-      line(mouse_x, @linear_representation[:top].baseline - 20, mouse_x, @linear_representation[:bottom].baseline + 20)
-      
-      strokeWeight 2
-      stroke 0,255,0,200
-      [:top, :bottom].each do |panel|
-        chr = @linear_representation[panel]
-        ideogram_line_x = map(mouse_x, 0, self.width, chr.zoom_box_ideogram_x1, chr.zoom_box_ideogram_x2)
-        line(ideogram_line_x, chr.ideogram_y1 - 2, ideogram_line_x, chr.ideogram_y1 + chr.ideogram.height + 4 )
+    if ! @circular_only
+      # The linear bit
+      translate(0, self.height/2)
+      image(@img_linear_highlighted,0,0)
+
+      # Draw green line on ideogram
+      if ! @active_panel.nil? and @active_panel > 1
+        noFill
+        strokeWeight 2
+        stroke 0, 255,0,50
+        line(mouse_x, @linear_representation[:top].baseline - 20, mouse_x, @linear_representation[:bottom].baseline + 20)
+
+        strokeWeight 2
+        stroke 0,255,0
+        [:top, :bottom].each do |panel|
+          chr = @linear_representation[panel]
+          ideogram_line_x = map(mouse_x, 0, self.width, chr.zoom_box_ideogram_x1, chr.zoom_box_ideogram_x2)
+          line(ideogram_line_x, chr.ideogram_y1 - 2, ideogram_line_x, chr.ideogram_y1 + chr.ideogram.height + 4 )
+        end
       end
+      translate(0, -self.height/2)
     end
-    translate(0, -self.height/2)
   end
     
   def load_chromosomes
@@ -93,21 +95,28 @@ class MySketch < Processing::App
   end
   
   def load_readpairs
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/NA12878.tsv').each do |l|
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/data.tsv').each do |l|
       fields = l.chomp.split(/\t/)
       ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
     end
   end
   
   def draw_buffer_circular_all
-    @buffer_circular_all = buffer(self.width/2,self.height/2,JAVA2D) do |b|
+    @buffer_circular_all = buffer(self.width,self.height,JAVA2D) do |b|
       b.background(255)
       b.text_font @f
     
       b.smooth
       b.strokeCap(SQUARE)
-    
-      b.translate(self.width.to_f/4,self.height.to_f/4)
+
+      if ! @circular_only
+        translate_x = self.width.to_f/4
+        translate_y = self.height.to_f/4
+      else
+        translate_x = self.width.to_f/2
+        translate_y = self.height.to_f/2
+      end
+      b.translate(translate_x, translate_y)
       b.strokeWeight(3)
       b.stroke(0)
       @chromosomes.each do |chr|
@@ -120,17 +129,24 @@ class MySketch < Processing::App
           rp.draw_buffer_circular(b, :all)
         end
       end
-      b.translate(-self.width.to_f/4,-self.height.to_f/4)
+      b.translate(-translate_x, -translate_y)
     end
     @img_circular_all = @buffer_circular_all.get(0, 0, @buffer_circular_all.width, @buffer_circular_all.height)
   end
   
   def draw_buffer_circular_highlighted
-    @buffer_circular_highlighted = buffer(self.width/2,self.height/2,JAVA2D) do |b|
+    @buffer_circular_highlighted = buffer(self.width,self.height,JAVA2D) do |b|
       b.background(@img_circular_all)
       b.smooth
-    
-      b.translate(self.width.to_f/4,self.height.to_f/4)
+
+      if ! @circular_only
+        translate_x = self.width.to_f/4
+        translate_y = self.height.to_f/4
+      else
+        translate_x = self.width.to_f/2
+        translate_y = self.height.to_f/2
+      end
+      b.translate(translate_x, translate_y)
     
       b.noFill
       @chromosomes.each do |chr|
@@ -142,7 +158,7 @@ class MySketch < Processing::App
       @chromosomes.select{|c| c.label.active}.each do |c|
         c.label.draw_buffer_circular(b, :highlighted)
       end
-      b.translate(-self.width.to_f/4,-self.height.to_f/4)
+      b.translate(-translate_x, -translate_y)
     end
     @img_circular_highlighted = @buffer_circular_highlighted.get(0, 0, @buffer_circular_highlighted.width, @buffer_circular_highlighted.height)
   end
@@ -207,68 +223,90 @@ class MySketch < Processing::App
     end
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
   end
-  
+
   def mouse_moved
-    if mouse_y < self.height/2
-      @active_panel = 1
-    elsif mouse_y < 3*self.height/4
-      @active_panel = 2
-    else
-      @active_panel = 3
-    end
-    
-    if @active_panel == 1
+    if @circular_only
       @chromosomes.each do |chr|
         [chr.within_chromosome_readpairs, chr.between_chromosome_readpairs.values.flatten].flatten.each do |rp|
-          if ( ( (rp.circular_x1 - mouse_x + self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or 
-               ( (rp.circular_x2 - mouse_x + self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
+          if ( ( (rp.circular_x1 - mouse_x + self.width/2).abs < 5 and (rp.circular_y1 - mouse_y + self.height/2).abs < 5 ) or
+               ( (rp.circular_x2 - mouse_x + self.width/2).abs < 5 and (rp.circular_y2 - mouse_y + self.height/2).abs < 5 ) )
+            rp.active = true
+          else
+            rp.active = false
+          end
+        end
+         if chr.label.under_mouse?#mouse_x > chr.label.x1 + width/4 and mouse_x < chr.label.x2 + width/4 and mouse_y > chr.label.y1 + height/4 and mouse_y < chr.label.y2 + height/4
+          chr.label.active = true
+        else
+          chr.label.active = false
+        end
+      end
+
+      self.draw_buffer_circular_highlighted
+      self.draw_buffer_linear_highlighted
+      redraw
+    else
+      if mouse_y < self.height/2
+        @active_panel = 1
+      elsif mouse_y < 3*self.height/4
+        @active_panel = 2
+      else
+        @active_panel = 3
+      end
+
+      if @active_panel == 1
+        @chromosomes.each do |chr|
+          [chr.within_chromosome_readpairs, chr.between_chromosome_readpairs.values.flatten].flatten.each do |rp|
+            if ( ( (rp.circular_x1 - mouse_x + self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or
+                 ( (rp.circular_x2 - mouse_x + self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
+              rp.active = true
+            else
+              rp.active = false
+            end
+          end
+
+          if chr.label.under_mouse?#mouse_x > chr.label.x1 + width/4 and mouse_x < chr.label.x2 + width/4 and mouse_y > chr.label.y1 + height/4 and mouse_y < chr.label.y2 + height/4
+            chr.label.active = true
+          else
+            chr.label.active = false
+          end
+        end
+
+        self.draw_buffer_circular_highlighted
+        self.draw_buffer_linear_highlighted
+        redraw
+      elsif @active_panel == 2 or @active_panel == 3
+        if @active_panel == 2
+          chr = @linear_representation[:top]
+          other_chr = @linear_representation[:bottom]
+        else
+          chr = @linear_representation[:bottom]
+          other_chr = @linear_representation[:top]
+        end
+        chr.activate_zoom_boxes
+        chr.within_chromosome_readpairs.select{|r| r.visible}.each do |rp|
+          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
             rp.active = true
           else
             rp.active = false
           end
         end
 
-        if chr.label.under_mouse?#mouse_x > chr.label.x1 + width/4 and mouse_x < chr.label.x2 + width/4 and mouse_y > chr.label.y1 + height/4 and mouse_y < chr.label.y2 + height/4
-          chr.label.active = true
-        else
-          chr.label.active = false
-        end
-      end
-      
-      self.draw_buffer_circular_highlighted
-      self.draw_buffer_linear_highlighted
-      redraw
-    elsif @active_panel == 2 or @active_panel == 3
-      if @active_panel == 2
-        chr = @linear_representation[:top]
-        other_chr = @linear_representation[:bottom]
-      else
-        chr = @linear_representation[:bottom]
-        other_chr = @linear_representation[:top]
-      end
-      chr.activate_zoom_boxes
-      chr.within_chromosome_readpairs.select{|r| r.visible}.each do |rp|
-        if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-          rp.active = true
-        else
-          rp.active = false
-        end
-      end
+        larger_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[0]
+        smaller_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[1]
 
-      larger_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[0]
-      smaller_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}[1]
-
-      larger_chr.between_chromosome_readpairs[smaller_chr.number].select{|r| r.visible}.each do |rp|
-        if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
-          rp.active = true
-        else
-          rp.active = false
+        larger_chr.between_chromosome_readpairs[smaller_chr.number].select{|r| r.visible}.each do |rp|
+          if (rp.linear_x1 - mouse_x).abs < 5 or (rp.linear_x2 - mouse_x).abs < 5
+            rp.active = true
+          else
+            rp.active = false
+          end
         end
-      end
 
-      self.draw_buffer_circular_highlighted
-      self.draw_buffer_linear_highlighted
-      redraw
+        self.draw_buffer_circular_highlighted
+        self.draw_buffer_linear_highlighted
+        redraw
+      end
     end
   end
   
@@ -334,6 +372,31 @@ class MySketch < Processing::App
         draw_buffer_linear_highlighted
         redraw
       end
+    end
+  end
+
+  def key_pressed
+    if key == 122 #'z'
+      @circular_only = !@circular_only
+
+      if @circular_only
+        @diameter = 7*self.height/8
+        @radius = @diameter/2
+      else
+        @diameter = 3*self.height/8
+        @radius = @diameter/2
+      end
+
+      @chromosomes.each do |chr|
+        chr.label.calculate_radians
+        chr.between_chromosome_readpairs.values.flatten.each do |rp|
+          rp.calculate_radians
+        end
+      end
+
+      draw_buffer_circular_all
+      draw_buffer_circular_highlighted
+      redraw
     end
   end
 end

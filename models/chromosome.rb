@@ -56,12 +56,12 @@ class Chromosome
     else
       b.stroke(150)
     end
-    b.arc(0,0, DIAMETER, DIAMETER, @start_rad, @stop_rad)
+    b.arc(0,0, S.diameter, S.diameter, @start_rad, @stop_rad)
     
     b.fill(0)
     b.strokeWeight(0.5)
     
-    b.ellipse(RADIUS*MySketch.cos(@centr_rad), RADIUS*MySketch.sin(@centr_rad),5,5)
+    b.ellipse(S.radius*MySketch.cos(@centr_rad), S.radius*MySketch.sin(@centr_rad),5,5)
     
     b.text(@number, @label.x1, @label.y2)
   end

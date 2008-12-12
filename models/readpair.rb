@@ -47,20 +47,25 @@ class ReadPair
     pos2_degree = (@pos2_whole_genome.to_f/GENOME_SIZE)*360
     @pos1_rad = MySketch.radians(pos1_degree)
     @pos2_rad = MySketch.radians(pos2_degree)
-    @circular_x1 = RADIUS*MySketch.cos(@pos1_rad)
-    @circular_y1 = RADIUS*MySketch.sin(@pos1_rad)
-    @circular_bezier1_x = (RADIUS-30)*MySketch.cos(@pos1_rad)
-    @circular_bezier1_y = (RADIUS-30)*MySketch.sin(@pos1_rad)
-    @circular_bezier2_x = (RADIUS-30)*MySketch.cos(@pos2_rad)
-    @circular_bezier2_y = (RADIUS-30)*MySketch.sin(@pos2_rad)
-    @circular_x2 = RADIUS*MySketch.cos(@pos2_rad)
-    @circular_y2 = RADIUS*MySketch.sin(@pos2_rad)
+
+    calculate_radians
     
     @linear_x1 = MySketch.map(@pos1, 0, @chr1.length, 0, S.width)
     @linear_x2 = MySketch.map(@pos2, 0, @chr2.length, 0, S.width)
     @bezier_random = S.random(-5,5)
   end
-  
+
+  def calculate_radians
+    @circular_x1 = S.radius*MySketch.cos(@pos1_rad)
+    @circular_y1 = S.radius*MySketch.sin(@pos1_rad)
+    @circular_bezier1_x = (S.radius-30)*MySketch.cos(@pos1_rad)
+    @circular_bezier1_y = (S.radius-30)*MySketch.sin(@pos1_rad)
+    @circular_bezier2_x = (S.radius-30)*MySketch.cos(@pos2_rad)
+    @circular_bezier2_y = (S.radius-30)*MySketch.sin(@pos2_rad)
+    @circular_x2 = S.radius*MySketch.cos(@pos2_rad)
+    @circular_y2 = S.radius*MySketch.sin(@pos2_rad)
+  end
+
   def draw_buffer_circular(b, buffer_type)
     if buffer_type == :all
       b.stroke(0,0,0,10)
