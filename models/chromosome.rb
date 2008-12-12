@@ -225,16 +225,24 @@ class Chromosome
       @left_border = 0
       @area = @length
     elsif action == :zoom_in_10x
+      orig_area = @area
       @area = [@area.to_f/10, 10].max
+      @left_border += (orig_area - @area)/2
     elsif action == :zoom_in_3x
+      orig_area = @area
       @area = [@area.to_f/3, 10].max
+      @left_border += (orig_area - @area)/2
     elsif action == :zoom_out_3x
+      orig_area = @area
       @area = [@area*3, @length].min
+      @left_border += (orig_area - @area)/2
       if ( @left_border + @area > @length )
         @left_border = @length - @area
       end
     elsif action == :zoom_out_10x
+      orig_area = @area
       @area = [@area*10, @length].min
+      @left_border += (orig_area - @area)/2
       if ( @left_border + @area > @length )
         @left_border = @length - @area
       end
