@@ -232,11 +232,16 @@ class MySketch < Processing::App
       b.background(255)
       b.text_font @f
       b.smooth
+      b.fill(225)
+      b.no_stroke
+      b.rect(0,0,self.width/4,self.height/4)
 
       b.fill(0)
-      b.text("Selected chromosomes:", 0, 50)
-      b.text("  Top: " + @linear_representation[:top].number.to_s, 0, 80)
-      b.text("  Bottom: " + @linear_representation[:bottom].number.to_s, 0, 100)
+      control_lines = Array.new
+      control_lines.push('Selected chromosomes')
+      control_lines.push('  Top: ' + @linear_representation[:top].number.to_s)
+      control_lines.push('  Bottom: ' + @linear_representation[:bottom].number.to_s)
+      b.text(control_lines.join("\n"), 5, 20)
     end
     @img_controls = @buffer_controls.get(0,0,@buffer_controls.width,@buffer_controls.height)
   end
