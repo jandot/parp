@@ -20,6 +20,7 @@ class MySketch < Processing::App
   attr_accessor :buffer_linear_ideograms, :img_linear_ideograms
   attr_accessor :buffer_linear_zoom, :img_linear_zoom
   attr_accessor :buffer_linear_highlighted, :img_linear_highlighted
+  attr_accessor :buffer_controls, :img_controls
   attr_accessor :f
   attr_accessor :linear_representation
   attr_accessor :active_panel
@@ -55,6 +56,7 @@ class MySketch < Processing::App
     self.draw_buffer_linear_ideograms
     self.draw_buffer_linear_zoom
     self.draw_buffer_linear_highlighted
+    self.draw_buffer_controls
   end
 
   def draw
@@ -85,6 +87,7 @@ class MySketch < Processing::App
       end
       translate(0, -self.height/2)
     end
+    image(@img_controls,3*self.width/4,0)
   end
     
   def load_chromosomes
@@ -224,6 +227,20 @@ class MySketch < Processing::App
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
   end
 
+  def draw_buffer_controls
+    @buffer_controls = buffer(self.width/4, self.height/2, JAVA2D) do |b|
+      b.background(255)
+      b.text_font @f
+      b.smooth
+
+      b.fill(0)
+      b.text("Selected chromosomes:", 0, 50)
+      b.text("  Top: " + @linear_representation[:top].number.to_s, 0, 80)
+      b.text("  Bottom: " + @linear_representation[:bottom].number.to_s, 0, 100)
+    end
+    @img_controls = @buffer_controls.get(0,0,@buffer_controls.width,@buffer_controls.height)
+  end
+
   def mouse_moved
     if @circular_only
       @chromosomes.each do |chr|
@@ -352,6 +369,7 @@ class MySketch < Processing::App
       draw_buffer_linear_ideograms
       draw_buffer_linear_zoom
       draw_buffer_linear_highlighted
+      draw_buffer_controls
       redraw
     else
       changed = false
