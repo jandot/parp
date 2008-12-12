@@ -270,9 +270,9 @@ class Chromosome
   
   def pan_by_step(action)
     if action == :left_large
-      @left_border = [@left_border - @area, 0].min
+      @left_border = [@left_border - @area, 0].max
     elsif action == :left_small
-      @left_border = [@left_border - @area.to_f/2, 0].min
+      @left_border = [@left_border - @area.to_f/2, 0].max
     elsif action == :right_small
       @left_border = [@left_border + @area.to_f/2, @length - @area - 10].min
     elsif action == :right_large
