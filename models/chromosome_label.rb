@@ -30,7 +30,7 @@ class ChromosomeLabel
       return true if S.mouse_x.between?(@x1 + S.width/2, @x2 + S.width/2) and S.mouse_y.between?(@y1 + S.height/2, @y2 + S.height/2)
       return false
     else
-      return true if S.mouse_x.between?(@x1 + S.width/4, @x2 + S.width/4) and S.mouse_y.between?(@y1 + S.height/4, @y2 + S.height/4)
+      return true if S.mouse_x.between?(@x1 + 3*S.width/4, @x2 + 3*S.width/4) and S.mouse_y.between?(@y1 + S.height/4, @y2 + S.height/4)
       return false
     end
   end

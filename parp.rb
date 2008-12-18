@@ -87,7 +87,7 @@ class MySketch < Processing::App
       end
       translate(0, -self.height/2)
     end
-    image(@img_controls,3*self.width/4,0)
+    image(@img_controls,0,0)
   end
     
   def load_chromosomes
@@ -113,7 +113,7 @@ class MySketch < Processing::App
       b.strokeCap(SQUARE)
 
       if ! @circular_only
-        translate_x = self.width.to_f/4
+        translate_x = 3*self.width.to_f/4
         translate_y = self.height.to_f/4
       else
         translate_x = self.width.to_f/2
@@ -143,7 +143,7 @@ class MySketch < Processing::App
       b.smooth
 
       if ! @circular_only
-        translate_x = self.width.to_f/4
+        translate_x = 3*self.width.to_f/4
         translate_y = self.height.to_f/4
       else
         translate_x = self.width.to_f/2
@@ -232,10 +232,7 @@ class MySketch < Processing::App
       b.background(255)
       b.text_font @f
       b.smooth
-      b.fill(225)
-      b.no_stroke
-      b.rect(0,0,self.width/4,self.height/4)
-
+      
       b.fill(0)
       control_lines = Array.new
       control_lines.push('Selected chromosomes')
@@ -279,8 +276,8 @@ class MySketch < Processing::App
       if @active_panel == 1
         @chromosomes.each do |chr|
           [chr.within_chromosome_readpairs, chr.between_chromosome_readpairs.values.flatten].flatten.each do |rp|
-            if ( ( (rp.circular_x1 - mouse_x + self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or
-                 ( (rp.circular_x2 - mouse_x + self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
+            if ( ( (rp.circular_x1 - mouse_x + 3*self.width/4).abs < 5 and (rp.circular_y1 - mouse_y + self.height/4).abs < 5 ) or
+                 ( (rp.circular_x2 - mouse_x + 3*self.width/4).abs < 5 and (rp.circular_y2 - mouse_y + self.height/4).abs < 5 ) )
               rp.active = true
             else
               rp.active = false
