@@ -27,6 +27,7 @@ class MySketch < Processing::App
   attr_accessor :buttons
   attr_accessor :diameter, :radius
   attr_accessor :circular_only
+  attr_accessor :dragging_chr
   
   def setup
     @f = create_font("Arial", 12)
@@ -35,6 +36,7 @@ class MySketch < Processing::App
     @circular_only = true
     @diameter = 7*self.height/8
     @radius = @diameter/2
+    @dragging_chr = nil
 
     @chromosomes = Array.new
     self.load_chromosomes
@@ -87,6 +89,15 @@ class MySketch < Processing::App
       end
       translate(0, -self.height/2)
     end
+
+    if !@dragging_chr.nil?
+      fill(0,50)
+      no_stroke
+      rect(mouseX-2,mouseY-text_ascent,@dragging_chr.label.dx+4,@dragging_chr.label.dy+4)
+      fill(0)
+      text(@dragging_chr.label.label, mouseX, mouseY)
+    end
+    
     image(@img_controls,0,0)
   end
     
@@ -331,7 +342,7 @@ class MySketch < Processing::App
   
   def mouse_dragged
     dragging = false
-    if @active_panel == 2 or @active_panel == 3
+    if !@circular_only
       if @active_panel == 2
         panel = @linear_representation[:top]
         if pmouse_y >= self.height/2 + 5 and pmouse_y <= self.height/2 + panel.ideogram.height + 5
@@ -353,45 +364,69 @@ class MySketch < Processing::App
         end
         self.draw_buffer_linear_zoom
         self.draw_buffer_linear_highlighted
-        redraw
+      end
+      if dragging or !@dragging_chr.nil?
+        self.redraw
       end
     end
   end
   
   def mouse_clicked
-    if key_pressed? and ( key == 49 or key == 50)
-      active_chr = @chromosomes.select{|l| l.label.active}
-      unless active_chr.length == 0
-        if key == 49
-          active_chr[0].set_linear(:top)
-        else
-          active_chr[0].set_linear(:bottom)
+    changed = false
+    [:top, :bottom].each do |panel|
+      @buttons[panel].each do |button|
+        if button.under_mouse?
+          if panel == :top
+            @linear_representation[:top].apply_button(button.type, button.action)
+          else
+            @linear_representation[:bottom].apply_button(button.type, button.action)
+          end
+          changed = true
         end
       end
-      draw_buffer_linear_ideograms
-      draw_buffer_linear_zoom
-      draw_buffer_linear_highlighted
-      draw_buffer_controls
-      redraw
-    else
-      changed = false
-      [:top, :bottom].each do |panel|
-        @buttons[panel].each do |button|
-          if button.under_mouse?
-            if panel == :top
-              @linear_representation[:top].apply_button(button.type, button.action)
-            else
-              @linear_representation[:bottom].apply_button(button.type, button.action)
-            end
-            changed = true
+    end
+    if changed
+      self.draw_buffer_linear_zoom
+      self.draw_buffer_linear_highlighted
+      self.redraw
+    end
+  end
+
+  def mouse_pressed
+    if !@circular_only and @active_panel == 1
+      @chromosomes.each do |chr|
+        if chr.label.under_mouse?
+          @dragging_chr = chr
+        end
+      end
+    end
+  end
+
+  def mouse_released
+    if !@circular_only
+      if mouse_y < self.height/2
+        @active_panel = 1
+      elsif mouse_y < 3*self.height/4
+        @active_panel = 2
+      else
+        @active_panel = 3
+      end
+
+      if @active_panel > 1
+        if ! @dragging_chr.nil?
+          if @active_panel == 2
+            @dragging_chr.set_linear(:top)
+          else
+            @dragging_chr.set_linear(:bottom)
           end
         end
+        self.draw_buffer_linear_ideograms
+        self.draw_buffer_linear_zoom
+        self.draw_buffer_linear_highlighted
+        self.draw_buffer_controls
       end
-      if changed
-        draw_buffer_linear_zoom
-        draw_buffer_linear_highlighted
-        redraw
-      end
+      @dragging_chr = nil
+      self.redraw
     end
   end
 
@@ -414,9 +449,9 @@ class MySketch < Processing::App
         end
       end
 
-      draw_buffer_circular_all
-      draw_buffer_circular_highlighted
-      redraw
+      self.draw_buffer_circular_all
+      self.draw_buffer_circular_highlighted
+      self.redraw
     end
   end
 end
