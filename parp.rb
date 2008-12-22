@@ -20,6 +20,7 @@ class MySketch < Processing::App
   attr_accessor :buffer_linear_ideograms, :img_linear_ideograms
   attr_accessor :buffer_linear_zoom, :img_linear_zoom
   attr_accessor :buffer_linear_highlighted, :img_linear_highlighted
+  attr_accessor :buffer_linear_continuous_features, :img_linear_continuous_features
   attr_accessor :buffer_controls, :img_controls
   attr_accessor :f
   attr_accessor :linear_representation
@@ -37,19 +38,21 @@ class MySketch < Processing::App
     @diameter = 7*self.height/8
     @radius = @diameter/2
     @dragging_chr = nil
+    @calculating = false
 
     @chromosomes = Array.new
     self.load_chromosomes
     self.load_readpairs
-    self.load_features
+    self.load_discrete_features
+    self.load_index_continuous_features
     
     @buttons = Hash.new
     @buttons[:top] = Array.new
     @buttons[:bottom] = Array.new
 
     @linear_representation = Hash.new
-    @chromosomes[0].set_linear(:top)
-    @chromosomes[1].set_linear(:bottom)
+    @chromosomes[15].set_linear(:top)
+    @chromosomes[16].set_linear(:bottom)
     
     smooth
     no_loop
@@ -71,6 +74,7 @@ class MySketch < Processing::App
     if ! @circular_only
       # The linear bit
       translate(0, self.height/2)
+
       image(@img_linear_highlighted,0,0)
 
       # Draw green line on ideogram
@@ -116,14 +120,23 @@ class MySketch < Processing::App
     end
   end
 
-  def load_features
+  def load_discrete_features
     File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/features.tsv').each do |l|
       fields = l.chomp.split(/\t/)
       if fields[3].nil?
-        Feature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, nil)
+        DiscreteFeature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, nil)
       else
-        Feature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3])
+        DiscreteFeature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3])
       end
+    end
+  end
+
+  def load_index_continuous_features
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/index_readdepth.tsv').each do |l|
+      chr_number, first_line, last_line = l.chomp.split(/\t/)
+      chr = @chromosomes.select{|c| c.number == chr_number.to_i}[0]
+      chr.first_line_continuous = first_line.to_i
+      chr.last_line_continuous = last_line.to_i
     end
   end
   

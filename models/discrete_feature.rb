@@ -1,10 +1,10 @@
-class Feature
+class DiscreteFeature
   attr_accessor :chr, :start, :stop, :x1, :x2, :label, :visible
 
   def initialize(chr, start, stop, label)
     @chr = S.chromosomes.select{|c| c.number == chr.to_i}[0]
     @start, @stop, @label = start, stop, label
-    @chr.features.push(self)
+    @chr.discrete_features.push(self)
   end
   
   def draw_buffer_linear(b, buffer_type)

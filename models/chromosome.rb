@@ -8,7 +8,8 @@ class Chromosome
   attr_accessor :linear_representation
   attr_accessor :zoom_box_left_activated, :zoom_box_right_activated
   attr_accessor :label
-  attr_accessor :features
+  attr_accessor :discrete_features, :continuous_features
+  attr_accessor :first_line_continuous, :last_line_continuous
   
   def initialize(nr, length, centromere_start, centromere_stop)
     @number = nr
@@ -26,7 +27,8 @@ class Chromosome
     (@number..24).each do |n|
       @between_chromosome_readpairs[n] = Array.new
     end
-    @features = Array.new
+    @discrete_features = Array.new
+    @continuous_features = Array.new
     
   end
   
@@ -93,11 +95,9 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
-
-    @features.select{|f| f.visible}.each do |f|
+    [@discrete_features, @continuous_features].flatten.select{|f| f.visible}.each do |f|
       f.draw_buffer_linear(b, :zoom)
     end
-
   end
   
   def draw_buffer_linear_highlighted(b)
@@ -118,7 +118,7 @@ class Chromosome
       rp.draw_buffer_linear(b, :highlighted)
     end
   end
-  
+
   def activate_zoom_boxes
     @zoom_box_left_activated = false
     @zoom_box_right_activated = false
@@ -152,7 +152,6 @@ class Chromosome
       rp.visible = true
     end
 
-    
     S.chromosomes.each do |chr|
       if ! chr == self
         chr.linear_representation[panel] = false
@@ -177,15 +176,25 @@ class Chromosome
     @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
-    
-    @features.each do |f|
+
+    if @continuous_features.length == 0
+      file = File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/bindepth-500')
+      @first_line_continuous.times { file.gets }
+      while file.lineno < @last_line_continuous
+        chr, pos, value = file.gets.chomp.split(/\t/)
+        value = MySketch.map(value.to_i, 100, 50000, 0, 20)
+        ContinuousFeature.new(chr.to_i, pos.to_i, value.to_i)
+      end
+    end
+
+    [@discrete_features, @continuous_features].flatten.each do |f|
       f.update_x
     end
 
   end
   
   def update_x
-    @features.each do |f|
+    @discrete_features.each do |f|
       f.update_x
     end
     
