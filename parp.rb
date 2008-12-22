@@ -29,7 +29,8 @@ class MySketch < Processing::App
   attr_accessor :diameter, :radius
   attr_accessor :circular_only
   attr_accessor :dragging_chr
-  
+  attr_accessor :thread_load_continuous_features, :thread_draw_continuous_features
+
   def setup
     @f = create_font("Arial", 12)
     text_font @f
@@ -56,13 +57,15 @@ class MySketch < Processing::App
     
     smooth
     no_loop
-    
+
     self.draw_buffer_circular_all
     self.draw_buffer_circular_highlighted
     self.draw_buffer_linear_ideograms
     self.draw_buffer_linear_zoom
     self.draw_buffer_linear_highlighted
+    self.draw_buffer_linear_continuous_features
     self.draw_buffer_controls
+
   end
 
   def draw
@@ -242,14 +245,23 @@ class MySketch < Processing::App
     end
     @img_linear_zoom = @buffer_linear_zoom.get(0,0,@buffer_linear_zoom.width, @buffer_linear_zoom.height)
   end
-  
+
+
   def draw_buffer_linear_highlighted
     @buffer_linear_highlighted = buffer(self.width, self.height/2, JAVA2D) do |b|
-      b.background(@img_linear_zoom)
       b.smooth
       b.strokeCap SQUARE
       b.rectMode CORNERS
       b.text_font @f
+      b.fill 0
+
+      if @img_linear_continuous_features.nil?
+        b.background(@img_linear_zoom)
+        b.text("Calculating read depth...", 10, self.height/4)
+      else
+        b.background(@img_linear_continuous_features)
+      end
+
       [:top, :bottom].each do |panel|
         chr = @linear_representation[panel]
         chr.draw_buffer_linear_highlighted(b)
@@ -264,6 +276,25 @@ class MySketch < Processing::App
     @img_linear_highlighted = @buffer_linear_highlighted.get(0,0,@buffer_linear_highlighted.width, @buffer_linear_highlighted.height)
   end
 
+  def draw_buffer_linear_continuous_features
+    @img_linear_continuous_features = nil
+    @thread_draw_continuous_features = Thread.new do
+      @buffer_linear_continuous_features = buffer(self.width, self.height/2, JAVA2D) do |b|
+        @thread_load_continuous_features.join
+        STDERR.puts "Joined loading thread"
+        b.background(@img_linear_zoom)
+        b.smooth
+        [:top,:bottom].each do |panel|
+          @linear_representation[panel].draw_buffer_linear_continuous_features(b)
+        end
+      end
+      @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
+      STDERR.puts "Image created"
+    end
+    self.draw_buffer_linear_highlighted
+    redraw
+  end
+
   def draw_buffer_controls
     @buffer_controls = buffer(self.width/4, self.height/2, JAVA2D) do |b|
       b.background(255)
@@ -276,6 +307,7 @@ class MySketch < Processing::App
       control_lines.push('  Top: ' + @linear_representation[:top].number.to_s)
       control_lines.push('  Bottom: ' + @linear_representation[:bottom].number.to_s)
       b.text(control_lines.join("\n"), 5, 20)
+
     end
     @img_controls = @buffer_controls.get(0,0,@buffer_controls.width,@buffer_controls.height)
   end
@@ -388,7 +420,13 @@ class MySketch < Processing::App
         elsif (pmouse_x > panel.zoom_box_ideogram_x1 + 5 and pmouse_x < panel.zoom_box_ideogram_x2 - 5)
           panel.pan_by_drag
         end
+
+        if @thread_draw_continuous_features.alive?
+          @thread_draw_continuous_features.kill
+          @img_draw_continuous_features = nil
+        end
         self.draw_buffer_linear_zoom
+        self.draw_buffer_linear_continuous_features
         self.draw_buffer_linear_highlighted
       end
       if dragging or !@dragging_chr.nil?
@@ -412,7 +450,12 @@ class MySketch < Processing::App
       end
     end
     if changed
+      if @thread_draw_continuous_features.alive?
+        @thread_draw_continuous_features.kill
+        @img_draw_continuous_features = nil
+      end
       self.draw_buffer_linear_zoom
+      self.draw_buffer_linear_continuous_features
       self.draw_buffer_linear_highlighted
       self.redraw
     end
@@ -446,8 +489,13 @@ class MySketch < Processing::App
             @dragging_chr.set_linear(:bottom)
           end
         end
+        if @thread_draw_continuous_features.alive?
+          @thread_draw_continuous_features.kill
+          @img_draw_continuous_features = nil
+        end
         self.draw_buffer_linear_ideograms
         self.draw_buffer_linear_zoom
+        self.draw_buffer_linear_continuous_features
         self.draw_buffer_linear_highlighted
         self.draw_buffer_controls
       end

@@ -95,7 +95,7 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
-    [@discrete_features, @continuous_features].flatten.select{|f| f.visible}.each do |f|
+    @discrete_features.select{|f| f.visible}.each do |f|
       f.draw_buffer_linear(b, :zoom)
     end
   end
@@ -103,7 +103,7 @@ class Chromosome
   def draw_buffer_linear_highlighted(b)
     b.fill 0
     b.text("Chromosome " + @number.to_s + " (" + (@length/1000).to_i.format + "kb). Cursor position: " + MySketch.map(S.mouse_x, 0, b.width, @left_border, @left_border + @area).to_i.format + "bp. Showing " + @left_border.to_i.format + " to " + (@left_border + @area).to_i.format, @ideogram.width + 10, @ideogram_y1 + S.text_ascent());
-    
+
     b.stroke 100
     b.strokeWeight 5
     b.strokeCap(MySketch::ROUND)
@@ -116,6 +116,13 @@ class Chromosome
     b.noFill
     @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
       rp.draw_buffer_linear(b, :highlighted)
+    end
+  end
+
+  def draw_buffer_linear_continuous_features(b)
+    STDERR.puts "Chromosome.draw_buffer_linear_continuous_features"
+    @continuous_features.each do |f|
+      f.draw_buffer_linear(b)
     end
   end
 
@@ -177,22 +184,34 @@ class Chromosome
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
 
-    if @continuous_features.length == 0
-      file = File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/bindepth-500')
-      @first_line_continuous.times { file.gets }
-      while file.lineno < @last_line_continuous
-        chr, pos, value = file.gets.chomp.split(/\t/)
-        value = MySketch.map(value.to_i, 100, 50000, 0, 20)
-        ContinuousFeature.new(chr.to_i, pos.to_i, value.to_i)
-      end
-    end
-
-    [@discrete_features, @continuous_features].flatten.each do |f|
+    @discrete_features.each do |f|
       f.update_x
     end
 
+    self.load_continuous_features
   end
-  
+
+  def load_continuous_features
+    if @continuous_features.length == 0
+      STDERR.puts "Starting thread to load chr " + @number.to_s
+      S.thread_load_continuous_features = Thread.new do
+        file = File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/bindepth-500')
+        @first_line_continuous.times { file.gets }
+        while file.lineno < @last_line_continuous
+          chr, pos, value = file.gets.chomp.split(/\t/)
+          value = MySketch.map(value.to_i, 100, 50000, 0, 20)
+          ContinuousFeature.new(chr.to_i, pos.to_i, value.to_i)
+        end
+        
+        @continuous_features.each do |f|
+          f.update_x
+        end
+
+        STDERR.puts "Finished loading chr " + @number.to_s
+      end
+    end
+  end
+
   def update_x
     @discrete_features.each do |f|
       f.update_x

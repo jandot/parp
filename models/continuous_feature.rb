@@ -7,7 +7,7 @@ class ContinuousFeature
     @chr.continuous_features.push(self)
   end
 
-  def draw_buffer_linear(b, buffer_type)
+  def draw_buffer_linear(b)
     if @visible
       b.fill 0,20
       b.no_stroke
