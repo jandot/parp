@@ -80,9 +80,11 @@ class ReadPair
   def draw_buffer_linear(b, buffer_type)
     if @visible
       if buffer_type == :zoom
+        b.no_fill
         b.stroke @colour
         b.strokeWeight 1
       else #buffer_type == :highlight
+        b.no_fill
         b.stroke 255,0,0
         b.strokeWeight 1
       end

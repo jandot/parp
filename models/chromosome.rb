@@ -8,6 +8,7 @@ class Chromosome
   attr_accessor :linear_representation
   attr_accessor :zoom_box_left_activated, :zoom_box_right_activated
   attr_accessor :label
+  attr_accessor :features
   
   def initialize(nr, length, centromere_start, centromere_stop)
     @number = nr
@@ -25,6 +26,7 @@ class Chromosome
     (@number..24).each do |n|
       @between_chromosome_readpairs[n] = Array.new
     end
+    @features = Array.new
     
   end
   
@@ -91,6 +93,11 @@ class Chromosome
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
+
+    @features.select{|f| f.visible}.each do |f|
+      f.draw_buffer_linear(b, :zoom)
+    end
+
   end
   
   def draw_buffer_linear_highlighted(b)
@@ -144,6 +151,7 @@ class Chromosome
     @between_chromosome_readpairs.values.flatten.each do |rp|
       rp.visible = true
     end
+
     
     S.chromosomes.each do |chr|
       if ! chr == self
@@ -170,12 +178,21 @@ class Chromosome
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
     
+    @features.each do |f|
+      f.update_x
+    end
+
   end
   
-  def update_x_readpairs
+  def update_x
+    @features.each do |f|
+      f.update_x
+    end
+    
     @within_chromosome_readpairs.each do |rp|
       rp.update_x
     end
+    
     if @linear_representation == :top
       if @number < S.linear_representation[:bottom].number
         @between_chromosome_readpairs[S.linear_representation[:bottom].number].each do |rp|
@@ -217,7 +234,7 @@ class Chromosome
       @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
       @area = MySketch.map(@zoom_box_ideogram_dx, @ideogram_x1, @ideogram_x1 + @ideogram.width, 0, @length)
     end
-    self.update_x_readpairs
+    self.update_x
   end
 
   def zoom_by_step(action)
@@ -252,7 +269,7 @@ class Chromosome
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
     
-    self.update_x_readpairs
+    self.update_x
   end
   
   
@@ -263,7 +280,7 @@ class Chromosome
       @zoom_box_ideogram_x2 += dx
       
       @left_border = MySketch.map(@zoom_box_ideogram_x1, @ideogram_x1, @ideogram_x2, 0, @length)
-      self.update_x_readpairs
+      self.update_x
 
     end
   end
@@ -283,7 +300,7 @@ class Chromosome
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
     
-    self.update_x_readpairs
+    self.update_x
   end
 
   def apply_button(type, action)

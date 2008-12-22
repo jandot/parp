@@ -41,6 +41,7 @@ class MySketch < Processing::App
     @chromosomes = Array.new
     self.load_chromosomes
     self.load_readpairs
+    self.load_features
     
     @buttons = Hash.new
     @buttons[:top] = Array.new
@@ -112,6 +113,17 @@ class MySketch < Processing::App
     File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/data.tsv').each do |l|
       fields = l.chomp.split(/\t/)
       ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
+    end
+  end
+
+  def load_features
+    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/features.tsv').each do |l|
+      fields = l.chomp.split(/\t/)
+      if fields[3].nil?
+        Feature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, nil)
+      else
+        Feature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3])
+      end
     end
   end
   
@@ -213,6 +225,7 @@ class MySketch < Processing::App
       start_chr.between_chromosome_readpairs[stop_chr.number].each do |rp|
         rp.draw_buffer_linear(b, :zoom)
       end
+
     end
     @img_linear_zoom = @buffer_linear_zoom.get(0,0,@buffer_linear_zoom.width, @buffer_linear_zoom.height)
   end
