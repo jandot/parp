@@ -36,7 +36,7 @@ class MySketch < Processing::App
   attr_accessor :diameter, :radius
   attr_accessor :circular_only
   attr_accessor :dragging_chr
-  attr_accessor :thread_load_continuous_features, :thread_draw_continuous_features
+  attr_accessor :thread_load_continuous_features, :thread_draw_continuous_features, :thread_update_x_continuous_features
 
   def setup
     @f = create_font("Arial", 12)
@@ -59,8 +59,8 @@ class MySketch < Processing::App
     @buttons[:bottom] = Array.new
 
     @linear_representation = Hash.new
-    @chromosomes[15].set_linear(:top)
-    @chromosomes[16].set_linear(:bottom)
+    @chromosomes[20].set_linear(:top)
+    @chromosomes[21].set_linear(:bottom)
     
     smooth
     no_loop
@@ -286,21 +286,22 @@ class MySketch < Processing::App
   def draw_buffer_linear_continuous_features
     @img_linear_continuous_features = nil
     @thread_draw_continuous_features = Thread.new do
+      STDERR.puts "=========Started drawing thread"
       @buffer_linear_continuous_features = buffer(self.width, self.height/2, JAVA2D) do |b|
-        @thread_load_continuous_features.join
-#        STDERR.puts "Joined loading thread"
         b.background(@img_linear_zoom)
         b.smooth
         [:top,:bottom].each do |panel|
+#          @thread_load_continuous_features.join
+#          STDERR.puts "Loading thread joined"
+          @thread_update_x_continuous_features.join
+          STDERR.puts "Updating thread joined"
           @linear_representation[panel].draw_buffer_linear_continuous_features(b)
         end
       end
       @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
-#      STDERR.puts "Image created"
       self.draw_buffer_linear_highlighted
-#      STDERR.puts "Buffer_linear_highlighted recreated"
       redraw
-#      STDERR.puts "Redrawn"
+      STDERR.puts "++++++++Finished drawing thread"
     end
   end
 
@@ -431,6 +432,7 @@ class MySketch < Processing::App
         end
 
         if @thread_draw_continuous_features.alive?
+          @thread_update_x_continuous_features.kill
           @thread_draw_continuous_features.kill
           @img_draw_continuous_features = nil
         end
@@ -449,7 +451,9 @@ class MySketch < Processing::App
     [:top, :bottom].each do |panel|
       @buttons[panel].each do |button|
         if button.under_mouse?
+          STDERR.puts "Button: " + button.action.to_s
           if panel == :top
+            STDERR.puts "Applying button"
             @linear_representation[:top].apply_button(button.type, button.action)
           else
             @linear_representation[:bottom].apply_button(button.type, button.action)
@@ -458,8 +462,10 @@ class MySketch < Processing::App
         end
       end
     end
+    STDERR.puts "Changed = " + changed.to_s
     if changed
       if @thread_draw_continuous_features.alive?
+        @thread_update_x_continuous_features.kill
         @thread_draw_continuous_features.kill
         @img_draw_continuous_features = nil
       end
@@ -497,19 +503,20 @@ class MySketch < Processing::App
           else
             @dragging_chr.set_linear(:bottom)
           end
+          if @thread_draw_continuous_features.alive?
+            @thread_update_x_continuous_features.kill
+            @thread_draw_continuous_features.kill
+            @img_draw_continuous_features = nil
+          end
+          @dragging_chr = nil
+          self.draw_buffer_linear_ideograms
+          self.draw_buffer_linear_zoom
+          self.draw_buffer_linear_continuous_features
+          self.draw_buffer_linear_highlighted
+          self.draw_buffer_controls
+          self.redraw
         end
-        if @thread_draw_continuous_features.alive?
-          @thread_draw_continuous_features.kill
-          @img_draw_continuous_features = nil
-        end
-        self.draw_buffer_linear_ideograms
-        self.draw_buffer_linear_zoom
-        self.draw_buffer_linear_continuous_features
-        self.draw_buffer_linear_highlighted
-        self.draw_buffer_controls
       end
-      @dragging_chr = nil
-      self.redraw
     end
   end
 

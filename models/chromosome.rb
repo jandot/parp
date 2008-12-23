@@ -123,8 +123,7 @@ class Chromosome
   end
 
   def draw_buffer_linear_continuous_features(b)
-#    STDERR.puts "Chromosome.draw_buffer_linear_continuous_features"
-    b.stroke 0, 20
+    b.stroke 0, 150
     b.no_fill
     @continuous_features.select{|f| f.visible}.each do |f|
       f.draw_buffer_linear(b)
@@ -155,22 +154,22 @@ class Chromosome
       @baseline = 3*S.height/8
     end
     @linear_representation = panel
-    
-    @within_chromosome_readpairs.each do |rp|
-      rp.visible = true
-    end
+    S.linear_representation[panel] = self
 
-    @between_chromosome_readpairs.values.flatten.each do |rp|
-      rp.visible = true
-    end
+    @left_border = 0
+    @area = @length
+    @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
+    @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
+
+    self.load_continuous_features
+    self.zoom_by_step(:show_complete)
 
     S.chromosomes.each do |chr|
       if ! chr == self
         chr.linear_representation[panel] = false
       end
     end
-    
-    S.linear_representation[panel] = self
     
     S.buttons[panel] = Array.new
     S.buttons[panel].push(Button.new(self, :zoom, "Complete", :show_complete))
@@ -182,24 +181,12 @@ class Chromosome
     S.buttons[panel].push(Button.new(self, :pan, "<", :left_small))
     S.buttons[panel].push(Button.new(self, :pan, ">", :right_small))
     S.buttons[panel].push(Button.new(self, :pan, ">>", :right_large))
-    
-    @left_border = 0
-    @area = @length
-    @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
-    @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
-    @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
-
-    @discrete_features.each do |f|
-      f.update_x
-    end
-
-    self.load_continuous_features
   end
 
   def load_continuous_features
     if @continuous_features.length == 0
-#      STDERR.puts "Starting thread to load chr " + @number.to_s
       S.thread_load_continuous_features = Thread.new do
+        STDERR.puts "Starting loading thread for chr " + @number.to_s
         file = File.open(FILE_CONTINUOUS_FEATURES)
         @first_line_continuous.times { file.gets }
         while file.lineno < @last_line_continuous
@@ -207,43 +194,50 @@ class Chromosome
           value = MySketch.map(value.to_i, 100, 50000, 0, 20)
           ContinuousFeature.new(chr.to_i, pos.to_i, value.to_i)
         end
-        
-        @continuous_features.each do |f|
-          f.update_x
-        end
-
-#        STDERR.puts "Finished loading chr " + @number.to_s
       end
     end
   end
 
   def update_x
+    STDERR.puts "Updating x for chr " + @number.to_s
     @discrete_features.each do |f|
       f.update_x
+    end
+
+    S.thread_update_x_continuous_features = Thread.new do
+      if !S.thread_load_continuous_features.nil?
+        S.thread_load_continuous_features.join
+      end
+      @continuous_features.each do |f|
+        f.update_x
+      end
+      STDERR.puts "Thread updating x continuous features about to finish"
     end
     
     @within_chromosome_readpairs.each do |rp|
       rp.update_x
     end
     
-    if @linear_representation == :top
-      if @number < S.linear_representation[:bottom].number
-        @between_chromosome_readpairs[S.linear_representation[:bottom].number].each do |rp|
-          rp.update_x
+    unless S.linear_representation[:top].nil? or S.linear_representation[:bottom].nil?
+      if @linear_representation == :top
+        if @number < S.linear_representation[:bottom].number
+          @between_chromosome_readpairs[S.linear_representation[:bottom].number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.linear_representation[:bottom].between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
         end
       else
-        S.linear_representation[:bottom].between_chromosome_readpairs[@number].each do |rp|
-          rp.update_x
-        end
-      end
-    else
-      if @number < S.linear_representation[:top].number
-        @between_chromosome_readpairs[S.linear_representation[:top].number].each do |rp|
-          rp.update_x
-        end
-      else
-        S.linear_representation[:top].between_chromosome_readpairs[@number].each do |rp|
-          rp.update_x
+        if @number < S.linear_representation[:top].number
+          @between_chromosome_readpairs[S.linear_representation[:top].number].each do |rp|
+            rp.update_x
+          end
+        else
+          S.linear_representation[:top].between_chromosome_readpairs[@number].each do |rp|
+            rp.update_x
+          end
         end
       end
     end
@@ -271,6 +265,7 @@ class Chromosome
   end
 
   def zoom_by_step(action)
+    STDERR.puts "I'm here!!!!!!!!"
     if action == :show_complete
       @left_border = 0
       @area = @length
@@ -301,8 +296,9 @@ class Chromosome
     @zoom_box_ideogram_x1 = MySketch.map(@left_border, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_x2 = MySketch.map(@left_border + @area, 0, @length, @ideogram_x1, @ideogram_x1 + @ideogram.width)
     @zoom_box_ideogram_dx = @zoom_box_ideogram_x2 - @zoom_box_ideogram_x1
-    
+
     self.update_x
+
   end
   
   

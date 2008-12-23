@@ -8,7 +8,7 @@ class ContinuousFeature
   end
 
   def draw_buffer_linear(b)
-    b.line(@x, @chr.baseline - @value, @x, @chr.baseline + 2)
+    b.line(@x, @chr.baseline - @value - 2, @x, @chr.baseline)
   end
 
   def update_x
