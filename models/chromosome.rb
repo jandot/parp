@@ -186,7 +186,6 @@ class Chromosome
   def load_continuous_features
     if @continuous_features.length == 0
       S.thread_load_continuous_features = Thread.new do
-        STDERR.puts "Starting loading thread for chr " + @number.to_s
         file = File.open(FILE_CONTINUOUS_FEATURES)
         @first_line_continuous.times { file.gets }
         while file.lineno < @last_line_continuous
@@ -199,7 +198,6 @@ class Chromosome
   end
 
   def update_x
-    STDERR.puts "Updating x for chr " + @number.to_s
     @discrete_features.each do |f|
       f.update_x
     end
@@ -211,7 +209,6 @@ class Chromosome
       @continuous_features.each do |f|
         f.update_x
       end
-      STDERR.puts "Thread updating x continuous features about to finish"
     end
     
     @within_chromosome_readpairs.each do |rp|
@@ -265,7 +262,6 @@ class Chromosome
   end
 
   def zoom_by_step(action)
-    STDERR.puts "I'm here!!!!!!!!"
     if action == :show_complete
       @left_border = 0
       @area = @length
@@ -283,6 +279,8 @@ class Chromosome
       @left_border += (orig_area - @area)/2
       if ( @left_border + @area > @length )
         @left_border = @length - @area
+      elsif @left_border < 0
+        @left_border = 0
       end
     elsif action == :zoom_out_10x
       orig_area = @area
@@ -290,6 +288,8 @@ class Chromosome
       @left_border += (orig_area - @area)/2
       if ( @left_border + @area > @length )
         @left_border = @length - @area
+      elsif @left_border < 0
+        @left_border = 0
       end
     end
 

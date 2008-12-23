@@ -286,7 +286,6 @@ class MySketch < Processing::App
   def draw_buffer_linear_continuous_features
     @img_linear_continuous_features = nil
     @thread_draw_continuous_features = Thread.new do
-      STDERR.puts "=========Started drawing thread"
       @buffer_linear_continuous_features = buffer(self.width, self.height/2, JAVA2D) do |b|
         b.background(@img_linear_zoom)
         b.smooth
@@ -294,14 +293,12 @@ class MySketch < Processing::App
 #          @thread_load_continuous_features.join
 #          STDERR.puts "Loading thread joined"
           @thread_update_x_continuous_features.join
-          STDERR.puts "Updating thread joined"
           @linear_representation[panel].draw_buffer_linear_continuous_features(b)
         end
       end
       @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
       self.draw_buffer_linear_highlighted
       redraw
-      STDERR.puts "++++++++Finished drawing thread"
     end
   end
 
@@ -451,9 +448,7 @@ class MySketch < Processing::App
     [:top, :bottom].each do |panel|
       @buttons[panel].each do |button|
         if button.under_mouse?
-          STDERR.puts "Button: " + button.action.to_s
           if panel == :top
-            STDERR.puts "Applying button"
             @linear_representation[:top].apply_button(button.type, button.action)
           else
             @linear_representation[:bottom].apply_button(button.type, button.action)
@@ -462,7 +457,6 @@ class MySketch < Processing::App
         end
       end
     end
-    STDERR.puts "Changed = " + changed.to_s
     if changed
       if @thread_draw_continuous_features.alive?
 #        @thread_update_x_continuous_features.kill
