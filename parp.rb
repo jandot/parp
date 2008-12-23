@@ -432,7 +432,7 @@ class MySketch < Processing::App
         end
 
         if @thread_draw_continuous_features.alive?
-          @thread_update_x_continuous_features.kill
+#          @thread_update_x_continuous_features.kill
           @thread_draw_continuous_features.kill
           @img_draw_continuous_features = nil
         end
@@ -465,7 +465,7 @@ class MySketch < Processing::App
     STDERR.puts "Changed = " + changed.to_s
     if changed
       if @thread_draw_continuous_features.alive?
-        @thread_update_x_continuous_features.kill
+#        @thread_update_x_continuous_features.kill
         @thread_draw_continuous_features.kill
         @img_draw_continuous_features = nil
       end
@@ -504,7 +504,7 @@ class MySketch < Processing::App
             @dragging_chr.set_linear(:bottom)
           end
           if @thread_draw_continuous_features.alive?
-            @thread_update_x_continuous_features.kill
+#            @thread_update_x_continuous_features.kill
             @thread_draw_continuous_features.kill
             @img_draw_continuous_features = nil
           end
