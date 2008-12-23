@@ -88,13 +88,16 @@ class Chromosome
   def draw_buffer_linear_zoom(b)
     b.fill 0,255,0,50
     b.stroke 0
-    b.strokeWeight 1
+    b.stroke_weight 1
     b.rect(@zoom_box_ideogram_x1, @ideogram_y1, @zoom_box_ideogram_x2, @ideogram_y1 + @ideogram.height)
     
-    b.noFill
+    b.no_fill
     @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
+    
+    b.fill 0,0,255,50
+    b.no_stroke
     @discrete_features.select{|f| f.visible}.each do |f|
       f.draw_buffer_linear(b, :zoom)
     end
@@ -105,15 +108,15 @@ class Chromosome
     b.text("Chromosome " + @number.to_s + " (" + (@length/1000).to_i.format + "kb). Cursor position: " + MySketch.map(S.mouse_x, 0, b.width, @left_border, @left_border + @area).to_i.format + "bp. Showing " + @left_border.to_i.format + " to " + (@left_border + @area).to_i.format, @ideogram.width + 10, @ideogram_y1 + S.text_ascent());
 
     b.stroke 100
-    b.strokeWeight 5
-    b.strokeCap(MySketch::ROUND)
+    b.stroke_weight 5
+    b.stroke_cap(MySketch::ROUND)
     if @zoom_box_left_activated
       b.line(@zoom_box_ideogram_x1, @ideogram_y1, @zoom_box_ideogram_x1, @ideogram_y1 + @ideogram.height)
     elsif @zoom_box_right_activated
       b.line(@zoom_box_ideogram_x2, @ideogram_y1, @zoom_box_ideogram_x2, @ideogram_y1 + @ideogram.height)
     end
     
-    b.noFill
+    b.no_fill
     @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
       rp.draw_buffer_linear(b, :highlighted)
     end
@@ -121,7 +124,9 @@ class Chromosome
 
   def draw_buffer_linear_continuous_features(b)
 #    STDERR.puts "Chromosome.draw_buffer_linear_continuous_features"
-    @continuous_features.each do |f|
+    b.stroke 0, 20
+    b.no_fill
+    @continuous_features.select{|f| f.visible}.each do |f|
       f.draw_buffer_linear(b)
     end
   end
@@ -193,9 +198,9 @@ class Chromosome
 
   def load_continuous_features
     if @continuous_features.length == 0
-      STDERR.puts "Starting thread to load chr " + @number.to_s
+#      STDERR.puts "Starting thread to load chr " + @number.to_s
       S.thread_load_continuous_features = Thread.new do
-        file = File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/bindepth-500')
+        file = File.open(FILE_CONTINUOUS_FEATURES)
         @first_line_continuous.times { file.gets }
         while file.lineno < @last_line_continuous
           chr, pos, value = file.gets.chomp.split(/\t/)
@@ -207,7 +212,7 @@ class Chromosome
           f.update_x
         end
 
-        STDERR.puts "Finished loading chr " + @number.to_s
+#        STDERR.puts "Finished loading chr " + @number.to_s
       end
     end
   end

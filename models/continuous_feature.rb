@@ -8,20 +8,7 @@ class ContinuousFeature
   end
 
   def draw_buffer_linear(b)
-    if @visible
-      b.fill 0,20
-      b.no_stroke
-    end
-
-    if @chr.area < 10000
-      b.fill 0, 20
-      b.no_stroke
-      b.ellipse(@x, @chr.baseline - 5, 1, 1)
-    else
-      b.stroke 0, 20
-      b.no_fill
-      b.line(@x, @chr.baseline - @value, @x, @chr.baseline + 2)
-    end
+    b.line(@x, @chr.baseline - @value, @x, @chr.baseline + 2)
   end
 
   def update_x

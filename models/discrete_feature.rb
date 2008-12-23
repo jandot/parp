@@ -8,11 +8,6 @@ class DiscreteFeature
   end
   
   def draw_buffer_linear(b, buffer_type)
-    if @visible
-      b.fill 0,0,255,150
-      b.no_stroke
-    end
-
     if @chr.linear_representation == :top
       y = @chr.baseline - 20
     else

@@ -78,7 +78,7 @@ class ReadPair
   end
   
   def draw_buffer_linear(b, buffer_type)
-    if @visible
+#    if @visible
       if buffer_type == :zoom
         b.no_fill
         b.stroke @colour
@@ -109,7 +109,7 @@ class ReadPair
           b.bezier(@linear_x2, @chr2.baseline, @linear_x2, @chr2.baseline + 40 + @bezier_random, @linear_x1, @chr1.baseline - 40 + @bezier_random, @linear_x1, @chr1.baseline)
         end
       end
-    end
+#    end
   end
   
   def update_x

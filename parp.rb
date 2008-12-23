@@ -1,6 +1,13 @@
 require '/usr/local/ruby-processing/ruby-processing'
 require 'yaml'
 
+WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
+FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
+FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
+FILE_DISCRETE_FEATURES = WORKING_DIRECTORY + '/data/features.tsv'
+FILE_INDEX_CONTINUOUS_FEATURES = WORKING_DIRECTORY + '/data/index_readdepth.tsv'
+FILE_CONTINUOUS_FEATURES = WORKING_DIRECTORY + '/data/bindepth-500'
+
 WIDTH = 1200
 HEIGHT = 600
 
@@ -110,21 +117,21 @@ class MySketch < Processing::App
   end
     
   def load_chromosomes
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/meta_data.tsv').each do |l|
+    File.open(FILE_CHROMOSOME_METADATA).each do |l|
       fields = l.chomp.split(/\t/)
       Chromosome.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i)
     end
   end
   
   def load_readpairs
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/data.tsv').each do |l|
+    File.open(FILE_READPAIRS).each do |l|
       fields = l.chomp.split(/\t/)
       ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
     end
   end
 
   def load_discrete_features
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/features.tsv').each do |l|
+    File.open(FILE_DISCRETE_FEATURES).each do |l|
       fields = l.chomp.split(/\t/)
       if fields[3].nil?
         DiscreteFeature.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, nil)
@@ -135,7 +142,7 @@ class MySketch < Processing::App
   end
 
   def load_index_continuous_features
-    File.open('/Users/ja8/LocalDocuments/Projects/pARP/data/index_readdepth.tsv').each do |l|
+    File.open(FILE_INDEX_CONTINUOUS_FEATURES).each do |l|
       chr_number, first_line, last_line = l.chomp.split(/\t/)
       chr = @chromosomes.select{|c| c.number == chr_number.to_i}[0]
       chr.first_line_continuous = first_line.to_i
