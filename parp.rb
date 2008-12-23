@@ -281,7 +281,7 @@ class MySketch < Processing::App
     @thread_draw_continuous_features = Thread.new do
       @buffer_linear_continuous_features = buffer(self.width, self.height/2, JAVA2D) do |b|
         @thread_load_continuous_features.join
-        STDERR.puts "Joined loading thread"
+#        STDERR.puts "Joined loading thread"
         b.background(@img_linear_zoom)
         b.smooth
         [:top,:bottom].each do |panel|
@@ -289,10 +289,12 @@ class MySketch < Processing::App
         end
       end
       @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
-      STDERR.puts "Image created"
+#      STDERR.puts "Image created"
+      self.draw_buffer_linear_highlighted
+#      STDERR.puts "Buffer_linear_highlighted recreated"
+      redraw
+#      STDERR.puts "Redrawn"
     end
-    self.draw_buffer_linear_highlighted
-    redraw
   end
 
   def draw_buffer_controls

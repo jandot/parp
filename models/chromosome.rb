@@ -120,7 +120,7 @@ class Chromosome
   end
 
   def draw_buffer_linear_continuous_features(b)
-    STDERR.puts "Chromosome.draw_buffer_linear_continuous_features"
+#    STDERR.puts "Chromosome.draw_buffer_linear_continuous_features"
     @continuous_features.each do |f|
       f.draw_buffer_linear(b)
     end
