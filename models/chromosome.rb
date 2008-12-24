@@ -172,15 +172,15 @@ class Chromosome
     end
     
     S.buttons[panel] = Array.new
-    S.buttons[panel].push(Button.new(self, :zoom, "Complete", :show_complete))
-    S.buttons[panel].push(Button.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
-    S.buttons[panel].push(Button.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
-    S.buttons[panel].push(Button.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
-    S.buttons[panel].push(Button.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
-    S.buttons[panel].push(Button.new(self, :pan, "<<", :left_large))
-    S.buttons[panel].push(Button.new(self, :pan, "<", :left_small))
-    S.buttons[panel].push(Button.new(self, :pan, ">", :right_small))
-    S.buttons[panel].push(Button.new(self, :pan, ">>", :right_large))
+    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "Complete", :show_complete))
+    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
+    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
+    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
+    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
+    S.buttons[panel].push(ChromosomeButton.new(self, :pan, "<<", :left_large))
+    S.buttons[panel].push(ChromosomeButton.new(self, :pan, "<", :left_small))
+    S.buttons[panel].push(ChromosomeButton.new(self, :pan, ">", :right_small))
+    S.buttons[panel].push(ChromosomeButton.new(self, :pan, ">>", :right_large))
   end
 
   def load_continuous_features
