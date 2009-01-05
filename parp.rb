@@ -65,7 +65,7 @@ class MySketch < Processing::App
     @control_buttons = Array.new
 
     @control_buttons.push(
-      Button.new(10,50,"Circular only") do
+      Button.new(10,50,"Toggle circular only") do
         self.toggle_circular_only
       end
     )
