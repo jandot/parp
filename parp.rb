@@ -32,7 +32,7 @@ class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :linear_representation
   attr_accessor :active_panel
-  attr_accessor :buttons
+  attr_accessor :buttons, :control_buttons
   attr_accessor :diameter, :radius
   attr_accessor :circular_only
   attr_accessor :dragging_chr
@@ -61,7 +61,16 @@ class MySketch < Processing::App
     @linear_representation = Hash.new
     @chromosomes[20].set_linear(:top)
     @chromosomes[21].set_linear(:bottom)
-    
+
+    @control_buttons = Array.new
+
+    @control_buttons.push(
+      Button.new(10,50,"Circular only") do
+        self.toggle_circular_only
+      end
+    )
+
+
     smooth
     no_loop
 
@@ -81,7 +90,7 @@ class MySketch < Processing::App
     # The circular bit
     image(@img_circular_highlighted,0,0)
 
-    if ! @circular_only
+    unless @circular_only
       # The linear bit
       translate(0, self.height/2)
 
@@ -158,7 +167,7 @@ class MySketch < Processing::App
       b.smooth
       b.strokeCap(SQUARE)
 
-      if ! @circular_only
+      unless @circular_only
         translate_x = 3*self.width.to_f/4
         translate_y = self.height.to_f/4
       else
@@ -188,7 +197,7 @@ class MySketch < Processing::App
       b.background(@img_circular_all)
       b.smooth
 
-      if ! @circular_only
+      unless @circular_only
         translate_x = 3*self.width.to_f/4
         translate_y = self.height.to_f/4
       else
@@ -309,12 +318,10 @@ class MySketch < Processing::App
       b.smooth
       
       b.fill(0)
-      control_lines = Array.new
-      control_lines.push('Selected chromosomes')
-      control_lines.push('  Top: ' + @linear_representation[:top].number.to_s)
-      control_lines.push('  Bottom: ' + @linear_representation[:bottom].number.to_s)
-      b.text(control_lines.join("\n"), 5, 20)
-
+      b.rect_mode CORNERS
+      @control_buttons.each do |cb|
+        cb.draw(b)
+      end
     end
     @img_controls = @buffer_controls.get(0,0,@buffer_controls.width,@buffer_controls.height)
   end
@@ -448,11 +455,7 @@ class MySketch < Processing::App
     [:top, :bottom].each do |panel|
       @buttons[panel].each do |button|
         if button.under_mouse?
-          if panel == :top
-            @linear_representation[:top].apply_button(button.type, button.action)
-          else
-            @linear_representation[:bottom].apply_button(button.type, button.action)
-          end
+          button.execute
           changed = true
         end
       end
@@ -467,6 +470,12 @@ class MySketch < Processing::App
       self.draw_buffer_linear_continuous_features
       self.draw_buffer_linear_highlighted
       self.redraw
+    end
+
+    @control_buttons.each do |cb|
+      if cb.under_mouse?
+        cb.execute
+      end
     end
   end
 
@@ -514,29 +523,27 @@ class MySketch < Processing::App
     end
   end
 
-  def key_pressed
-    if key == 122 #'z'
-      @circular_only = !@circular_only
+  def toggle_circular_only
+    @circular_only = !@circular_only
 
-      if @circular_only
-        @diameter = 7*self.height/8
-        @radius = @diameter/2
-      else
-        @diameter = 3*self.height/8
-        @radius = @diameter/2
-      end
-
-      @chromosomes.each do |chr|
-        chr.label.calculate_radians
-        chr.between_chromosome_readpairs.values.flatten.each do |rp|
-          rp.calculate_radians
-        end
-      end
-
-      self.draw_buffer_circular_all
-      self.draw_buffer_circular_highlighted
-      self.redraw
+    if @circular_only
+      @diameter = 7*self.height/8
+      @radius = @diameter/2
+    else
+      @diameter = 3*self.height/8
+      @radius = @diameter/2
     end
+
+    @chromosomes.each do |chr|
+      chr.label.calculate_radians
+      chr.between_chromosome_readpairs.values.flatten.each do |rp|
+        rp.calculate_radians
+      end
+    end
+
+    self.draw_buffer_circular_all
+    self.draw_buffer_circular_highlighted
+    self.redraw
   end
 end
 

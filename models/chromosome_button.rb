@@ -1,11 +1,10 @@
 class ChromosomeButton < Button
-  attr_accessor :chr, :type
+  attr_accessor :chr
   
-  def initialize(chr, type, contents, action)
+  def initialize(chr, contents, &block)
     @chr = chr
     @contents = contents
-    @action = action
-    @type = type
+    @action = block
     
     if @chr == S.linear_representation[:top]
       if S.buttons[:top].length > 0
@@ -25,4 +24,8 @@ class ChromosomeButton < Button
     @y2 = @y1 + S.textAscent
   end
 
+  def under_mouse?
+    return true if S.mouse_x.between?(@x1, @x2) and S.mouse_y.between?(@y1 + S.height/2, @y2 + S.height/2)
+    return false
+  end
 end

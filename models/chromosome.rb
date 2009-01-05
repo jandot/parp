@@ -172,15 +172,51 @@ class Chromosome
     end
     
     S.buttons[panel] = Array.new
-    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "Complete", :show_complete))
-    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom out 10x", :zoom_out_10x))
-    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom out 3x", :zoom_out_3x))
-    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom in 3x", :zoom_in_3x))
-    S.buttons[panel].push(ChromosomeButton.new(self, :zoom, "zoom in 10x", :zoom_in_10x))
-    S.buttons[panel].push(ChromosomeButton.new(self, :pan, "<<", :left_large))
-    S.buttons[panel].push(ChromosomeButton.new(self, :pan, "<", :left_small))
-    S.buttons[panel].push(ChromosomeButton.new(self, :pan, ">", :right_small))
-    S.buttons[panel].push(ChromosomeButton.new(self, :pan, ">>", :right_large))
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "Complete") do
+        self.show_complete
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "zoom out 10x") do
+        self.zoom_out_10x
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "zoom out 3x") do
+        self.zoom_out_3x
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "zoom in 3x") do
+        self.zoom_in_3x
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "zoom in 10x") do
+        self.zoom_in_10x
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "<<") do
+        self.left_large
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, "<") do
+        self.left_small
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, ">") do
+        self.right_small
+      end
+    )
+    S.buttons[panel].push(
+      ChromosomeButton.new(self, ">>") do
+        self.right_large
+      end
+    )
   end
 
   def load_continuous_features
@@ -332,11 +368,32 @@ class Chromosome
     self.update_x
   end
 
-  def apply_button(type, action)
-    if type == :zoom
-      self.zoom_by_step(action)
-    else
-      self.pan_by_step(action)
-    end
+  def show_complete
+    self.zoom_by_step(:show_complete)
   end
+  def zoom_out_10x
+    self.zoom_by_step(:zoom_out_10x)
+  end
+  def zoom_out_3x
+    self.zoom_by_step(:zoom_out_3x)
+  end
+  def zoom_in_3x
+    self.zoom_by_step(:zoom_in_3x)
+  end
+  def zoom_in_10x
+    self.zoom_by_step(:zoom_in_10x)
+  end
+  def left_large
+    self.pan_by_step(:left_large)
+  end
+  def left_small
+    self.pan_by_step(:left_small)
+  end
+  def right_small
+    self.pan_by_step(:right_small)
+  end
+  def right_large
+    self.pan_by_step(:right_large)
+  end
+
 end
