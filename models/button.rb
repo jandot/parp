@@ -12,8 +12,8 @@ class Button
   end
   
   def draw(b)
-    b.fill 240
-    b.noStroke
+    b.fill 200
+    b.no_stroke
     b.rect(@x1, @y1, @x2, @y2)
     b.fill 0
     b.text(@contents, @x1, @y1 + S.textAscent)

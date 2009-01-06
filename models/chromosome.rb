@@ -92,7 +92,7 @@ class Chromosome
     b.rect(@zoom_box_ideogram_x1, @ideogram_y1, @zoom_box_ideogram_x2, @ideogram_y1 + @ideogram.height)
     
     b.no_fill
-    @within_chromosome_readpairs.select{|rp| rp.visible}.each do |rp|
+    @within_chromosome_readpairs.select{|rp| rp.visible and rp.qual_score >= S.quality_score_cutoff}.each do |rp|
       rp.draw_buffer_linear(b, :zoom)
     end
     
@@ -117,7 +117,7 @@ class Chromosome
     end
     
     b.no_fill
-    @within_chromosome_readpairs.select{|rp| rp.visible and rp.active}.each do |rp|
+    @within_chromosome_readpairs.select{|rp| rp.visible and rp.active and rp.qual_score >= S.quality_score_cutoff}.each do |rp|
       rp.draw_buffer_linear(b, :highlighted)
     end
   end

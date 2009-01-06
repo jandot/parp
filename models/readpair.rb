@@ -2,6 +2,7 @@ class ReadPair
   attr_accessor :chr1, :pos1, :x1, :chr2, :pos2, :x2
   attr_accessor :bezier_y
   attr_accessor :code
+  attr_accessor :qual_score
   attr_accessor :active
   attr_accessor :within_chromosome
   attr_accessor :pos1_whole_genome, :pos2_whole_genome
@@ -12,7 +13,7 @@ class ReadPair
   attr_accessor :visible
   attr_accessor :colour
   
-  def initialize(chr1, pos1, chr2, pos2, code)
+  def initialize(chr1, pos1, chr2, pos2, code, qual_score = 15)
     if chr1 > chr2
       chr1, chr2 = chr2, chr1
       pos1, pos2 = pos2, pos1
@@ -23,6 +24,8 @@ class ReadPair
     @chr2 = S.chromosomes.select{|c| c.number == chr2}[0]
     @pos2 = pos2
     @code = code
+    @qual_score = qual_score
+    
     @active = false
     @within_chromosome = (chr1 == chr2) ? true : false
     
@@ -67,18 +70,21 @@ class ReadPair
   end
 
   def draw_buffer_circular(b, buffer_type)
-    if buffer_type == :all
-      b.stroke(0,0,0,10)
-      b.strokeWeight(0.5)
-    else #buffer_type == :highlighted
-      b.stroke(255,0,0,50)
-      b.strokeWeight(2)
-    end
-    b.bezier(@circular_x1, @circular_y1, @circular_bezier1_x, @circular_bezier1_y, @circular_bezier2_x, @circular_bezier2_y, @circular_x2, @circular_y2)
+#    if @qual_score >= S.quality_score_cutoff
+      if buffer_type == :all
+        b.stroke(0,0,0,10)
+        b.strokeWeight(0.5)
+      else #buffer_type == :highlighted
+        b.stroke(255,0,0,50)
+        b.strokeWeight(2)
+      end
+      b.bezier(@circular_x1, @circular_y1, @circular_bezier1_x, @circular_bezier1_y, @circular_bezier2_x, @circular_bezier2_y, @circular_x2, @circular_y2)
+#    end
   end
   
   def draw_buffer_linear(b, buffer_type)
 #    if @visible
+#    if @qual_score >= S.quality_score_cutoff
       if buffer_type == :zoom
         b.no_fill
         b.stroke @colour
@@ -109,6 +115,7 @@ class ReadPair
           b.bezier(@linear_x2, @chr2.baseline, @linear_x2, @chr2.baseline + 40 + @bezier_random, @linear_x1, @chr1.baseline - 40 + @bezier_random, @linear_x1, @chr1.baseline)
         end
       end
+#    end
 #    end
   end
   

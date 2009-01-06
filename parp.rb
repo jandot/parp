@@ -32,11 +32,12 @@ class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :linear_representation
   attr_accessor :active_panel
-  attr_accessor :buttons, :control_buttons
+  attr_accessor :buttons, :control_buttons, :control_sliders
   attr_accessor :diameter, :radius
   attr_accessor :circular_only
-  attr_accessor :dragging_chr
+  attr_accessor :dragging_chr, :dragging_qual_cutoff
   attr_accessor :thread_load_continuous_features, :thread_draw_continuous_features, :thread_update_x_continuous_features
+  attr_accessor :quality_score_cutoff
 
   def setup
     @f = create_font("Arial", 12)
@@ -47,6 +48,7 @@ class MySketch < Processing::App
     @radius = @diameter/2
     @dragging_chr = nil
     @calculating = false
+    @quality_score_cutoff = 15
 
     @chromosomes = Array.new
     self.load_chromosomes
@@ -63,11 +65,15 @@ class MySketch < Processing::App
     @chromosomes[21].set_linear(:bottom)
 
     @control_buttons = Array.new
-
     @control_buttons.push(
       Button.new(10,50,"Toggle circular only") do
         self.toggle_circular_only
       end
+    )
+
+    @control_sliders = Array.new
+    @control_sliders.push(
+      Slider.new(10, 120, "Quality score cutoff:", @quality_score_cutoff)
     )
 
 
@@ -135,7 +141,7 @@ class MySketch < Processing::App
   def load_readpairs
     File.open(FILE_READPAIRS).each do |l|
       fields = l.chomp.split(/\t/)
-      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4])
+      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], random(5,35)) #TODO: 28 is now arbitrary qual score
     end
   end
 
@@ -163,7 +169,7 @@ class MySketch < Processing::App
     @buffer_circular_all = buffer(self.width,self.height,JAVA2D) do |b|
       b.background(255)
       b.text_font @f
-    
+
       b.smooth
       b.strokeCap(SQUARE)
 
@@ -180,10 +186,10 @@ class MySketch < Processing::App
       @chromosomes.each do |chr|
         chr.draw_buffer_circular_all(b)
       end
-    
+
       b.noFill
       @chromosomes.each do |chr|
-        chr.between_chromosome_readpairs.values.flatten.each do |rp|
+        chr.between_chromosome_readpairs.values.flatten.select{|r| r.qual_score >= @quality_score_cutoff}.each do |rp|
           rp.draw_buffer_circular(b, :all)
         end
       end
@@ -205,10 +211,10 @@ class MySketch < Processing::App
         translate_y = self.height.to_f/2
       end
       b.translate(translate_x, translate_y)
-    
+
       b.noFill
       @chromosomes.each do |chr|
-        chr.between_chromosome_readpairs.values.flatten.select{|r| r.active}.each do |rp|
+        chr.between_chromosome_readpairs.values.flatten.select{|r| r.active and r.qual_score >= @quality_score_cutoff}.each do |rp|
           rp.draw_buffer_circular(b, :highlighted)
         end
       end
@@ -242,11 +248,18 @@ class MySketch < Processing::App
   
   def draw_buffer_linear_zoom
     @buffer_linear_zoom = buffer(self.width, self.height/2, JAVA2D) do |b|
-      b.background(@img_linear_ideograms)
+      b.text_font @f
+
+      if @img_linear_continuous_features.nil?
+        b.background(@img_linear_ideograms)
+        b.fill 0
+        b.text("Calculating read depth...", 10, self.height/4)
+      else
+        b.background(@img_linear_continuous_features)
+      end
       b.smooth
       b.strokeCap SQUARE
       b.rectMode CORNERS
-      b.text_font @f
       [:top, :bottom].each do |panel|
         chr = @linear_representation[panel]
         chr.draw_buffer_linear_zoom(b)
@@ -254,7 +267,7 @@ class MySketch < Processing::App
 
       #Draw between-chromosome readpairs
       start_chr, stop_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}
-      start_chr.between_chromosome_readpairs[stop_chr.number].each do |rp|
+      start_chr.between_chromosome_readpairs[stop_chr.number].select{|rp| rp.visible and rp.qual_score >= @quality_score_cutoff}.each do |rp|
         rp.draw_buffer_linear(b, :zoom)
       end
 
@@ -268,15 +281,10 @@ class MySketch < Processing::App
       b.smooth
       b.strokeCap SQUARE
       b.rectMode CORNERS
-      b.text_font @f
       b.fill 0
+      b.text_font @f
 
-      if @img_linear_continuous_features.nil?
-        b.background(@img_linear_zoom)
-        b.text("Calculating read depth...", 10, self.height/4)
-      else
-        b.background(@img_linear_continuous_features)
-      end
+      b.background(@img_linear_zoom)
 
       [:top, :bottom].each do |panel|
         chr = @linear_representation[panel]
@@ -285,7 +293,7 @@ class MySketch < Processing::App
 
       #Draw between-chromosome readpairs
       start_chr, stop_chr = [@linear_representation[:top], @linear_representation[:bottom]].sort_by{|c| c.number}
-      start_chr.between_chromosome_readpairs[stop_chr.number].select{|rp| rp.visible and rp.active}.each do |rp|
+      start_chr.between_chromosome_readpairs[stop_chr.number].select{|rp| rp.visible and rp.active and rp.qual_score >= @quality_score_cutoff}.each do |rp|
         rp.draw_buffer_linear(b, :highlighted)
       end
     end
@@ -294,20 +302,19 @@ class MySketch < Processing::App
 
   def draw_buffer_linear_continuous_features
     @img_linear_continuous_features = nil
+
     @thread_draw_continuous_features = Thread.new do
       @buffer_linear_continuous_features = buffer(self.width, self.height/2, JAVA2D) do |b|
         b.background(@img_linear_zoom)
         b.smooth
         [:top,:bottom].each do |panel|
-#          @thread_load_continuous_features.join
-#          STDERR.puts "Loading thread joined"
           @thread_update_x_continuous_features.join
           @linear_representation[panel].draw_buffer_linear_continuous_features(b)
         end
       end
       @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
       self.draw_buffer_linear_highlighted
-      redraw
+      self.redraw
     end
   end
 
@@ -316,11 +323,14 @@ class MySketch < Processing::App
       b.background(255)
       b.text_font @f
       b.smooth
-      
+
       b.fill(0)
       b.rect_mode CORNERS
       @control_buttons.each do |cb|
         cb.draw(b)
+      end
+      @control_sliders.each do |cs|
+        cs.draw(b)
       end
     end
     @img_controls = @buffer_controls.get(0,0,@buffer_controls.width,@buffer_controls.height)
@@ -337,7 +347,7 @@ class MySketch < Processing::App
             rp.active = false
           end
         end
-         if chr.label.under_mouse?#mouse_x > chr.label.x1 + width/4 and mouse_x < chr.label.x2 + width/4 and mouse_y > chr.label.y1 + height/4 and mouse_y < chr.label.y2 + height/4
+         if chr.label.under_mouse?
           chr.label.active = true
         else
           chr.label.active = false
@@ -346,7 +356,7 @@ class MySketch < Processing::App
 
       self.draw_buffer_circular_highlighted
       self.draw_buffer_linear_highlighted
-      redraw
+      self.redraw
     else
       if mouse_y < self.height/2
         @active_panel = 1
@@ -376,7 +386,7 @@ class MySketch < Processing::App
 
         self.draw_buffer_circular_highlighted
         self.draw_buffer_linear_highlighted
-        redraw
+        self.redraw
       elsif @active_panel == 2 or @active_panel == 3
         if @active_panel == 2
           chr = @linear_representation[:top]
@@ -404,17 +414,28 @@ class MySketch < Processing::App
             rp.active = false
           end
         end
-
         self.draw_buffer_circular_highlighted
         self.draw_buffer_linear_highlighted
-        redraw
+        self.redraw
       end
     end
   end
   
   def mouse_dragged
     dragging = false
-    if !@circular_only
+
+    @control_sliders.each do |cs|
+      if cs.under_mouse?
+        cs.value = map(mouseY, cs.y1, cs.y2, 40, 0).to_i
+        @quality_score_cutoff = cs.value
+        @dragging_qual_cutoff = true
+        dragging = true
+        self.draw_buffer_controls
+        self.redraw
+      end
+    end
+
+    if !dragging and !@circular_only
       if @active_panel == 2
         panel = @linear_representation[:top]
         if pmouse_y >= self.height/2 + 5 and pmouse_y <= self.height/2 + panel.ideogram.height + 5
@@ -440,14 +461,15 @@ class MySketch < Processing::App
           @thread_draw_continuous_features.kill
           @img_draw_continuous_features = nil
         end
-        self.draw_buffer_linear_zoom
         self.draw_buffer_linear_continuous_features
+        self.draw_buffer_linear_zoom
         self.draw_buffer_linear_highlighted
       end
       if dragging or !@dragging_chr.nil?
         self.redraw
       end
     end
+
   end
   
   def mouse_clicked
@@ -521,6 +543,15 @@ class MySketch < Processing::App
         end
       end
     end
+
+    if @dragging_qual_cutoff
+      self.draw_buffer_circular_all
+      self.draw_buffer_circular_highlighted
+      self.draw_buffer_linear_zoom
+      self.draw_buffer_linear_highlighted
+      self.redraw
+      @dragging_qual_cutoff = false
+    end
   end
 
   def toggle_circular_only
@@ -545,6 +576,7 @@ class MySketch < Processing::App
     self.draw_buffer_circular_highlighted
     self.redraw
   end
+
 end
 
 S = MySketch.new :title => "My Sketch", :width => WIDTH, :height => HEIGHT
