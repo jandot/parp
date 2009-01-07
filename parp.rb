@@ -141,7 +141,7 @@ class MySketch < Processing::App
   def load_readpairs
     File.open(FILE_READPAIRS).each do |l|
       fields = l.chomp.split(/\t/)
-      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], random(5,35)) #TODO: 28 is now arbitrary qual score
+      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], fields[5].to_i)
     end
   end
 
