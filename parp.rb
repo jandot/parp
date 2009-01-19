@@ -1,4 +1,4 @@
-require '/usr/local/ruby-processing/ruby-processing'
+require 'ruby-processing'
 require 'yaml'
 
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
