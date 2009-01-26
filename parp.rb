@@ -141,7 +141,11 @@ class MySketch < Processing::App
   def load_readpairs
     File.open(FILE_READPAIRS).each do |l|
       fields = l.chomp.split(/\t/)
-      ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], fields[5].to_i)
+      if fields.length == 6
+        ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], fields[5].to_i)
+      else
+        ReadPair.new(fields[0].to_i, fields[1].to_i, fields[2].to_i, fields[3].to_i, fields[4], 0)
+      end
     end
   end
 
