@@ -14,13 +14,13 @@ class Slider
   def draw(b)
     b.fill 150
     b.no_stroke
-    b.rect(@x1, @y2 - MySketch.map(@value, 0, 40, 0, 100), @x2, @y2)
+    b.rect(@x1, @y2 - MySketch.map(@value, S.min_qual_score, S.max_qual_score, 0, 100), @x2, @y2)
     b.no_fill
     b.stroke 150
     b.rect(@x1, @y1, @x2, @y2)
     b.fill 0
     b.text(@label, @x1, @y1 - S.text_ascent)
-    b.text(@value.to_s, @x2 + 5, @y2 - MySketch.map(@value, 0, 40, 0, 100))
+    b.text(@value.to_s, @x2 + 5, @y2 - MySketch.map(@value, S.min_qual_score, S.max_qual_score, 0, 100))
   end
 
   def under_mouse?

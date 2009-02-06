@@ -25,6 +25,12 @@ class ReadPair
     @pos2 = pos2
     @code = code
     @qual_score = qual_score
+    if @qual_score < S.min_qual_score
+      S.min_qual_score = @qual_score
+    end
+    if @qual_score > S.max_qual_score
+      S.max_qual_score = @qual_score
+    end
     
     @active = false
     @within_chromosome = (chr1 == chr2) ? true : false
@@ -35,6 +41,8 @@ class ReadPair
       @colour = S.color(0,0,255,50)
     elsif @code == 'RR'
       @colour = S.color(0,255,0,50)
+    elsif @code == 'RF'
+      @colour = S.color(255,0,255,50)
     end
     
     if @within_chromosome

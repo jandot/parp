@@ -37,7 +37,7 @@ class MySketch < Processing::App
   attr_accessor :circular_only
   attr_accessor :dragging_chr, :dragging_qual_cutoff
   attr_accessor :thread_load_continuous_features, :thread_draw_continuous_features, :thread_update_x_continuous_features
-  attr_accessor :quality_score_cutoff
+  attr_accessor :quality_score_cutoff, :min_qual_score, :max_qual_score
 
   def setup
     @f = create_font("Arial", 12)
@@ -48,14 +48,17 @@ class MySketch < Processing::App
     @radius = @diameter/2
     @dragging_chr = nil
     @calculating = false
-    @quality_score_cutoff = 15
+    @min_qual_score = 99999
+    @max_qual_score = 0
 
     @chromosomes = Array.new
     self.load_chromosomes
     self.load_readpairs
     self.load_discrete_features
     self.load_index_continuous_features
-    
+
+    @quality_score_cutoff = ((@min_qual_score + @max_qual_score)/2).floor
+
     @buttons = Hash.new
     @buttons[:top] = Array.new
     @buttons[:bottom] = Array.new
@@ -317,6 +320,7 @@ class MySketch < Processing::App
         end
       end
       @img_linear_continuous_features = @buffer_linear_continuous_features.get(0,0,@buffer_linear_continuous_features.width,@buffer_linear_continuous_features.height)
+      self.draw_buffer_linear_zoom
       self.draw_buffer_linear_highlighted
       self.redraw
     end
@@ -430,7 +434,7 @@ class MySketch < Processing::App
 
     @control_sliders.each do |cs|
       if cs.under_mouse?
-        cs.value = map(mouseY, cs.y1, cs.y2, 40, 0).to_i
+        cs.value = map(mouseY, cs.y1, cs.y2, @max_qual_score, @min_qual_score).to_i
         @quality_score_cutoff = cs.value
         @dragging_qual_cutoff = true
         dragging = true
@@ -481,6 +485,11 @@ class MySketch < Processing::App
     [:top, :bottom].each do |panel|
       @buttons[panel].each do |button|
         if button.under_mouse?
+#          if @thread_draw_continuous_features.alive?
+##           @thread_update_x_continuous_features.kill
+#            @thread_draw_continuous_features.kill
+#            @img_draw_continuous_features = nil
+#          end
           button.execute
           changed = true
         end
@@ -582,5 +591,6 @@ class MySketch < Processing::App
   end
 
 end
+
 
 S = MySketch.new :title => "My Sketch", :width => WIDTH, :height => HEIGHT
