@@ -2,10 +2,15 @@
 DISTANCE = 250
 
 @readpairs = Array.new
-@clusters = Array.new
+@from_clusters = Array.new
+@to_clusters = Array.new
 
 class ReadPair
-  attr_accessor :from_chr, :from_pos, :to_chr,  :to_pos
+  attr_accessor :from_chr, :from_pos, :to_chr, :to_pos, :code, :qual
+  def initialize(from_chr, from_pos, to_chr, to_pos, code, qual)
+    @from_chr, @from_pos, @to_chr, @to_pos, @code, @qual =
+      from_chr, from_pos, to_chr, to_pos, code, qual
+  end
 end
 
 class Cluster
@@ -14,8 +19,10 @@ end
 
 #create clusters
 ARGF.sort.each do |line|
-  chr1, pos1, chr2, pos2, code, qual = line.chomp.split(/\t/)
-  STDERR.puts chr1 + "\t" + pos1
+  fields = line.chomp.split(/\t/)
+  @readpairs.push(ReadPair.new(*fields))
 end
 
 #link clusters
+@readpairs.each
+STDERR.puts @readpairs.length
