@@ -1,11 +1,13 @@
+require 'rubygems'
 require 'ruby-processing'
 require 'yaml'
+require 'bsearch'
 
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
 FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
-FILE_READDEPTH = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_segmented.txt'
+FILE_READDEPTH = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_selectioned.txt'
 
 WIDTH = 1200
 HEIGHT = 600
@@ -16,27 +18,45 @@ GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 
+class Integer
+  def format
+    return self.to_s.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+  end
+end
 
 class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
   attr_accessor :dragging
-  attr_accessor :image_genome_overview
-  attr_accessor :start_degree_segment
-  
+  attr_accessor :image_overview, :image_detail
+  attr_accessor :selection_start_degree, :selection_start
+  attr_accessor :active_plane, :origin_x, :origin_y
+  attr_accessor :chromosome_under_mouse, :pos_under_mouse
+  attr_accessor :formatted_position
+  attr_accessor :displays, :selections
+  attr_accessor :active_slice
+
   def setup
     @diameter = 400
     @radius = @diameter/2
+    
+    @active_plane = :left
+    @origin_x = width/4
+    @origin_y = height/2
+
+    @formatted_position = ''
+    @displays = Hash.new
+    @selections = Array.new
 
     @f = create_font("Arial", 12)
     text_font @f
-    text_align CENTER
     
     self.load_chromosomes
     self.load_readpairs
 
-    self.draw_genome_overview
+    self.draw_overview_display
+    self.draw_detail_display
 
     smooth
     no_loop
@@ -63,68 +83,67 @@ class MySketch < Processing::App
   def draw
     background 255
 
-    image(@image_genome_overview,0,0)
-    image(@image_genome_overview, width/2, 0)
+    image(@image_overview,0,0)
+    image(@image_detail, width/2, 0)
 
-    stroke 100
-    if mouse_x < width/2
-      line width/4, height/2, mouse_x, mouse_y
-    else
-      line 3*width/4, height/2, mouse_x, mouse_y
+    #Selections
+    no_stroke
+    @selections.each do |s|
+      pline(s.start_overview_degree, s.stop_overview_degree, @diameter+100, width/4, height/2, :fill => color(0,0,255,50))
     end
 
+    #Line following mouse
+    stroke 100
+    line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
+
+    fill 0
+    text @formatted_position, 50, 50
+
+    #Selection being drawn (green)
     if @dragging
       fill 0,255,0,50
       no_stroke
-      if mouse_x < width/2
-        pline(@start_degree_segment, angle(mouse_x, mouse_y, width/4, height/2), @diameter+100, width/4, height/2, :fill => color(0,255,0,50))
-#
-#        triangle(cx(@start_degree_segment, @radius+50, width/4),
-#                 cy(@start_degree_segment, @radius+50, height/2),
-#                 width/4,
-#                 height/2,
-#                 mouse_x,
-#                 mouse_y
-#                )
-#        stroke 0,255,0
-#        pline(@start_degree_segment, angle(mouse_x, mouse_y, width/4, height/2), @diameter+100, width/4, height/2)
-#
-      else
-        triangle(cx(@start_degree_segment, @radius+50, 3*width/4),
-                 cy(@start_degree_segment, @radius+50, height/2),
-                 3*width/4,
-                 height/2,
-                 mouse_x,
-                 mouse_y
-                )
-      end
-
-    end
-
-    unless @start_degree_segment.nil?
+      pline(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y), @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
       fill 0
-      text @start_degree_segment.to_s, 100, 20
     end
   end
 
-  def draw_genome_overview
-    buffer_genome_overview = buffer(self.width/2,self.height,JAVA2D) do |b|
+  def draw_overview_display
+    buffer_overview = buffer(self.width/2, self.height, JAVA2D) do |b|
       b.background 255
       b.text_font @f
       b.text_align CENTER
-
       b.smooth
+      
+      @displays[:overview] = Display.new(:overview, width/4, height/2)
+      @chromosomes.values.each do |chr|
+        chr.slice(@displays[:overview])
+      end
 
       b.translate(self.width.to_f/4, self.height.to_f/2)
-      @chromosomes.values.each do |chr|
-        chr.draw(b)
-      end
-      @readpairs.each do |readpair|
-        readpair.draw(b)
-      end
-      b.translate(-self.width.to_f/4, self.height.to_f/2)
+      @displays[:overview].draw(b)
+      b.translate(self.width.to_f/4, self.height.to_f/2)
     end
-    @image_genome_overview = buffer_genome_overview.get(0, 0, buffer_genome_overview.width, buffer_genome_overview.height)
+    @image_overview = buffer_overview.get(0, 0, buffer_overview.width, buffer_overview.height)
+  end
+
+  def draw_detail_display
+    buffer_detail = buffer(self.width/2, self.height, JAVA2D) do |b|
+#      b.background 255
+#      b.text_font @f
+#      b.text_align CENTER
+#      b.smooth
+#
+#      @displays[:detail] = Display.new(:detail, width/4, height/2)
+#      @selections.each do |selection|
+#        selection.slice(@displays[:detail])
+#      end
+#
+#      b.translate(self.width.to_f/4, self.height.to_f/2)
+#      @displays[:detail].draw(b)
+#      b.translate(self.width.to_f/4, self.height.to_f/2)
+    end
+    @image_detail = buffer_detail.get(0,0,buffer_detail.width, buffer_detail.height)
   end
 
   def cx(alpha, r, origin_x = 0)
@@ -166,27 +185,78 @@ class MySketch < Processing::App
 
   end
 
-  def mouse_pressed
-    if mouse_x < width/2
-      @start_degree_segment = angle(mouse_x, mouse_y, width/4, height/2)
-    else
-      @start_degree_segment = angle(mouse_x, mouse_y, 3*width/4, height/2)
+  def calculate_position_under_mouse
+    a = angle(mouse_x, mouse_y, @origin_x, @origin_y)
+    if a == 0
+      return [@chromosomes['1'],0]
     end
+    b = map(a, 0, 360, 0, GENOME_SIZE)
+
+    chromosome_under_mouse = nil
+    @chromosomes.values.sort_by{|c| c.bp_offset}.each do |chr|
+      if chr.bp_offset < b
+        chromosome_under_mouse = @chromosomes[chr.name]
+      end
+    end
+    pos_under_mouse = (b - chromosome_under_mouse.bp_offset).to_i
+    return [chromosome_under_mouse, pos_under_mouse]
+  end
+
+  def mouse_pressed
+    @selection_start_degree = angle(mouse_x, mouse_y, @origin_x, @origin_y)
+    @chromosomes.values.sort_by{|c| c.name.to_i}.each do |chr|
+      if chr.degree_offset < @selection_start_degree
+        @start_selection_chr = chr.degree_offset
+      end
+    end
+    under_mouse = self.calculate_position_under_mouse
+    @selection_start_chromosome = under_mouse[0]
+    @selection_start_pos = under_mouse[1]
   end
 
   def mouse_moved
+    @active_plane = ( mouse_x < width/2 ) ? :left : :right
+    if ( @active_plane == :left )
+      @origin_x = width/4
+    else
+      @origin_x = 3*width/4
+    end
+
+    under_mouse = self.calculate_position_under_mouse
+    @chromosome_under_mouse = under_mouse[0]
+    @pos_under_mouse = under_mouse[1]
+    @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
     redraw
   end
-  
+
   def mouse_dragged
     @dragging = true
+    under_mouse = self.calculate_position_under_mouse
+    @chromosome_under_mouse = under_mouse[0]
+    @pos_under_mouse = under_mouse[1]
+    @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
     redraw
   end
 
   def mouse_released
     @dragging = false
-    @segment_line_angles = Array.new
+    under_mouse = self.calculate_position_under_mouse
+    selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
+                              @selection_start_chromosome, @selection_start_pos,
+                              under_mouse[0],
+                              under_mouse[1])
+    @selections.push(selection)
+    @selection_start = nil
+
+    self.draw_detail_display
     redraw
+  end
+
+  def key_pressed
+    if key == 'r'
+      @selections = Array.new
+      redraw
+    end
   end
 end
 
