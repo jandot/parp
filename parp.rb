@@ -31,7 +31,7 @@ class MySketch < Processing::App
   attr_accessor :dragging
   attr_accessor :image_overview, :image_detail
   attr_accessor :selection_start_degree, :selection_start
-  attr_accessor :active_plane, :origin_x, :origin_y
+  attr_accessor :active_display, :origin_x, :origin_y
   attr_accessor :chromosome_under_mouse, :pos_under_mouse
   attr_accessor :formatted_position
   attr_accessor :displays, :selections
@@ -41,7 +41,7 @@ class MySketch < Processing::App
     @diameter = 400
     @radius = @diameter/2
     
-    @active_plane = :left
+    @active_display = :overview
     @origin_x = width/4
     @origin_y = height/2
 
@@ -129,19 +129,19 @@ class MySketch < Processing::App
 
   def draw_detail_display
     buffer_detail = buffer(self.width/2, self.height, JAVA2D) do |b|
-#      b.background 255
-#      b.text_font @f
-#      b.text_align CENTER
-#      b.smooth
-#
-#      @displays[:detail] = Display.new(:detail, width/4, height/2)
-#      @selections.each do |selection|
-#        selection.slice(@displays[:detail])
-#      end
-#
-#      b.translate(self.width.to_f/4, self.height.to_f/2)
-#      @displays[:detail].draw(b)
-#      b.translate(self.width.to_f/4, self.height.to_f/2)
+      b.background 255
+      b.text_font @f
+      b.text_align CENTER
+      b.smooth
+
+      @displays[:detail] = Display.new(:detail, width/4, height/2)
+      @selections.each do |selection|
+        selection.slice(@displays[:detail])
+      end
+
+      b.translate(self.width.to_f/4, self.height.to_f/2)
+      @displays[:detail].draw(b)
+      b.translate(self.width.to_f/4, self.height.to_f/2)
     end
     @image_detail = buffer_detail.get(0,0,buffer_detail.width, buffer_detail.height)
   end
@@ -215,8 +215,8 @@ class MySketch < Processing::App
   end
 
   def mouse_moved
-    @active_plane = ( mouse_x < width/2 ) ? :left : :right
-    if ( @active_plane == :left )
+    @active_display = ( mouse_x < width/2 ) ? :overview : :detail
+    if ( @active_display == :overview )
       @origin_x = width/4
     else
       @origin_x = 3*width/4
@@ -230,31 +230,36 @@ class MySketch < Processing::App
   end
 
   def mouse_dragged
-    @dragging = true
     under_mouse = self.calculate_position_under_mouse
-    @chromosome_under_mouse = under_mouse[0]
-    @pos_under_mouse = under_mouse[1]
-    @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
+    if @active_display == :overview
+      @dragging = true
+      @chromosome_under_mouse = under_mouse[0]
+      @pos_under_mouse = under_mouse[1]
+      @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
+    end
     redraw
   end
 
   def mouse_released
-    @dragging = false
     under_mouse = self.calculate_position_under_mouse
-    selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
-                              @selection_start_chromosome, @selection_start_pos,
-                              under_mouse[0],
-                              under_mouse[1])
-    @selections.push(selection)
-    @selection_start = nil
+    if @active_display == :overview
+      @dragging = false
+      under_mouse = self.calculate_position_under_mouse
+      selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
+                                @selection_start_chromosome, @selection_start_pos,
+                                under_mouse[1])
+      @selections.push(selection)
+      @selection_start = nil
 
-    self.draw_detail_display
+      self.draw_detail_display
+    end
     redraw
   end
 
   def key_pressed
     if key == 'r'
       @selections = Array.new
+      self.draw_detail_display
       redraw
     end
   end

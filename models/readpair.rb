@@ -5,7 +5,7 @@ class ReadPair
   attr_accessor :normalized_degree_from, :normalized_degree_to
 #  attr_accessor :interchromosomal
   
-  def initialize(from_chr, from_pos, to_chr, to_pos, code, qual)
+  def initialize(from_chr, from_pos, to_chr, to_pos, code, qual = 40)
     @reads = Array.new
     @reads.push(Read.new(from_chr, from_pos, self))
     @reads.push(Read.new(to_chr, to_pos, self))
@@ -16,7 +16,6 @@ class ReadPair
 
 
   def draw(b, display)
-    STDERR.puts self.to_s + "\t" + self.visible(display).to_s
     if self.visible(display)
       b.no_fill
         b.stroke 200
