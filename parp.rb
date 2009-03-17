@@ -6,7 +6,8 @@ require 'bsearch'
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
-FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
+#FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
+FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
 FILE_READDEPTH = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_selectioned.txt'
 
 WIDTH = 1200
@@ -41,7 +42,6 @@ class MySketch < Processing::App
     @diameter = 400
     @radius = @diameter/2
     
-    @active_display = :overview
     @origin_x = width/4
     @origin_y = height/2
 
@@ -58,6 +58,7 @@ class MySketch < Processing::App
     self.draw_overview_display
     self.draw_detail_display
 
+    @active_display = @displays[:overview]
     smooth
     no_loop
   end
@@ -187,18 +188,20 @@ class MySketch < Processing::App
 
   def calculate_position_under_mouse
     a = angle(mouse_x, mouse_y, @origin_x, @origin_y)
-    if a == 0
-      return [@chromosomes['1'],0]
-    end
-    b = map(a, 0, 360, 0, GENOME_SIZE)
+    b = map(a, 0, 360, 0, @active_display.bp_length)
 
-    chromosome_under_mouse = nil
-    @chromosomes.values.sort_by{|c| c.bp_offset}.each do |chr|
-      if chr.bp_offset < b
-        chromosome_under_mouse = @chromosomes[chr.name]
+    running_position = 0
+    @active_display.slices.each do |slice|
+      running_position += slice.length
+      if running_position >= b
+        @active_slice = slice
+        break
       end
     end
-    pos_under_mouse = (b - chromosome_under_mouse.bp_offset).to_i
+
+    chromosome_under_mouse = @active_slice.chr
+    pos_under_mouse = (b - @active_slice.bp_offset + @active_slice.from_pos).to_i
+
     return [chromosome_under_mouse, pos_under_mouse]
   end
 
@@ -215,23 +218,25 @@ class MySketch < Processing::App
   end
 
   def mouse_moved
-    @active_display = ( mouse_x < width/2 ) ? :overview : :detail
-    if ( @active_display == :overview )
+    @active_display = ( mouse_x < width/2 ) ? @displays[:overview] : @displays[:detail]
+    if ( @active_display == @displays[:overview] )
       @origin_x = width/4
     else
       @origin_x = 3*width/4
     end
 
-    under_mouse = self.calculate_position_under_mouse
-    @chromosome_under_mouse = under_mouse[0]
-    @pos_under_mouse = under_mouse[1]
-    @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
-    redraw
+    if @active_display == @displays[:overview] or ( @active_display == @displays[:detail] and @active_display.slices.length > 0 )
+      under_mouse = self.calculate_position_under_mouse
+      @chromosome_under_mouse = under_mouse[0]
+      @pos_under_mouse = under_mouse[1]
+      @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
+      redraw
+    end
   end
 
   def mouse_dragged
     under_mouse = self.calculate_position_under_mouse
-    if @active_display == :overview
+    if @active_display == @displays[:overview]
       @dragging = true
       @chromosome_under_mouse = under_mouse[0]
       @pos_under_mouse = under_mouse[1]
@@ -242,7 +247,7 @@ class MySketch < Processing::App
 
   def mouse_released
     under_mouse = self.calculate_position_under_mouse
-    if @active_display == :overview
+    if @active_display == @displays[:overview]
       @dragging = false
       under_mouse = self.calculate_position_under_mouse
       selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
