@@ -6,8 +6,9 @@ require 'bsearch'
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
+FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/read_pairs.parsed'
 #FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
-FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
+#FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
 FILE_READDEPTH = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_selectioned.txt'
 
 WIDTH = 1200
@@ -32,6 +33,7 @@ class MySketch < Processing::App
   attr_accessor :displays, :selections
   attr_accessor :active_slice
   attr_accessor :next_selection_label
+  attr_accessor :min_qual, :max_qual, :qual_cutoff
 
   def setup
     @diameter = 400
@@ -50,7 +52,10 @@ class MySketch < Processing::App
     
     self.load_chromosomes
     self.load_readpairs
+    self.load_copy_numbers
 
+    @qual_cutoff = ((@min_qual + @max_qual)/2).ceil
+    
     @displays[:overview] = Display.new(:overview, width/4, height/2)
     @displays[:detail] = Display.new(:detail, width/4, height/2)
     self.add_chromosomes_to_overview_display
@@ -78,6 +83,13 @@ class MySketch < Processing::App
       @readpairs.push(ReadPair.new(from_chr, from_pos, to_chr, to_pos, code, qual))
     end
     @reads = @reads.sort_by{|r| r.as_string}
+    all_qualities = @readpairs.collect{|rp| rp.qual}
+    @min_qual = all_qualities.min
+    @max_qual = all_qualities.max
+  end
+
+  def load_copy_numbers
+    
   end
 
   def add_chromosomes_to_overview_display
@@ -152,13 +164,14 @@ class MySketch < Processing::App
 
       b.fill 0
       b.text "Mouse position: " + @formatted_position, 10, 10 + text_ascent
-      b.text "Active display: " + @active_display.name.to_s, 10, 10 + 2*(text_ascent+2)
-      b.text "Selections:", 10, 10 + 3*(text_ascent+2)
+      b.text "Quality score cutoff: " + @qual_cutoff.to_s, 10, 10+2*(text_ascent+2)
+      b.text "Active display: " + @active_display.name.to_s, 10, 10 + 3*(text_ascent+2)
+      b.text "Selections:", 10, 10 + 4*(text_ascent+2)
       counter = 0
       @selections.each do |selection|
         counter += 1
         b.text "  " + selection.label + ": " + selection.slice.formatted_position,
-          20, 10 + (3+counter)*(text_ascent+2)
+          20, 10 + (4+counter)*(text_ascent+2)
       end
     end
     @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
@@ -284,6 +297,15 @@ class MySketch < Processing::App
       @selections = Array.new
       @next_selection_label = 'A'
       @displays[:detail] = Display.new(:detail, width/4, height/2)
+      self.draw_detail_display
+      redraw
+    elsif key_code
+      if key_code == UP and @qual_cutoff < @max_qual
+        @qual_cutoff += 1
+      elsif key_code == DOWN and @qual_cutoff > @min_qual
+        @qual_cutoff -= 1
+      end
+      self.draw_overview_display
       self.draw_detail_display
       redraw
     end

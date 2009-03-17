@@ -27,7 +27,7 @@ class Display
     end
     @readpairs.flatten!
     @readpairs.uniq!
-    @readpairs.reject!{|rp| !rp.visible(self)}
+    @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < S.qual_cutoff}
 
     # calculate all degrees
     self.calculate_degrees
