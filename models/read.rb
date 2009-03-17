@@ -31,7 +31,7 @@ class Read
   end
 
   def calculate_degree(total_bp_length, display)
-    @degree[display] = ((@pos+@slices[display].bp_offset).to_f/total_bp_length)*360
+    @degree[display] = ((@pos+@slices[display].bp_offset-@slices[display].from_pos).to_f/total_bp_length)*360
   end
 
   def to_s
