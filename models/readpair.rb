@@ -27,15 +27,23 @@ class ReadPair
         b.stroke 0,255,0,200
       end
       b.stroke_weight 0.5
-  
-      distance_from_circle = ( @reads[0].slices[display] == @reads[1].slices[display] ) ? 20 : 80
 
+      distance_from_circle = nil
+      bezier_distance = nil
+
+      if ( @reads[0].slices[display] == @reads[1].slices[display] )
+        distance_from_circle = 50
+        bezier_distance = 20
+      else
+        distance_from_circle = 80
+        bezier_distance = 50
+      end
       b.bezier(S.cx(@reads[0].degree[display], S.radius - distance_from_circle),
                S.cy(@reads[0].degree[display], S.radius - distance_from_circle),
-               S.cx(@reads[0].degree[display], S.radius - distance_from_circle - 50),
-               S.cy(@reads[0].degree[display], S.radius - distance_from_circle - 50),
-               S.cx(@reads[1].degree[display], S.radius - distance_from_circle - 50),
-               S.cy(@reads[1].degree[display], S.radius - distance_from_circle - 50),
+               S.cx(@reads[0].degree[display], S.radius - distance_from_circle - bezier_distance),
+               S.cy(@reads[0].degree[display], S.radius - distance_from_circle - bezier_distance),
+               S.cx(@reads[1].degree[display], S.radius - distance_from_circle - bezier_distance),
+               S.cy(@reads[1].degree[display], S.radius - distance_from_circle - bezier_distance),
                S.cx(@reads[1].degree[display], S.radius - distance_from_circle),
                S.cy(@reads[1].degree[display], S.radius - distance_from_circle))
     end
