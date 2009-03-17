@@ -6,12 +6,14 @@ class Slice
   attr_accessor :reads
   attr_accessor :selections
   attr_accessor :label
+  attr_accessor :formatted_position
 
   def initialize(chr, from_pos, to_pos, display)
     @chr, @from_pos, @to_pos, @display = chr, from_pos, to_pos, display
     @length = @to_pos - @from_pos + 1
     @display.bp_length += @length
-    @label = @chr.name
+    @label = ''
+    @formatted_position = @chr.name + ':' + @from_pos.format + ".." + @to_pos.format
 
     from_pos_string = ( @chr.name.length == 1) ? '0' + @chr.name : @chr.name
     from_pos_string += '_' + @from_pos.to_s.pad('0', 9)
@@ -37,7 +39,7 @@ class Slice
     end
   end
   
-  def draw(b, label = '', index = 0)
+  def draw(b, index = 0)
     # Draw the curve
     b.no_fill
     b.stroke_weight 3
@@ -55,7 +57,7 @@ class Slice
     b.fill 0
     b.no_fill
     b.text_align MySketch::CENTER
-    b.text(label, S.cx(@degree_offset + @normalized_length/2, S.radius + 15), S.cy(@degree_offset + @normalized_length/2, S.radius + 15))
+    b.text(@label, S.cx(@degree_offset + @normalized_length/2, S.radius + 15), S.cy(@degree_offset + @normalized_length/2, S.radius + 15))
     b.text_align MySketch::LEFT
   end
 end

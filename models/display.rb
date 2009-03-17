@@ -34,7 +34,7 @@ class Display
 
     # and finally draw
     @slices.each_with_index do |slice, i|
-      slice.draw(b, slice.label, i)
+      slice.draw(b, i)
     end
 
     # Readpairs are drawn independently of slices because they can be inter-slice

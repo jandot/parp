@@ -20,6 +20,7 @@ class Chromosome
   def slice(display)
     offset = display.bp_length
     slice = Slice.new(self, 0, @length, display)
+    slice.label = self.name
     slice.bp_offset = offset
     return slice
   end

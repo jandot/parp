@@ -19,24 +19,19 @@ GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 
-class Integer
-  def format
-    return self.to_s.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-  end
-end
-
 class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
   attr_accessor :dragging
-  attr_accessor :image_overview, :image_detail
+  attr_accessor :image_overview, :image_detail, :image_information
   attr_accessor :selection_start_degree, :selection_start
   attr_accessor :active_display, :origin_x, :origin_y
   attr_accessor :chromosome_under_mouse, :pos_under_mouse
   attr_accessor :formatted_position
   attr_accessor :displays, :selections
   attr_accessor :active_slice
+  attr_accessor :next_selection_label
 
   def setup
     @diameter = 400
@@ -48,6 +43,7 @@ class MySketch < Processing::App
     @formatted_position = ''
     @displays = Hash.new
     @selections = Array.new
+    @next_selection_label = 'A'
 
     @f = create_font("Arial", 12)
     text_font @f
@@ -55,6 +51,9 @@ class MySketch < Processing::App
     self.load_chromosomes
     self.load_readpairs
 
+    @displays[:overview] = Display.new(:overview, width/4, height/2)
+    @displays[:detail] = Display.new(:detail, width/4, height/2)
+    self.add_chromosomes_to_overview_display
     self.draw_overview_display
     self.draw_detail_display
 
@@ -81,24 +80,31 @@ class MySketch < Processing::App
     @reads = @reads.sort_by{|r| r.as_string}
   end
 
+  def add_chromosomes_to_overview_display
+    @chromosomes.values.each do |chr|
+      chr.slice(@displays[:overview])
+    end
+  end
+
   def draw
     background 255
 
+    self.draw_information_display
     image(@image_overview,0,0)
     image(@image_detail, width/2, 0)
+    image(@image_information, width/2-100, 10)
 
     #Selections
     no_stroke
     @selections.each do |s|
       pline(s.start_overview_degree, s.stop_overview_degree, @diameter+100, width/4, height/2, :fill => color(0,0,255,50))
+      fill 0
+      text(s.label, cx((s.start_overview_degree+s.stop_overview_degree).to_f/2, @radius + 60, width/4), cy((s.start_overview_degree+s.stop_overview_degree).to_f/2, @radius + 60, height/2))
     end
 
     #Line following mouse
     stroke 100
     line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
-
-    fill 0
-    text @formatted_position, 50, 50
 
     #Selection being drawn (green)
     if @dragging
@@ -115,11 +121,6 @@ class MySketch < Processing::App
       b.text_font @f
       b.text_align CENTER
       b.smooth
-      
-      @displays[:overview] = Display.new(:overview, width/4, height/2)
-      @chromosomes.values.each do |chr|
-        chr.slice(@displays[:overview])
-      end
 
       b.translate(self.width.to_f/4, self.height.to_f/2)
       @displays[:overview].draw(b)
@@ -135,16 +136,32 @@ class MySketch < Processing::App
       b.text_align CENTER
       b.smooth
 
-      @displays[:detail] = Display.new(:detail, width/4, height/2)
-      @selections.each do |selection|
-        selection.slice(@displays[:detail])
-      end
-
       b.translate(self.width.to_f/4, self.height.to_f/2)
       @displays[:detail].draw(b)
       b.translate(self.width.to_f/4, self.height.to_f/2)
     end
     @image_detail = buffer_detail.get(0,0,buffer_detail.width, buffer_detail.height)
+  end
+
+  def draw_information_display
+    buffer_information = buffer(200,200,JAVA2D) do |b|
+      b.background 220
+      b.text_font @f
+      b.text_align LEFT
+      b.smooth
+
+      b.fill 0
+      b.text "Mouse position: " + @formatted_position, 10, 10 + text_ascent
+      b.text "Active display: " + @active_display.name.to_s, 10, 10 + 2*(text_ascent+2)
+      b.text "Selections:", 10, 10 + 3*(text_ascent+2)
+      counter = 0
+      @selections.each do |selection|
+        counter += 1
+        b.text "  " + selection.label + ": " + selection.slice.formatted_position,
+          20, 10 + (3+counter)*(text_ascent+2)
+      end
+    end
+    @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
   end
 
   def cx(alpha, r, origin_x = 0)
@@ -252,10 +269,11 @@ class MySketch < Processing::App
       under_mouse = self.calculate_position_under_mouse
       selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
                                 @selection_start_chromosome, @selection_start_pos,
-                                under_mouse[1])
+                                under_mouse[1], @next_selection_label.clone) #FIXME: I don't understand why I have to use clone here.
       @selections.push(selection)
       @selection_start = nil
 
+      @next_selection_label.succ!
       self.draw_detail_display
     end
     redraw
@@ -264,6 +282,8 @@ class MySketch < Processing::App
   def key_pressed
     if key == 'r'
       @selections = Array.new
+      @next_selection_label = 'A'
+      @displays[:detail] = Display.new(:detail, width/4, height/2)
       self.draw_detail_display
       redraw
     end

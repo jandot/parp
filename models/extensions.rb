@@ -12,6 +12,12 @@ class String
   end
 end
 
+class Integer
+  def format
+    return self.to_s.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+  end
+end
+
 class Array
   # This only works on sorted arrays!
   # Returns the index before (default) or after a certain value
