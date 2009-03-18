@@ -65,12 +65,13 @@ class Slice
     b.text(@label, S.cx(@degree_offset + @normalized_length/2, S.radius + 15), S.cy(@degree_offset + @normalized_length/2, S.radius + 15))
     b.text_align MySketch::LEFT
 
-    b.stroke_weight 1
     @copy_numbers.each do |copy_number|
       if copy_number.original_value < 20
         b.stroke 255,0,0
+        b.stroke_weight 2
       elsif copy_number.original_value > 60
         b.stroke 0,255,0
+        b.stroke_weight 2
       else
         b.stroke 0
         b.stroke_weight 0.5
