@@ -7,6 +7,7 @@ class Slice
   attr_accessor :selections
   attr_accessor :label
   attr_accessor :formatted_position
+  attr_accessor :copy_numbers
 
   def initialize(chr, from_pos, to_pos, display)
     @chr, @from_pos, @to_pos, @display = chr, from_pos, to_pos, display
@@ -23,6 +24,10 @@ class Slice
     @reads = Read.fetch_region(from_pos_string, to_pos_string)
     @reads.each do |read|
       read.slices[display] = self
+    end
+    @copy_numbers = CopyNumber.fetch_region(from_pos_string, to_pos_string)
+    @copy_numbers.each do |copy_number|
+      copy_number.slices[display] = self
     end
 
     @display.add_slice(self)
@@ -59,5 +64,18 @@ class Slice
     b.text_align MySketch::CENTER
     b.text(@label, S.cx(@degree_offset + @normalized_length/2, S.radius + 15), S.cy(@degree_offset + @normalized_length/2, S.radius + 15))
     b.text_align MySketch::LEFT
+
+    b.stroke_weight 1
+    @copy_numbers.each do |copy_number|
+      if copy_number.original_value < 20
+        b.stroke 255,0,0
+      elsif copy_number.original_value > 60
+        b.stroke 0,255,0
+      else
+        b.stroke 0
+        b.stroke_weight 0.5
+      end
+      S.pline(copy_number.start_degree[@display], copy_number.stop_degree[@display], S.diameter - 20 - copy_number.value, 0, 0, :buffer => b)
+    end
   end
 end

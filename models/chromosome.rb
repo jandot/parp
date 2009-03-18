@@ -3,6 +3,7 @@ class Chromosome
   attr_accessor :readpairs
   attr_accessor :normalized_length, :normalized_centromere #to 360 TODO: move this to slice
   attr_accessor :bp_offset, :degree_offset # TODO: move this to slice
+  attr_accessor :copy_numbers
 
   def initialize(name, length, centr)
     @name, @length, @centromere = name, length, centr

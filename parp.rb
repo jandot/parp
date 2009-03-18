@@ -6,10 +6,11 @@ require 'bsearch'
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
-FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/read_pairs.parsed'
-#FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
+#FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/read_pairs.parsed'
+FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
-FILE_READDEPTH = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_selectioned.txt'
+#FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/copy_number_segmented.txt'
+FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_segmented.txt'
 
 WIDTH = 1200
 HEIGHT = 600
@@ -34,6 +35,7 @@ class MySketch < Processing::App
   attr_accessor :active_slice
   attr_accessor :next_selection_label
   attr_accessor :min_qual, :max_qual, :qual_cutoff
+  attr_accessor :copy_numbers
 
   def setup
     @diameter = 400
@@ -89,7 +91,12 @@ class MySketch < Processing::App
   end
 
   def load_copy_numbers
-    
+    @copy_numbers = Array.new
+    File.open(FILE_COPY_NUMBER).each do |line|
+      chr, start, stop, value = line.chomp.split("\t")
+      @copy_numbers.push(CopyNumber.new(chr, start, stop, value))
+    end
+    @copy_numbers = @copy_numbers.sort_by{|cn| cn.as_string}
   end
 
   def add_chromosomes_to_overview_display
