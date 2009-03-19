@@ -32,17 +32,9 @@ class CopyNumber
     return S.copy_numbers.collect{|r| r.as_string}.bsearch_lower_boundary{|x| x <=> value}
   end
 
-  def calculate_degree(total_bp_length, display)
-    if @slices[display].from_pos < @start
-      @start_degree[display] = ((@slices[display].bp_offset-@slices[display].from_pos+@start).to_f/total_bp_length)*360
-    else
-      @start_degree[display] = @slices[display].degree_offset
-    end
-    if @stop > @slices[display].to_pos
-      @stop_degree[display] = @slices[display].degree_offset + @slices[display].normalized_length
-    else
-      @stop_degree[display] = ((@slices[display].bp_offset-@slices[display].from_pos+@stop).to_f/total_bp_length)*360
-    end
+  def calculate_degree(display)
+    @start_degree[display] = [@slices[display].start_degree, S.map(@start, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)].max
+    @stop_degree[display] = [@slices[display].stop_degree, S.map(@stop, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)].min
   end
 
   def to_s

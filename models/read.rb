@@ -30,8 +30,8 @@ class Read
 #    return S.reads.collect{|r| r.as_string}.binary_search(value, direction)
   end
 
-  def calculate_degree(total_bp_length, display)
-    @degree[display] = ((@pos+@slices[display].bp_offset-@slices[display].from_pos).to_f/total_bp_length)*360
+  def calculate_degree(display)
+    @degree[display] = S.map(@pos, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)
   end
 
   def to_s
