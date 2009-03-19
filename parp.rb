@@ -129,7 +129,8 @@ class MySketch < Processing::App
     if @dragging
       fill 0,255,0,50
       no_stroke
-      pline(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y), @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
+      start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
+      pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
       fill 0
     end
   end
@@ -287,9 +288,11 @@ class MySketch < Processing::App
     if @active_display == @displays[:overview]
       @dragging = false
       under_mouse = self.calculate_position_under_mouse
-      selection = Selection.new(@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y),
-                                @selection_start_chromosome, @selection_start_pos,
-                                under_mouse[1], @next_selection_label.clone) #FIXME: I don't understand why I have to use clone here.
+      start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
+      start_pos, stop_pos = [@selection_start_pos, under_mouse[1]].sort
+      selection = Selection.new(start_degree, stop_degree, 
+                                @selection_start_chromosome, start_pos, stop_pos,
+                                @next_selection_label.clone) #FIXME: I don't understand why I have to use clone here.
       @selections.push(selection)
       @selection_start = nil
 
