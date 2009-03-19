@@ -10,7 +10,7 @@ class CopyNumber
     @start, @stop = start.to_i, stop.to_i
     @original_value = value.to_f
     @value = S.map(@original_value.to_f, 0, 382, 0, 80)
-    @as_string = [@chr.pad('0', 2), @start.to_s.pad('0', 9)].join('_')
+    @as_string = [@chr.pad('0', 2), @start.to_s.pad('0', 9), @stop.to_s.pad('0', 9)].join('_')
     @start_degree = Hash.new
     @stop_degree = Hash.new
     @slices = Hash.new
@@ -22,7 +22,7 @@ class CopyNumber
     from_index = CopyNumber.get_index(start)
     to_index = CopyNumber.get_index(stop) - 1
     if to_index >= from_index
-      return S.copy_numbers[from_index, to_index - from_index + 1]
+      return S.copy_numbers[[0, from_index - 1].max, to_index - from_index + 2]
     else
       return []
     end
