@@ -76,7 +76,7 @@ class Slice
         b.stroke 0
         b.stroke_weight 0.5
       end
-      S.pline(copy_number.start_degree[@display], copy_number.stop_degree[@display], S.diameter - 20 - copy_number.value, 0, 0, :buffer => b)
+      S.pline(copy_number.start_degree[@display], copy_number.stop_degree[@display], S.diameter - 60 + copy_number.value, 0, 0, :buffer => b)
     end
   end
 end
