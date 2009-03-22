@@ -33,8 +33,8 @@ class CopyNumber
   end
 
   def calculate_degree(display)
-    @start_degree[display] = [@slices[display].start_degree, S.map(@start, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)].max
-    @stop_degree[display] = [@slices[display].stop_degree, S.map(@stop, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)].min
+    @start_degree[display] = [@slices[display].start_degree[display], S.map(@start, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].max
+    @stop_degree[display] = [@slices[display].stop_degree[display], S.map(@stop, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].min
   end
 
   def to_s

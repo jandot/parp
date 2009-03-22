@@ -31,7 +31,7 @@ class Read
   end
 
   def calculate_degree(display)
-    @degree[display] = S.map(@pos, @slices[display].from_pos, @slices[display].to_pos, @slices[display].start_degree, @slices[display].stop_degree)
+    @degree[display] = S.map(@pos, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])
   end
 
   def to_s

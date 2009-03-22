@@ -2,13 +2,13 @@ class Display
   attr_accessor :name
   attr_accessor :origin_x, :origin_y
   attr_accessor :slices, :readpairs
-  attr_accessor :bp_length, :scale
+  attr_accessor :length_bp, :scale
 
   def initialize(name, origin_x, origin_y)
     @name = name
     @origin_x, @origin_y = origin_x, origin_y
     @slices = Array.new
-    @bp_length = 0
+    @length_bp = 0
   end
 
   def add_slice(slice)
@@ -21,7 +21,7 @@ class Display
     end
   end
   
-  def draw(b)
+  def draw(b, dependent = true)
     # First get all readpairs and copy_numbers
     @readpairs = Array.new
     @copy_numbers = Array.new
@@ -36,11 +36,11 @@ class Display
     @copy_numbers.flatten!
 
     # calculate all degrees
-    self.calculate_degrees
+    self.calculate_degrees(dependent)
 
     # and finally draw
     @slices.each_with_index do |slice, i|
-      slice.draw(b, i)
+      slice.draw(b, self, i)
     end
 
     # Readpairs are drawn independently of slices because they can be inter-slice
@@ -49,16 +49,17 @@ class Display
     end
   end
 
-  def calculate_degrees
+  def calculate_degrees(dependent = true)
+    # Caution: this resets the zoomlevel of all slices to be the same
     @slices.each_with_index do |slice, i|
-      slice.calculate_degree(@bp_length, i)
+      slice.calculate_degree(self, i, dependent)
     end
     @readpairs.each do |readpair|
-      readpair.reads[0].calculate_degree(@bp_length, self)
-      readpair.reads[1].calculate_degree(@bp_length, self)
+      readpair.reads[0].calculate_degree(self)
+      readpair.reads[1].calculate_degree(self)
     end
     @copy_numbers.each do |copy_number|
-      copy_number.calculate_degree(@bp_length, self)
+      copy_number.calculate_degree(self)
     end
   end
 end

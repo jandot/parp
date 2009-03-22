@@ -25,7 +25,7 @@ class MySketch < Processing::App
   attr_accessor :f
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
-  attr_accessor :dragging
+  attr_accessor :creating_new_selection, :zooming_detail
   attr_accessor :image_overview, :image_detail, :image_information
   attr_accessor :selection_start_degree, :selection_start
   attr_accessor :active_display, :origin_x, :origin_y
@@ -115,10 +115,15 @@ class MySketch < Processing::App
 
     #Selections
     no_stroke
-    @selections.each do |s|
-      pline(s.start_overview_degree, s.stop_overview_degree, @diameter+100, width/4, height/2, :fill => color(0,0,255,50))
+    stroke 50
+    i = 0
+    @displays[:detail].slices.each do |s|
+      STDERR.puts s.label + "\t" + s.start_degree[@displays[:overview]].to_s
+      STDERR.puts s.label + "\t" + s.stop_degree[@displays[:overview]].to_s
+      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter+100 + i, width/4, height/2, :fill => color(0,0,255,50))
       fill 0
-      text(s.label, cx((s.start_overview_degree+s.stop_overview_degree).to_f/2, @radius + 60, width/4), cy((s.start_overview_degree+s.stop_overview_degree).to_f/2, @radius + 60, height/2))
+      text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, height/2))
+      i += 10
     end
 
     #Line following mouse
@@ -126,7 +131,7 @@ class MySketch < Processing::App
     line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
 
     #Selection being drawn (green)
-    if @dragging
+    if @creating_new_selection
       fill 0,255,0,50
       no_stroke
       start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
@@ -149,7 +154,7 @@ class MySketch < Processing::App
     @image_overview = buffer_overview.get(0, 0, buffer_overview.width, buffer_overview.height)
   end
 
-  def draw_detail_display
+  def draw_detail_display(zooming = false)
     buffer_detail = buffer(self.width/2, self.height, JAVA2D) do |b|
       b.background 255
       b.text_font @f
@@ -157,7 +162,7 @@ class MySketch < Processing::App
       b.smooth
 
       b.translate(self.width.to_f/4, self.height.to_f/2)
-      @displays[:detail].draw(b)
+      @displays[:detail].draw(b, zooming)
       b.translate(self.width.to_f/4, self.height.to_f/2)
     end
     @image_detail = buffer_detail.get(0,0,buffer_detail.width, buffer_detail.height)
@@ -176,22 +181,23 @@ class MySketch < Processing::App
       b.text "Active display: " + @active_display.name.to_s, 10, 10 + 3*(text_ascent+2)
       b.text "Selections:", 10, 10 + 4*(text_ascent+2)
       counter = 0
-      @selections.each do |selection|
+      @displays[:detail].slices.each do |slice|
         counter += 1
-        b.text "  " + selection.label + ": " + selection.slice.formatted_position,
+        b.text "  " + slice.label + ": " + slice.formatted_position[@displays[:detail]],
           20, 10 + (4+counter)*(text_ascent+2)
       end
     end
     @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
   end
 
+  # cx is the x coordinate for a point on a circle
   def cx(alpha, r, origin_x = 0)
     return r*cos(MySketch.radians(alpha)) + origin_x
   end
   def cy(alpha, r, origin_y = 0)
     return r*sin(MySketch.radians(alpha)) + origin_y
   end
-
+  
   def pline(alpha1, alpha2, r, origin_x = 0, origin_y = 0, args = {})
     if args[:fill].nil? or args[:fill] == false
       no_fill
@@ -199,6 +205,12 @@ class MySketch < Processing::App
       fill args[:fill]
     end
     if args[:buffer].nil?
+#      STDERR.puts '-------------'
+#      STDERR.puts origin_x
+#      STDERR.puts origin_y
+#      STDERR.puts r
+#      STDERR.puts alpha1
+#      STDERR.puts alpha2
       return arc origin_x, origin_y, r, r, MySketch.radians(alpha1), MySketch.radians(alpha2)
     else
       return args[:buffer].arc origin_x, origin_y, r, r, MySketch.radians(alpha1), MySketch.radians(alpha2)
@@ -221,16 +233,15 @@ class MySketch < Processing::App
       alpha = MySketch.degrees(theta)
     end
     return alpha
-
   end
 
   def calculate_position_under_mouse
     a = angle(mouse_x, mouse_y, @origin_x, @origin_y)
-    b = map(a, 0, 360, 0, @active_display.bp_length)
+    b = map(a, 0, 360, 0, @active_display.length_bp)
 
     running_position = 0
     @active_display.slices.each do |slice|
-      running_position += slice.length
+      running_position += slice.length_bp
       if running_position >= b
         @active_slice = slice
         break
@@ -238,21 +249,26 @@ class MySketch < Processing::App
     end
 
     chromosome_under_mouse = @active_slice.chr
-    pos_under_mouse = (b - @active_slice.bp_offset + @active_slice.from_pos).to_i
+    pos_under_mouse = (b - @active_slice.bp_offset + @active_slice.start_bp).to_i
 
     return [chromosome_under_mouse, pos_under_mouse]
   end
 
   def mouse_pressed
-    @selection_start_degree = angle(mouse_x, mouse_y, @origin_x, @origin_y)
-    @chromosomes.values.sort_by{|c| c.name.to_i}.each do |chr|
-      if chr.degree_offset < @selection_start_degree
-        @start_selection_chr = chr.degree_offset
+    if ( @active_display == @displays[:overview] )
+      @selection_start_degree = angle(mouse_x, mouse_y, @origin_x, @origin_y)
+      @chromosomes.values.sort_by{|c| c.name.to_i}.each do |chr|
+        if chr.degree_offset < @selection_start_degree
+          @start_selection_chr = chr.degree_offset
+        end
       end
+      under_mouse = self.calculate_position_under_mouse
+      @selection_start_chromosome = under_mouse[0]
+      @selection_start_pos = under_mouse[1]
+    else # We're initiating a zoom on the detail
+      @dragging_start_degree = angle(mouse_x, mouse_y, @origin_x, @origin_y)
+      @dragging_start_radius = dist(mouse_x, mouse_y, @origin_x, @origin_y)
     end
-    under_mouse = self.calculate_position_under_mouse
-    @selection_start_chromosome = under_mouse[0]
-    @selection_start_pos = under_mouse[1]
   end
 
   def mouse_moved
@@ -275,10 +291,13 @@ class MySketch < Processing::App
   def mouse_dragged
     under_mouse = self.calculate_position_under_mouse
     if @active_display == @displays[:overview]
-      @dragging = true
+      @creating_new_selection = true
       @chromosome_under_mouse = under_mouse[0]
       @pos_under_mouse = under_mouse[1]
       @formatted_position = @chromosome_under_mouse.name + ':' + @pos_under_mouse.format
+    else #working on the detail panel; we're zooming
+      @zooming_detail = true
+      @dragging_radius = dist(mouse_x, mouse_y, @origin_x, @origin_y)
     end
     redraw
   end
@@ -286,18 +305,48 @@ class MySketch < Processing::App
   def mouse_released
     under_mouse = self.calculate_position_under_mouse
     if @active_display == @displays[:overview]
-      @dragging = false
       under_mouse = self.calculate_position_under_mouse
       start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
       start_pos, stop_pos = [@selection_start_pos, under_mouse[1]].sort
-      selection = Selection.new(start_degree, stop_degree, 
-                                @selection_start_chromosome, start_pos, stop_pos,
-                                @next_selection_label.clone) #FIXME: I don't understand why I have to use clone here.
-      @selections.push(selection)
+      
+      slice = Slice.new(@selection_start_chromosome, start_pos, stop_pos, @displays[:detail],
+                        @next_selection_label.clone) #FIXME: I don't understand why I have to use clone here.
+      slice.start_degree[@displays[:overview]] = start_degree
+      slice.stop_degree[@displays[:overview]] = stop_degree
       @selection_start = nil
 
       @next_selection_label.succ!
+      @creating_new_selection = false
       self.draw_detail_display
+    else
+      #TODO: center of zooming should not be center of slice, but start degree of mouse
+      @zooming_detail = false
+      @dragging_radius = dist(mouse_x, mouse_y, @origin_x, @origin_y)
+      #Taking zooming of 2x for 100px => /50
+#      zoom_level = (@dragging_start_radius - @dragging_radius).to_f/50
+      slice_center = @active_slice.start_bp + @active_slice.length_bp/2
+#      STDERR.puts ["before:", zoom_level, @active_slice.length, @active_slice.from_pos, @active_slice.to_pos, @active_slice.start_degree, @active_slice.stop_degree].join("\t")
+#      @active_slice.length /= zoom_level
+      @active_slice.length_bp = map(@dragging_radius, 0, @dragging_start_radius, 0, @active_slice.length_bp)
+#      @active_slice.start_bp = [0,slice_center - (@active_slice.length_bp/2).to_i].max
+#      @active_slice.stop_bp = [@active_slice.chr.length, slice_center + (@active_slice.length_bp/2).to_i].min
+      @active_slice.start_bp = slice_center - (@active_slice.length_bp/2).to_i
+      @active_slice.stop_bp = slice_center + (@active_slice.length_bp/2).to_i
+#      @active_slice.start_bp += 5000000
+#      @active_slice.stop_bp -= 5000000
+
+#      STDERR.puts [@active_slice.label, slice_center, @active_slice.length_bp].join("\t")
+
+      from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+      from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
+      to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+      to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
+      @active_slice.fetch_reads(from_pos_string, to_pos_string)
+      @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
+#      STDERR.puts ["after:", zoom_level, @active_slice.length, @active_slice.from_pos, @active_slice.to_pos, @active_slice.start_degree, @active_slice.stop_degree].join("\t")
+      @active_slice.calculate_degree(S.displays[:overview], nil, false)
+      self.draw_detail_display(true)
+#      STDERR.puts ["after redraw:", zoom_level, @active_slice.length, @active_slice.from_pos, @active_slice.to_pos, @active_slice.start_degree, @active_slice.stop_degree].join("\t")
     end
     redraw
   end

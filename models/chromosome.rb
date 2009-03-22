@@ -4,6 +4,7 @@ class Chromosome
   attr_accessor :normalized_length, :normalized_centromere #to 360 TODO: move this to slice
   attr_accessor :bp_offset, :degree_offset # TODO: move this to slice
   attr_accessor :copy_numbers
+  attr_accessor :overview_slice
 
   def initialize(name, length, centr)
     @name, @length, @centromere = name, length, centr
@@ -19,10 +20,13 @@ class Chromosome
   end
 
   def slice(display)
-    offset = display.bp_length
+    offset = display.length_bp
     slice = Slice.new(self, 0, @length, display)
     slice.label = self.name
     slice.bp_offset = offset
+    if display == S.displays[:overview]
+      @overview_slice = slice
+    end
     return slice
   end
 
