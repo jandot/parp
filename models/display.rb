@@ -25,7 +25,9 @@ class Display
     # First get all readpairs and copy_numbers
     @readpairs = Array.new
     @copy_numbers = Array.new
+    @length_bp = 0
     @slices.each do |slice|
+      @length_bp += slice.length_bp
       readpairs = slice.reads.collect{|r| r.readpair}
       @readpairs.push(readpairs)
       @copy_numbers.push(slice.copy_numbers)
