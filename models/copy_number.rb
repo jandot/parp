@@ -3,8 +3,6 @@ class CopyNumber
   attr_accessor :as_string
   attr_accessor :start_degree, :stop_degree
   attr_accessor :slices
-  attr_accessor :visible
-
   def initialize(chr, start, stop, value)
     @chr = chr
     @start, @stop = start.to_i, stop.to_i
@@ -14,7 +12,6 @@ class CopyNumber
     @start_degree = Hash.new
     @stop_degree = Hash.new
     @slices = Hash.new
-    @visible = Hash.new
     S.copy_numbers.push(self)
   end
 

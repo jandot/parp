@@ -8,6 +8,7 @@ class Slice
   attr_accessor :label
   attr_accessor :formatted_position
   attr_accessor :copy_numbers
+  attr_accessor :segdups
 
   def initialize(chr, start_bp, stop_bp, display, label = '')
     @chr, @start_bp, @stop_bp, @display = chr, start_bp, stop_bp, display
@@ -27,6 +28,7 @@ class Slice
 
     self.fetch_reads(start_bp_string, stop_bp_string)
     self.fetch_copy_numbers(start_bp_string, stop_bp_string)
+    self.fetch_segdups(start_bp_string, stop_bp_string)
     
     @display.add_slice(self)
   end
@@ -42,6 +44,13 @@ class Slice
     @copy_numbers = CopyNumber.fetch_region(from_pos_string, to_pos_string)
     @copy_numbers.each do |copy_number|
       copy_number.slices[@display] = self
+    end
+  end
+
+  def fetch_segdups(from_pos_string, to_pos_string)
+    @segdups = SegDup.fetch_region(from_pos_string, to_pos_string)
+    @segdups.each do |segdup|
+      segdup.slices[@display] = self
     end
   end
 
@@ -95,5 +104,13 @@ class Slice
       end
       S.pline(copy_number.start_degree[display], copy_number.stop_degree[display], S.diameter - 60 + copy_number.value, 0, 0, :buffer => b)
     end
+
+    b.stroke 0,0,255,50
+    b.stroke_weight 1
+
+    @segdups.each do |segdup|
+      S.pline(segdup.start_degree[display], segdup.stop_degree[display], S.diameter + 10, 0, 0, :buffer => b)
+    end
+
   end
 end

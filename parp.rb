@@ -11,6 +11,7 @@ FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
 #FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/copy_number_segmented.txt'
 FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_segmented.txt'
+FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
 
 WIDTH = 1200
 HEIGHT = 600
@@ -35,7 +36,7 @@ class MySketch < Processing::App
   attr_accessor :active_slice
   attr_accessor :next_selection_label
   attr_accessor :min_qual, :max_qual, :qual_cutoff
-  attr_accessor :copy_numbers
+  attr_accessor :copy_numbers, :segdups
 
   def setup
     @diameter = 400
@@ -55,6 +56,7 @@ class MySketch < Processing::App
     self.load_chromosomes
     self.load_readpairs
     self.load_copy_numbers
+    self.load_segdups
 
     @qual_cutoff = ((@min_qual + @max_qual)/2).ceil
     
@@ -97,6 +99,15 @@ class MySketch < Processing::App
       @copy_numbers.push(CopyNumber.new(chr, start, stop, value))
     end
     @copy_numbers = @copy_numbers.sort_by{|cn| cn.as_string}
+  end
+
+  def load_segdups
+    @segdups = Array.new
+    File.open(FILE_SEGDUPS).each do |line|
+      chr, start, stop = line.chomp.split("\t")
+      @segdups.push(SegDup.new(chr, start, stop))
+    end
+    @segdups = @segdups.sort_by{|sd| sd.as_string}
   end
 
   def add_chromosomes_to_overview_display
@@ -348,11 +359,11 @@ class MySketch < Processing::App
       @displays[:detail].slices.each_with_index do |slice,i|
         slice_center = slice.start_bp + slice.length_bp/2
         if key == 'i'
-          slice.start_bp = [0, slice_center - (slice.length_bp/2).to_i + 10000000].max
-          slice.stop_bp = [slice_center + (slice.length_bp/2).to_i - 10000000, slice.chr.length].min
+          slice.start_bp = [0, slice_center - (slice.length_bp/4).to_i].max
+          slice.stop_bp = [slice_center + (slice.length_bp/4).to_i, slice.chr.length].min
         else
-          slice.start_bp = [0,slice_center - (slice.length_bp/2).to_i - 10000000].max
-          slice.stop_bp = [slice_center + (slice.length_bp/2).to_i + 10000000, slice.chr.length].min
+          slice.start_bp = [0,slice_center - (3*slice.length_bp/4).to_i].max
+          slice.stop_bp = [slice_center + (3*slice.length_bp/4).to_i, slice.chr.length].min
         end
         if slice.start_bp > slice.stop_bp
           slice.start_bp, slice.stop_bp = slice.stop_bp, slice.start_bp
@@ -366,6 +377,7 @@ class MySketch < Processing::App
         to_pos_string += '_' + slice.stop_bp.to_s.pad('0', 9)
         slice.fetch_reads(from_pos_string, to_pos_string)
         slice.fetch_copy_numbers(from_pos_string, to_pos_string)
+        slice.fetch_segdups(from_pos_string, to_pos_string)
       end
       self.draw_detail_display
       redraw

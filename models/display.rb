@@ -16,26 +16,26 @@ class Display
     slice.reads.each do |read|
       read.visible[self] = true
     end
-    slice.copy_numbers.each do |copy_number|
-      copy_number.visible[self] = true
-    end
   end
   
   def draw(b, dependent = true)
     # First get all readpairs and copy_numbers
     @readpairs = Array.new
     @copy_numbers = Array.new
+    @segdups = Array.new
     @length_bp = 0
     @slices.each do |slice|
       @length_bp += slice.length_bp
       readpairs = slice.reads.collect{|r| r.readpair}
       @readpairs.push(readpairs)
       @copy_numbers.push(slice.copy_numbers)
+      @segdups.push(slice.segdups)
     end
     @readpairs.flatten!
     @readpairs.uniq!
     @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < S.qual_cutoff}
     @copy_numbers.flatten!
+    @segdups.flatten!
 
     # calculate all degrees
     self.calculate_degrees(dependent)
@@ -62,6 +62,9 @@ class Display
     end
     @copy_numbers.each do |copy_number|
       copy_number.calculate_degree(self)
+    end
+    @segdups.each do |segdup|
+      segdup.calculate_degree(self)
     end
   end
 end
