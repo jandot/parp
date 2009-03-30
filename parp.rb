@@ -126,15 +126,10 @@ class MySketch < Processing::App
 
     #Selections
     no_stroke
-    stroke 50
-    i = 0
     @displays[:detail].slices.each do |s|
-#      STDERR.puts s.label + "\t" + s.start_degree[@displays[:overview]].to_s
-#      STDERR.puts s.label + "\t" + s.stop_degree[@displays[:overview]].to_s
-      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter+100 + i, width/4, height/2, :fill => color(0,0,255,50))
+      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter+100, width/4, height/2, :fill => color(0,0,255,50))
       fill 0
       text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, height/2))
-      i += 10
     end
 
     #Line following mouse
