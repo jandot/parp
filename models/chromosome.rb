@@ -1,4 +1,7 @@
 class Chromosome
+  class << self
+    attr_accessor :sketch
+  end
   attr_accessor :name, :length, :centromere
   attr_accessor :readpairs
   attr_accessor :normalized_length, :normalized_centromere #to 360 TODO: move this to slice
@@ -13,7 +16,7 @@ class Chromosome
     if @name == '1'
       @bp_offset, @degree_offset = 0, 0
     else
-      prev_chr = S.chromosomes[(@name.to_i - 1).to_s]
+      prev_chr = self.class.sketch.chromosomes[(@name.to_i - 1).to_s]
       @bp_offset = prev_chr.bp_offset + prev_chr.length
       @degree_offset = prev_chr.degree_offset + prev_chr.normalized_length
     end
@@ -24,7 +27,7 @@ class Chromosome
     slice = Slice.new(self, 0, @length, display)
     slice.label = self.name
     slice.bp_offset = offset
-    if display == S.displays[:overview]
+    if display == self.class.sketch.displays[:overview]
       @overview_slice = slice
     end
     return slice
@@ -38,13 +41,13 @@ class Chromosome
     else
       b.stroke 150
     end
-    S.pline(offset, offset + @normalized_length, S.diameter, 0, 0, :buffer => b)
+    self.class.sketch.pline(offset, offset + @normalized_length, self.class.sketch.diameter, 0, 0, :buffer => b)
 
     b.fill 0
     b.no_stroke
-    b.ellipse(S.cx(@normalized_centromere + offset, S.radius), S.cy(@normalized_centromere + offset, S.radius),5,5)
+    b.ellipse(self.class.sketch.cx(@normalized_centromere + offset, self.class.sketch.radius), self.class.sketch.cy(@normalized_centromere + offset, self.class.sketch.radius),5,5)
     b.text_align MySketch::CENTER
-    b.text(@name, S.cx(@normalized_centromere + offset, S.radius + 15), S.cy(@normalized_centromere + offset, S.radius + 15))
+    b.text(@name, self.class.sketch.cx(@normalized_centromere + offset, self.class.sketch.radius + 15), self.class.sketch.cy(@normalized_centromere + offset, self.class.sketch.radius + 15))
     b.text_align MySketch::LEFT
   end
 end

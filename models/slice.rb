@@ -1,4 +1,7 @@
 class Slice
+  class << self
+    attr_accessor :sketch
+  end
   attr_accessor :display #either :overview or :detail -> will know left or right
   attr_accessor :chr, :start_bp, :stop_bp
   attr_accessor :start_degree, :stop_degree
@@ -55,9 +58,9 @@ class Slice
   end
 
   def calculate_degree(display, i = nil, dependent = true)
-    @length_degree[display] = S.map(@length_bp, 0, display.length_bp, 0, 360)
+    @length_degree[display] = self.class.sketch.map(@length_bp, 0, display.length_bp, 0, 360)
     if i.nil?
-      @start_degree[S.displays[:overview]] = @chr.degree_offset + S.map(@start_bp, 0, @chr.length, 0, @chr.overview_slice.length_degree[S.displays[:overview]])
+      @start_degree[self.class.sketch.displays[:overview]] = @chr.degree_offset + self.class.sketch.map(@start_bp, 0, @chr.length, 0, @chr.overview_slice.length_degree[self.class.sketch.displays[:overview]])
     else
       if i == 0
         @bp_offset = 0
@@ -79,16 +82,16 @@ class Slice
     else
       b.stroke 150
     end
-    S.pline(@start_degree[display], @start_degree[display] + @length_degree[display], S.diameter, 0, 0, :buffer => b)
+    self.class.sketch.pline(@start_degree[display], @start_degree[display] + @length_degree[display], self.class.sketch.diameter, 0, 0, :buffer => b)
     b.stroke 0
     b.stroke_weight 1
-    b.line(S.cx(@start_degree[display], S.radius - 5), S.cy(@start_degree[display], S.radius - 5), S.cx(@start_degree[display], S.radius + 5), S.cy(@start_degree[display], S.radius + 5))
+    b.line(self.class.sketch.cx(@start_degree[display], self.class.sketch.radius - 5), self.class.sketch.cy(@start_degree[display], self.class.sketch.radius - 5), self.class.sketch.cx(@start_degree[display], self.class.sketch.radius + 5), self.class.sketch.cy(@start_degree[display], self.class.sketch.radius + 5))
 
     # Draw the label
     b.fill 0
     b.no_fill
     b.text_align MySketch::CENTER
-    b.text(@label, S.cx(@start_degree[display] + @length_degree[display]/2, S.radius + 15), S.cy(@start_degree[display] + @length_degree[display]/2, S.radius + 15))
+    b.text(@label, self.class.sketch.cx(@start_degree[display] + @length_degree[display]/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree[display] + @length_degree[display]/2, self.class.sketch.radius + 15))
     b.text_align MySketch::LEFT
 
     @copy_numbers.each do |copy_number|
@@ -102,14 +105,14 @@ class Slice
         b.stroke 0
         b.stroke_weight 0.5
       end
-      S.pline(copy_number.start_degree[display], copy_number.stop_degree[display], S.diameter - 60 + copy_number.value, 0, 0, :buffer => b)
+      self.class.sketch.pline(copy_number.start_degree[display], copy_number.stop_degree[display], self.class.sketch.diameter - 60 + copy_number.value, 0, 0, :buffer => b)
     end
 
     b.stroke 0,0,255,50
     b.stroke_weight 1
 
     @segdups.each do |segdup|
-      S.pline(segdup.start_degree[display], segdup.stop_degree[display], S.diameter + 10, 0, 0, :buffer => b)
+      self.class.sketch.pline(segdup.start_degree[display], segdup.stop_degree[display], self.class.sketch.diameter + 10, 0, 0, :buffer => b)
     end
 
   end

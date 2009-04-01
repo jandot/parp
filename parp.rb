@@ -53,6 +53,14 @@ class MySketch < Processing::App
     @f = create_font("Arial", 12)
     text_font @f
     
+    Chromosome.sketch = self
+    ReadPair.sketch = self
+    Read.sketch = self
+    SegDup.sketch = self
+    CopyNumber.sketch = self
+    Slice.sketch = self
+    Display.sketch = self
+
     self.load_chromosomes
     self.load_readpairs
     self.load_copy_numbers

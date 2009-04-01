@@ -1,4 +1,7 @@
 class Display
+  class << self
+    attr_accessor :sketch
+  end
   attr_accessor :name
   attr_accessor :origin_x, :origin_y
   attr_accessor :slices, :readpairs
@@ -33,7 +36,7 @@ class Display
     end
     @readpairs.flatten!
     @readpairs.uniq!
-    @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < S.qual_cutoff}
+    @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < self.class.sketch.qual_cutoff}
     @copy_numbers.flatten!
     @segdups.flatten!
 

@@ -1,4 +1,7 @@
 class ReadPair
+  class << self
+    attr_accessor :sketch
+  end
   attr_accessor :code, :qual
   attr_accessor :reads
   attr_accessor :normalized_bp_from, :normalized_bp_to
@@ -38,14 +41,14 @@ class ReadPair
         distance_from_circle = 80
         bezier_distance = 50
       end
-      b.bezier(S.cx(@reads[0].degree[display], S.radius - distance_from_circle),
-               S.cy(@reads[0].degree[display], S.radius - distance_from_circle),
-               S.cx(@reads[0].degree[display], S.radius - distance_from_circle - bezier_distance),
-               S.cy(@reads[0].degree[display], S.radius - distance_from_circle - bezier_distance),
-               S.cx(@reads[1].degree[display], S.radius - distance_from_circle - bezier_distance),
-               S.cy(@reads[1].degree[display], S.radius - distance_from_circle - bezier_distance),
-               S.cx(@reads[1].degree[display], S.radius - distance_from_circle),
-               S.cy(@reads[1].degree[display], S.radius - distance_from_circle))
+      b.bezier(self.class.sketch.cx(@reads[0].degree[display], self.class.sketch.radius - distance_from_circle),
+               self.class.sketch.cy(@reads[0].degree[display], self.class.sketch.radius - distance_from_circle),
+               self.class.sketch.cx(@reads[0].degree[display], self.class.sketch.radius - distance_from_circle - bezier_distance),
+               self.class.sketch.cy(@reads[0].degree[display], self.class.sketch.radius - distance_from_circle - bezier_distance),
+               self.class.sketch.cx(@reads[1].degree[display], self.class.sketch.radius - distance_from_circle - bezier_distance),
+               self.class.sketch.cy(@reads[1].degree[display], self.class.sketch.radius - distance_from_circle - bezier_distance),
+               self.class.sketch.cx(@reads[1].degree[display], self.class.sketch.radius - distance_from_circle),
+               self.class.sketch.cy(@reads[1].degree[display], self.class.sketch.radius - distance_from_circle))
     end
   end
 
