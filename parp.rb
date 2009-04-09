@@ -23,7 +23,7 @@ GENOME_SIZE = 3080419000
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 
 class MySketch < Processing::App
-  attr_accessor :f
+  attr_accessor :f, :big_f
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
   attr_accessor :creating_new_selection
@@ -52,6 +52,7 @@ class MySketch < Processing::App
 
     @f = create_font("Arial", 12)
     text_font @f
+    @big_f = create_font("Arial", 16)
     
     Chromosome.sketch = self
     ReadPair.sketch = self
@@ -130,7 +131,7 @@ class MySketch < Processing::App
     self.draw_information_display
     image(@image_overview,0,0)
     image(@image_detail, width/2, 0)
-    image(@image_information, width/2-100, 10)
+    image(@image_information, width/2-150, 10)
 
     #Selections
     no_stroke
@@ -183,14 +184,15 @@ class MySketch < Processing::App
   end
 
   def draw_information_display
-    buffer_information = buffer(200,200,JAVA2D) do |b|
-      b.background 220
-      b.text_font @f
+    buffer_information = buffer(300,120,JAVA2D) do |b|
+      b.background 255
       b.text_align LEFT
       b.smooth
 
       b.fill 0
+      b.text_font @big_f
       b.text "Mouse position: " + @formatted_position, 10, 10 + text_ascent
+      b.text_font @f
       b.text "Quality score cutoff: " + @qual_cutoff.to_s, 10, 10+2*(text_ascent+2)
       b.text "Active display: " + @active_display.name.to_s, 10, 10 + 3*(text_ascent+2)
       b.text "Selections:", 10, 10 + 4*(text_ascent+2)
