@@ -153,6 +153,15 @@ class MySketch < Processing::App
       pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
       fill 0
     end
+
+    text_font @big_f
+    fill 255, 200
+    no_stroke
+    rect mouse_x, mouse_y - text_ascent, text_width(@formatted_position) + 10, text_ascent + 10
+    fill 0
+    text @formatted_position, mouse_x + 5, mouse_y + 5
+    text_font @f
+
   end
 
   def draw_overview_display
@@ -190,17 +199,15 @@ class MySketch < Processing::App
       b.smooth
 
       b.fill 0
-      b.text_font @big_f
-      b.text "Mouse position: " + @formatted_position, 10, 10 + text_ascent
       b.text_font @f
-      b.text "Quality score cutoff: " + @qual_cutoff.to_s, 10, 10+2*(text_ascent+2)
-      b.text "Active display: " + @active_display.name.to_s, 10, 10 + 3*(text_ascent+2)
-      b.text "Selections:", 10, 10 + 4*(text_ascent+2)
+      b.text "Quality score cutoff: " + @qual_cutoff.to_s, 10, 10+text_ascent
+      b.text "Active display: " + @active_display.name.to_s, 10, 10 + 2*(text_ascent+2)
+      b.text "Selections:", 10, 10 + 3*(text_ascent+2)
       counter = 0
       @displays[:detail].slices.each do |slice|
         counter += 1
         b.text "  " + slice.label + ": " + slice.formatted_position[@displays[:detail]],
-          20, 10 + (4+counter)*(text_ascent+2)
+          20, 10 + (3+counter)*(text_ascent+2)
       end
     end
     @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
