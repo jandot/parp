@@ -33,7 +33,7 @@ class Slice
     self.fetch_copy_numbers(start_bp_string, stop_bp_string)
     self.fetch_segdups(start_bp_string, stop_bp_string)
     
-    @display.add_slice(self)
+    @display.slices.push(self)
   end
 
   def fetch_reads(from_pos_string, to_pos_string)

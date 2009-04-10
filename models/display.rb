@@ -13,13 +13,6 @@ class Display
     @slices = Array.new
     @length_bp = 0
   end
-
-  def add_slice(slice)
-    @slices.push(slice)
-    slice.reads.each do |read|
-      read.visible[self] = true
-    end
-  end
   
   def draw(b)
     # First get all readpairs and copy_numbers
