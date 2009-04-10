@@ -367,8 +367,11 @@ class MySketch < Processing::App
       self.draw_detail_display
       redraw
     elsif key_code
-      if key_code == UP or key_code == DOWN #zooming
-        if ( @active_display == @displays[:detail] )
+      if ( @active_display == @displays[:detail] )
+        if key_code == UP or key_code == DOWN #zooming
+#          # If I want to change zooming so that it focussed around position of mouse:
+#          under_mouse = self.calculate_position_under_mouse
+#          slice_center = under_mouse[1]
           slice_center = @active_slice.start_bp + @active_slice.length_bp/2
           if key_code == UP
             @active_slice.start_bp = [0, slice_center - (@active_slice.length_bp/4).to_i].max
@@ -380,18 +383,28 @@ class MySketch < Processing::App
           if @active_slice.start_bp > @active_slice.stop_bp
             @active_slice.start_bp, @active_slice.stop_bp = @active_slice.stop_bp, @active_slice.start_bp
           end
-          @active_slice.length_bp = @active_slice.stop_bp - @active_slice.start_bp
-          @active_slice.calculate_degree(S.displays[:overview], nil)
-
-          from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
-          from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
-          to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
-          to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
-          @active_slice.fetch_reads(from_pos_string, to_pos_string)
-          @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
-          @active_slice.fetch_segdups(from_pos_string, to_pos_string)
-          @active_slice.formatted_position[@active_display] = @active_slice.chr.name + ':' + @active_slice.start_bp.format + ".." + @active_slice.stop_bp.format
+        elsif key_code == LEFT or key_code == RIGHT #panning
+          step = ((@active_slice.stop_bp - @active_slice.start_bp).to_f/5).to_i
+          if key_code == LEFT #counterclockwise
+            @active_slice.start_bp = [0, @active_slice.start_bp - step].max
+            @active_slice.stop_bp -= step unless @active_slice.start_bp == 0
+          else #key_code == RIGHT -> clockwise
+            @active_slice.stop_bp = [@active_slice.stop_bp + step, @active_slice.chr.length].min
+            @active_slice.start_bp += step unless @active_slice.stop_bp == @active_slice.chr.length
+          end
         end
+        @active_slice.length_bp = @active_slice.stop_bp - @active_slice.start_bp
+        @active_slice.calculate_degree(S.displays[:overview], nil)
+
+        from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+        from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
+        to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+        to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
+        @active_slice.fetch_reads(from_pos_string, to_pos_string)
+        @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
+        @active_slice.fetch_segdups(from_pos_string, to_pos_string)
+        @active_slice.formatted_position[@active_display] = @active_slice.chr.name + ':' + @active_slice.start_bp.format + ".." + @active_slice.stop_bp.format
+
         self.draw_detail_display
         redraw
       end
