@@ -23,6 +23,7 @@ class Slice
     @start_degree = Hash.new
     @stop_degree = Hash.new
     @length_degree = Hash.new
+    @reads = Array.new
     
     start_bp_string = ( @chr.name.length == 1) ? '0' + @chr.name : @chr.name
     start_bp_string += '_' + @start_bp.to_s.pad('0', 9)
@@ -41,6 +42,9 @@ class Slice
   end
 
   def fetch_reads(from_pos_string, to_pos_string)
+    @reads.each do |read|
+      read.visible[@display] = false
+    end
     @reads = Read.fetch_region(from_pos_string, to_pos_string)
     @reads.each do |read|
       read.slices[@display] = self
