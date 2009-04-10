@@ -357,42 +357,44 @@ class MySketch < Processing::App
       @displays[:detail] = Display.new(:detail, width/4, height/2)
       self.draw_detail_display
       redraw
-    elsif key == 'i' or key == 'o' #zooming
-      if ( @active_display == @displays[:detail] )
-        slice_center = @active_slice.start_bp + @active_slice.length_bp/2
-        if key == 'i'
-          @active_slice.start_bp = [0, slice_center - (@active_slice.length_bp/4).to_i].max
-          @active_slice.stop_bp = [slice_center + (@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
-        else
-          @active_slice.start_bp = [0,slice_center - (3*@active_slice.length_bp/4).to_i].max
-          @active_slice.stop_bp = [slice_center + (3*@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
-        end
-        if @active_slice.start_bp > @active_slice.stop_bp
-          @active_slice.start_bp, @active_slice.stop_bp = @active_slice.stop_bp, @active_slice.start_bp
-        end
-        @active_slice.length_bp = @active_slice.stop_bp - @active_slice.start_bp
-        @active_slice.calculate_degree(S.displays[:overview], nil)
-
-        from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
-        from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
-        to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
-        to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
-        @active_slice.fetch_reads(from_pos_string, to_pos_string)
-        @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
-        @active_slice.fetch_segdups(from_pos_string, to_pos_string)
-        @active_slice.formatted_position[@active_display] = @active_slice.chr.name + ':' + @active_slice.start_bp.format + ".." + @active_slice.stop_bp.format
-      end
-      self.draw_detail_display
-      redraw
-    elsif key_code
-      if key_code == UP and @qual_cutoff < @max_qual
+    elsif key == 'i' or key == 'd' # Increase or Decrease
+      if key == 'i' and @qual_cutoff < @max_qual
         @qual_cutoff += 1
-      elsif key_code == DOWN and @qual_cutoff > @min_qual
+      elsif key == 'd' and @qual_cutoff > @min_qual
         @qual_cutoff -= 1
       end
       self.draw_overview_display
       self.draw_detail_display
       redraw
+    elsif key_code
+      if key_code == UP or key_code == DOWN #zooming
+        if ( @active_display == @displays[:detail] )
+          slice_center = @active_slice.start_bp + @active_slice.length_bp/2
+          if key_code == UP
+            @active_slice.start_bp = [0, slice_center - (@active_slice.length_bp/4).to_i].max
+            @active_slice.stop_bp = [slice_center + (@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
+          else
+            @active_slice.start_bp = [0,slice_center - (3*@active_slice.length_bp/4).to_i].max
+            @active_slice.stop_bp = [slice_center + (3*@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
+          end
+          if @active_slice.start_bp > @active_slice.stop_bp
+            @active_slice.start_bp, @active_slice.stop_bp = @active_slice.stop_bp, @active_slice.start_bp
+          end
+          @active_slice.length_bp = @active_slice.stop_bp - @active_slice.start_bp
+          @active_slice.calculate_degree(S.displays[:overview], nil)
+
+          from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+          from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
+          to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+          to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
+          @active_slice.fetch_reads(from_pos_string, to_pos_string)
+          @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
+          @active_slice.fetch_segdups(from_pos_string, to_pos_string)
+          @active_slice.formatted_position[@active_display] = @active_slice.chr.name + ':' + @active_slice.start_bp.format + ".." + @active_slice.stop_bp.format
+        end
+        self.draw_detail_display
+        redraw
+      end
     end
   end
 end
