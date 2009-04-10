@@ -228,12 +228,6 @@ class MySketch < Processing::App
       fill args[:fill]
     end
     if args[:buffer].nil?
-#      STDERR.puts '-------------'
-#      STDERR.puts origin_x
-#      STDERR.puts origin_y
-#      STDERR.puts r
-#      STDERR.puts alpha1
-#      STDERR.puts alpha2
       return arc origin_x, origin_y, r, r, MySketch.radians(alpha1), MySketch.radians(alpha2)
     else
       return args[:buffer].arc origin_x, origin_y, r, r, MySketch.radians(alpha1), MySketch.radians(alpha2)
@@ -260,19 +254,15 @@ class MySketch < Processing::App
 
   def calculate_position_under_mouse
     a = angle(mouse_x, mouse_y, @origin_x, @origin_y)
-    b = map(a, 0, 360, 0, @active_display.length_bp)
 
-    running_position = 0
     @active_display.slices.each do |slice|
-      running_position += slice.length_bp
-      if running_position >= b
+      if a >= slice.start_degree[@active_display] and a < slice.stop_degree[@active_display]
         @active_slice = slice
-        break
       end
     end
 
     chromosome_under_mouse = @active_slice.chr
-    pos_under_mouse = (b - @active_slice.bp_offset + @active_slice.start_bp).to_i
+    pos_under_mouse = map(a, @active_slice.start_degree[@active_display], @active_slice.stop_degree[@active_display], @active_slice.start_bp, @active_slice.stop_bp).to_i
 
     return [chromosome_under_mouse, pos_under_mouse]
   end
@@ -390,6 +380,7 @@ class MySketch < Processing::App
         @active_slice.fetch_reads(from_pos_string, to_pos_string)
         @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
         @active_slice.fetch_segdups(from_pos_string, to_pos_string)
+        @active_slice.formatted_position[@active_display] = @active_slice.chr.name + ':' + @active_slice.start_bp.format + ".." + @active_slice.stop_bp.format
       end
       self.draw_detail_display
       redraw
