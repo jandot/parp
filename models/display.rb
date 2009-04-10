@@ -49,9 +49,9 @@ class Display
 
   def calculate_degrees
     # Caution: this resets the zoomlevel of all slices to be the same
-    @slices.each_with_index do |slice, i|
-      slice.calculate_degree(self, i)
-    end
+#    @slices.each_with_index do |slice, i|
+#      slice.calculate_degree(self, i)
+#    end
     @readpairs.each do |readpair|
       readpair.reads[0].calculate_degree(self)
       readpair.reads[1].calculate_degree(self)

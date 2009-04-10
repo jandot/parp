@@ -34,6 +34,10 @@ class Slice
     self.fetch_segdups(start_bp_string, stop_bp_string)
     
     @display.slices.push(self)
+
+    @display.slices.each_with_index do |s, i|
+      s.calculate_degree(@display, i)
+    end
   end
 
   def fetch_reads(from_pos_string, to_pos_string)
