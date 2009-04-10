@@ -44,6 +44,7 @@ class Slice
     @reads = Read.fetch_region(from_pos_string, to_pos_string)
     @reads.each do |read|
       read.slices[@display] = self
+      read.visible[@display] = true
     end
   end
 
