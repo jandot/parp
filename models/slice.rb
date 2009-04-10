@@ -57,7 +57,7 @@ class Slice
     end
   end
 
-  def calculate_degree(display, i = nil, dependent = true)
+  def calculate_degree(display, i = nil)
     @length_degree[display] = self.class.sketch.map(@length_bp, 0, display.length_bp, 0, 360)
     if i.nil?
       @start_degree[self.class.sketch.displays[:overview]] = @chr.degree_offset + self.class.sketch.map(@start_bp, 0, @chr.length, 0, @chr.overview_slice.length_degree[self.class.sketch.displays[:overview]])

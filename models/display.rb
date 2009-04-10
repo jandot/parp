@@ -21,7 +21,7 @@ class Display
     end
   end
   
-  def draw(b, dependent = true)
+  def draw(b)
     # First get all readpairs and copy_numbers
     @readpairs = Array.new
     @copy_numbers = Array.new
@@ -41,7 +41,7 @@ class Display
     @segdups.flatten!
 
     # calculate all degrees
-    self.calculate_degrees(dependent)
+    self.calculate_degrees
 
     # and finally draw
     @slices.each_with_index do |slice, i|
@@ -54,10 +54,10 @@ class Display
     end
   end
 
-  def calculate_degrees(dependent = true)
+  def calculate_degrees
     # Caution: this resets the zoomlevel of all slices to be the same
     @slices.each_with_index do |slice, i|
-      slice.calculate_degree(self, i, dependent)
+      slice.calculate_degree(self, i)
     end
     @readpairs.each do |readpair|
       readpair.reads[0].calculate_degree(self)

@@ -381,7 +381,7 @@ class MySketch < Processing::App
           slice.start_bp, slice.stop_bp = slice.stop_bp, slice.start_bp
         end
         slice.length_bp = slice.stop_bp - slice.start_bp
-        slice.calculate_degree(S.displays[:overview], nil, false)
+        slice.calculate_degree(S.displays[:overview], nil)
 
         from_pos_string = ( slice.chr.name.length == 1) ? '0' + slice.chr.name : slice.chr.name
         from_pos_string += '_' + slice.start_bp.to_s.pad('0', 9)
