@@ -368,28 +368,28 @@ class MySketch < Processing::App
       self.draw_detail_display
       redraw
     elsif key == 'i' or key == 'o' #zooming
-      @displays[:detail].slices.each_with_index do |slice,i|
-        slice_center = slice.start_bp + slice.length_bp/2
+      if ( @active_display == @displays[:detail] )
+        slice_center = @active_slice.start_bp + @active_slice.length_bp/2
         if key == 'i'
-          slice.start_bp = [0, slice_center - (slice.length_bp/4).to_i].max
-          slice.stop_bp = [slice_center + (slice.length_bp/4).to_i, slice.chr.length].min
+          @active_slice.start_bp = [0, slice_center - (@active_slice.length_bp/4).to_i].max
+          @active_slice.stop_bp = [slice_center + (@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
         else
-          slice.start_bp = [0,slice_center - (3*slice.length_bp/4).to_i].max
-          slice.stop_bp = [slice_center + (3*slice.length_bp/4).to_i, slice.chr.length].min
+          @active_slice.start_bp = [0,slice_center - (3*@active_slice.length_bp/4).to_i].max
+          @active_slice.stop_bp = [slice_center + (3*@active_slice.length_bp/4).to_i, @active_slice.chr.length].min
         end
-        if slice.start_bp > slice.stop_bp
-          slice.start_bp, slice.stop_bp = slice.stop_bp, slice.start_bp
+        if @active_slice.start_bp > @active_slice.stop_bp
+          @active_slice.start_bp, @active_slice.stop_bp = @active_slice.stop_bp, @active_slice.start_bp
         end
-        slice.length_bp = slice.stop_bp - slice.start_bp
-        slice.calculate_degree(S.displays[:overview], nil)
+        @active_slice.length_bp = @active_slice.stop_bp - @active_slice.start_bp
+        @active_slice.calculate_degree(S.displays[:overview], nil)
 
-        from_pos_string = ( slice.chr.name.length == 1) ? '0' + slice.chr.name : slice.chr.name
-        from_pos_string += '_' + slice.start_bp.to_s.pad('0', 9)
-        to_pos_string = ( slice.chr.name.length == 1) ? '0' + slice.chr.name : slice.chr.name
-        to_pos_string += '_' + slice.stop_bp.to_s.pad('0', 9)
-        slice.fetch_reads(from_pos_string, to_pos_string)
-        slice.fetch_copy_numbers(from_pos_string, to_pos_string)
-        slice.fetch_segdups(from_pos_string, to_pos_string)
+        from_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+        from_pos_string += '_' + @active_slice.start_bp.to_s.pad('0', 9)
+        to_pos_string = ( @active_slice.chr.name.length == 1) ? '0' + @active_slice.chr.name : @active_slice.chr.name
+        to_pos_string += '_' + @active_slice.stop_bp.to_s.pad('0', 9)
+        @active_slice.fetch_reads(from_pos_string, to_pos_string)
+        @active_slice.fetch_copy_numbers(from_pos_string, to_pos_string)
+        @active_slice.fetch_segdups(from_pos_string, to_pos_string)
       end
       self.draw_detail_display
       redraw
