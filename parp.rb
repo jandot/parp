@@ -18,8 +18,6 @@ FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
 WIDTH = 1280
 HEIGHT = 800
 
-SPACER = 20000000 # spacer in bp between chromosomes and sections
-
 GENOME_SIZE = 3080419000
 
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
