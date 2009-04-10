@@ -13,8 +13,10 @@ FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO
 FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_segmented.txt'
 FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
 
-WIDTH = 1200
-HEIGHT = 600
+#WIDTH = 1200
+#HEIGHT = 600
+WIDTH = 1280
+HEIGHT = 800
 
 SPACER = 20000000 # spacer in bp between chromosomes and sections
 
@@ -39,7 +41,7 @@ class MySketch < Processing::App
   attr_accessor :copy_numbers, :segdups
 
   def setup
-    @diameter = 400
+    @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
     
     @origin_x = width/4
