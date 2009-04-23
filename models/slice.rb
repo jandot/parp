@@ -6,6 +6,7 @@ class Slice
   attr_accessor :chr, :start_bp, :stop_bp
   attr_accessor :start_degree, :stop_degree
   attr_accessor :length_bp, :length_degree
+  attr_accessor :resolution #bp/degree
   attr_accessor :bp_offset
   attr_accessor :reads
   attr_accessor :label
@@ -24,6 +25,7 @@ class Slice
     @stop_degree = Hash.new
     @length_degree = Hash.new
     @reads = Array.new
+    @resolution = Hash.new
     
     start_bp_string = ( @chr.name.length == 1) ? '0' + @chr.name : @chr.name
     start_bp_string += '_' + @start_bp.to_s.pad('0', 9)
@@ -83,13 +85,19 @@ class Slice
   end
   
   def draw(b, display, index = 0)
+    @resolution[display] = @length_bp.to_f/@length_degree[display]
+
     # Draw the curve
     b.no_fill
     b.stroke_weight 3
-    if index % 2 == 0
-      b.stroke 0
+    if display == self.class.sketch.displays[:overview]
+      if index % 2 == 0
+        b.stroke 0
+      else
+        b.stroke 150
+      end
     else
-      b.stroke 150
+      b.stroke self.class.sketch.map(@resolution[display], 100000, 100, 0, 200)
     end
     self.class.sketch.pline(@start_degree[display], @start_degree[display] + @length_degree[display], self.class.sketch.diameter, 0, 0, :buffer => b)
     b.stroke 0
