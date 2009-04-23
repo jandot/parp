@@ -89,15 +89,16 @@ class Slice
 
     # Draw the curve
     b.no_fill
-    b.stroke_weight 3
     if display == self.class.sketch.displays[:overview]
+      b.stroke_weight 3
       if index % 2 == 0
         b.stroke 0
       else
         b.stroke 150
       end
     else
-      b.stroke self.class.sketch.map(@resolution[display], 100000, 100, 0, 200)
+      b.stroke_weight [self.class.sketch.map(@resolution[display], 100, 1000000, 1, 10), 1].max
+      b.stroke self.class.sketch.map(@resolution[display], 100, 1000000, 200, 0)
     end
     self.class.sketch.pline(@start_degree[display], @start_degree[display] + @length_degree[display], self.class.sketch.diameter, 0, 0, :buffer => b)
     b.stroke 0
