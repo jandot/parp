@@ -169,6 +169,7 @@ class MySketch < Processing::App
       b.background 255
       b.text_font @f
       b.text_align CENTER
+      b.stroke_cap MySketch::SQUARE
       b.smooth
 
       b.translate(self.width.to_f/4, self.height.to_f/2)
@@ -183,6 +184,7 @@ class MySketch < Processing::App
       b.background 255
       b.text_font @f
       b.text_align CENTER
+      b.stroke_cap MySketch::SQUARE
       b.smooth
 
       b.translate(self.width.to_f/4, self.height.to_f/2)
