@@ -95,6 +95,10 @@ class Slice
     b.stroke 0
     b.stroke_weight 1
     b.line(self.class.sketch.cx(@start_degree[display], self.class.sketch.radius - 5), self.class.sketch.cy(@start_degree[display], self.class.sketch.radius - 5), self.class.sketch.cx(@start_degree[display], self.class.sketch.radius + 5), self.class.sketch.cy(@start_degree[display], self.class.sketch.radius + 5))
+    if display == self.class.sketch.displays[:detail]
+      b.stroke 200
+      b.line(0,0, self.class.sketch.cx(@start_degree[display], self.class.sketch.radius + 5), self.class.sketch.cy(@start_degree[display], self.class.sketch.radius + 5))
+    end
 
     # Draw the label
     b.fill 0
