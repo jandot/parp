@@ -53,6 +53,11 @@ class ReadPair
   end
 
   def visible(display)
+    return false if ( @code == 'DIST' and !self.class.sketch.show_dist )
+    return false if ( @code == 'FF' and !self.class.sketch.show_ff )
+    return false if ( @code == 'RF' and !self.class.sketch.show_rf )
+    return false if ( @code == 'RR' and !self.class.sketch.show_rr )
+
     if @reads[0].visible[display] and @reads[1].visible[display]
       return true
     else

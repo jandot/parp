@@ -27,7 +27,7 @@ class MySketch < Processing::App
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
   attr_accessor :creating_new_selection
-  attr_accessor :image_overview, :image_detail, :image_information
+  attr_accessor :image_overview, :image_detail, :image_information, :image_toggles
   attr_accessor :selection_start_degree, :selection_start
   attr_accessor :active_display, :origin_x, :origin_y
   attr_accessor :chromosome_under_mouse, :pos_under_mouse
@@ -37,6 +37,7 @@ class MySketch < Processing::App
   attr_accessor :next_selection_label
   attr_accessor :min_qual, :max_qual, :qual_cutoff
   attr_accessor :copy_numbers, :segdups
+  attr_accessor :show_dist, :show_ff, :show_rf, :show_rr
 
   def setup
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
@@ -49,6 +50,11 @@ class MySketch < Processing::App
     @displays = Hash.new
     @selections = Array.new
     @next_selection_label = 'A'
+
+    @show_dist = true
+    @show_ff = true
+    @show_rf = true
+    @show_rr = true
 
     @f = create_font("Arial", 12)
     text_font @f
@@ -74,6 +80,7 @@ class MySketch < Processing::App
     self.add_chromosomes_to_overview_display
     self.draw_overview_display
     self.draw_detail_display
+    self.draw_toggles_display
 
     @active_display = @displays[:overview]
     smooth
@@ -132,6 +139,7 @@ class MySketch < Processing::App
     image(@image_overview,0,0)
     image(@image_detail, width/2, 0)
     image(@image_information, width/2-150, 10)
+    image(@image_toggles, width-200, 10)
 
     #Selections
     no_stroke
@@ -213,6 +221,23 @@ class MySketch < Processing::App
       end
     end
     @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
+  end
+
+  def draw_toggles_display
+    buffer_toggles = buffer(100, 100, JAVA2D) do |b|
+      b.background 255
+      b.text_align LEFT
+      b.smooth
+
+      b.fill 0
+      b.text_font @f
+      b.text "Readpairs shown:", 10, 10+text_ascent
+      b.text "DIST - " + @show_dist.to_s, 10, 10+2*(text_ascent+2)
+      b.text "FF - " + @show_ff.to_s, 10, 10+3*(text_ascent+2)
+      b.text "RF - " + @show_rf.to_s, 10, 10+4*(text_ascent+2)
+      b.text "RR - " + @show_rr.to_s, 10, 10+5*(text_ascent+2)
+    end
+    @image_toggles = buffer_toggles.get(0,0,buffer_toggles.width, buffer_toggles.height)
   end
 
   # cx is the x coordinate for a point on a circle
@@ -367,6 +392,20 @@ class MySketch < Processing::App
       end
       self.draw_overview_display
       self.draw_detail_display
+      redraw
+    elsif key == '1' or key == '2' or key == '3' or key == '4'
+      if key == '1'
+        @show_dist = !@show_dist
+      elsif key == '2'
+        @show_ff = !@show_ff
+      elsif key == '3'
+        @show_rf = !@show_rf
+      elsif key == '4'
+        @show_rr = !@show_rr
+      end
+      self.draw_overview_display
+      self.draw_detail_display
+      self.draw_toggles_display
       redraw
     elsif key_code
       if ( @active_display == @displays[:detail] )
