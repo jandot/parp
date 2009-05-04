@@ -21,9 +21,9 @@ class ReadPair
   def draw(b, display)
     if self.visible(display)
       b.no_fill
-        b.stroke 200
+      b.stroke 200
       if @code == 'DIST'
-        b.stroke 255,0,0,200
+        b.stroke 255,0,0,self.class.sketch.controls[:opacity].value
       elsif @code == 'FF'
         b.stroke 0,0,255,200
       elsif @code == 'RF'
@@ -53,10 +53,10 @@ class ReadPair
   end
 
   def visible(display)
-    return false if ( @code == 'DIST' and !self.class.sketch.show_dist )
-    return false if ( @code == 'FF' and !self.class.sketch.show_ff )
-    return false if ( @code == 'RF' and !self.class.sketch.show_rf )
-    return false if ( @code == 'RR' and !self.class.sketch.show_rr )
+    return false if ( @code == 'DIST' and !self.class.sketch.controls[:show_dist].value )
+    return false if ( @code == 'FF' and !self.class.sketch.controls[:show_ff].value )
+    return false if ( @code == 'RF' and !self.class.sketch.controls[:show_rf].value )
+    return false if ( @code == 'RR' and !self.class.sketch.controls[:show_rr].value )
 
     if @reads[0].visible[display] and @reads[1].visible[display]
       return true

@@ -27,7 +27,7 @@ class MySketch < Processing::App
   attr_accessor :chromosomes, :readpairs, :reads
   attr_accessor :radius, :diameter
   attr_accessor :creating_new_selection
-  attr_accessor :image_overview, :image_detail, :image_information, :image_toggles
+  attr_accessor :image_overview, :image_detail, :image_information, :image_controls
   attr_accessor :selection_start_degree, :selection_start
   attr_accessor :active_display, :origin_x, :origin_y
   attr_accessor :chromosome_under_mouse, :pos_under_mouse
@@ -35,9 +35,9 @@ class MySketch < Processing::App
   attr_accessor :displays, :selections
   attr_accessor :active_slice
   attr_accessor :next_selection_label
-  attr_accessor :min_qual, :max_qual, :qual_cutoff
+  attr_accessor :min_qual, :max_qual
   attr_accessor :copy_numbers, :segdups
-  attr_accessor :show_dist, :show_ff, :show_rf, :show_rr
+  attr_accessor :controls
 
   def setup
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
@@ -51,10 +51,7 @@ class MySketch < Processing::App
     @selections = Array.new
     @next_selection_label = 'A'
 
-    @show_dist = true
-    @show_ff = true
-    @show_rf = true
-    @show_rr = true
+    @controls = Hash.new
 
     @f = create_font("Arial", 12)
     text_font @f
@@ -67,24 +64,35 @@ class MySketch < Processing::App
     CopyNumber.sketch = self
     Slice.sketch = self
     Display.sketch = self
+    Slider.sketch = self
+    Toggle.sketch = self
 
     self.load_chromosomes
     self.load_readpairs
     self.load_copy_numbers
     self.load_segdups
 
-    @qual_cutoff = ((@min_qual + @max_qual)/2).ceil
-    
+    self.initialize_controls
+
     @displays[:overview] = Display.new(:overview, width/4, height/2)
     @displays[:detail] = Display.new(:detail, width/4, height/2)
     self.add_chromosomes_to_overview_display
     self.draw_overview_display
     self.draw_detail_display
-    self.draw_toggles_display
+    self.draw_controls_display
 
     @active_display = @displays[:overview]
     smooth
     no_loop
+  end
+
+  def initialize_controls
+    @controls[:qual_cutoff] = Slider.new('Qualscore cutoff: ', ((@min_qual + @max_qual)/2).ceil, @min_qual, @max_qual)
+    @controls[:opacity] = Slider.new('Opacity: ', 150, 0, 255)
+    @controls[:show_dist] = Toggle.new('DIST', true)
+    @controls[:show_ff] = Toggle.new('FF', true)
+    @controls[:show_rf] = Toggle.new('RF', true)
+    @controls[:show_rr] = Toggle.new('RR', true)
   end
 
   def load_chromosomes
@@ -139,14 +147,14 @@ class MySketch < Processing::App
     image(@image_overview,0,0)
     image(@image_detail, width/2, 0)
     image(@image_information, width/2-150, 10)
-    image(@image_toggles, width-200, 10)
+    image(@image_controls, 0, height - 20)
 
     #Selections
     no_stroke
     @displays[:detail].slices.each do |s|
-      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter+100, width/4, height/2, :fill => color(0,0,255,50))
+      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter*1.1, width/4, height/2, :fill => color(0,0,255,50))
       fill 0
-      text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, height/2))
+      text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius*1.1+10, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius*1.1+10, height/2))
     end
 
     #Selection being drawn (green)
@@ -154,14 +162,14 @@ class MySketch < Processing::App
       fill 0,255,0,50
       no_stroke
       start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
-      pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
+      pline(start_degree, stop_degree, @diameter*1.1, @origin_x, @origin_y, :fill => color(0,255,0,50))
       fill 0
     end
 
     #Line following mouse
-    if dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius + 50
+    if dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius*1.1
       stroke 100
-      line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
+      line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius*1.1, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius*1.1, @origin_y)
       text_font @big_f
       fill 255, 200
       no_stroke
@@ -210,7 +218,7 @@ class MySketch < Processing::App
 
       b.fill 0
       b.text_font @f
-      b.text "Quality score cutoff: " + @qual_cutoff.to_s, 10, 10+text_ascent
+      b.text "Quality score cutoff: " + @controls[:qual_cutoff].value.to_s, 10, 10+text_ascent
       b.text "Active display: " + @active_display.name.to_s, 10, 10 + 2*(text_ascent+2)
       b.text "Selections:", 10, 10 + 3*(text_ascent+2)
       counter = 0
@@ -223,21 +231,28 @@ class MySketch < Processing::App
     @image_information = buffer_information.get(0,0,buffer_information.width, buffer_information.height)
   end
 
-  def draw_toggles_display
-    buffer_toggles = buffer(100, 100, JAVA2D) do |b|
+  def draw_controls_display
+    buffer_controls = buffer(width, 20, JAVA2D) do |b|
       b.background 255
       b.text_align LEFT
       b.smooth
 
       b.fill 0
+      b.stroke 0
       b.text_font @f
-      b.text "Readpairs shown:", 10, 10+text_ascent
-      b.text "DIST - " + @show_dist.to_s, 10, 10+2*(text_ascent+2)
-      b.text "FF - " + @show_ff.to_s, 10, 10+3*(text_ascent+2)
-      b.text "RF - " + @show_rf.to_s, 10, 10+4*(text_ascent+2)
-      b.text "RR - " + @show_rr.to_s, 10, 10+5*(text_ascent+2)
+
+      offset = 5
+      @controls.keys.each do |key|
+        @controls[key].draw(b, offset)
+        if @controls[key].class == Slider
+          offset += @controls[key].line_stop + 20
+        else
+          offset += text_width(@controls[key].text) + 20
+        end
+      end
+      b.fill 0
     end
-    @image_toggles = buffer_toggles.get(0,0,buffer_toggles.width, buffer_toggles.height)
+    @image_controls = buffer_controls.get(0,0,buffer_controls.width, buffer_controls.height)
   end
 
   # cx is the x coordinate for a point on a circle
@@ -309,6 +324,25 @@ class MySketch < Processing::App
       @dragging_start_degree = angle(mouse_x, mouse_y, @origin_x, @origin_y)
       @dragging_start_radius = dist(mouse_x, mouse_y, @origin_x, @origin_y)
     end
+
+    control_changed = false
+    @controls.keys.each do |key|
+      if @controls[key].under_mouse?
+        if @controls[key].class == Slider
+          @controls[key].value = map(mouse_x, @controls[key].x1, @controls[key].x2, @controls[key].min, @controls[key].max).to_i
+        else
+          @controls[key].toggle
+        end
+        control_changed = true
+      end
+    end
+
+    if control_changed
+      self.draw_overview_display
+      self.draw_detail_display
+      self.draw_controls_display
+      redraw
+    end
   end
 
   def mouse_moved
@@ -319,6 +353,7 @@ class MySketch < Processing::App
       @origin_x = 3*width/4
     end
 
+    # To update the bp postions in the information display
     if @active_display == @displays[:overview] or ( @active_display == @displays[:detail] and @active_display.slices.length > 0 )
       under_mouse = self.calculate_position_under_mouse
       @chromosome_under_mouse = under_mouse[0]
@@ -330,7 +365,7 @@ class MySketch < Processing::App
 
   def mouse_dragged
     under_mouse = self.calculate_position_under_mouse
-    if @active_display == @displays[:overview]
+    if @active_display == @displays[:overview] and dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius*1.1
       @creating_new_selection = true
       @chromosome_under_mouse = under_mouse[0]
       @pos_under_mouse = under_mouse[1]
@@ -341,7 +376,7 @@ class MySketch < Processing::App
 
   def mouse_released
     under_mouse = self.calculate_position_under_mouse
-    if @active_display == @displays[:overview]
+    if @active_display == @displays[:overview] and dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius*1.1
       under_mouse = self.calculate_position_under_mouse
       start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
       start_pos, stop_pos = [@selection_start_pos, under_mouse[1]].sort
@@ -395,13 +430,13 @@ class MySketch < Processing::App
       redraw
     elsif key == '1' or key == '2' or key == '3' or key == '4'
       if key == '1'
-        @show_dist = !@show_dist
+        @controls[:show_dist].value = !@controls[:show_dist].value
       elsif key == '2'
-        @show_ff = !@show_ff
+        @controls[:show_ff].value = !@controls[:show_ff].value
       elsif key == '3'
-        @show_rf = !@show_rf
+        @controls[:show_rf].value = !@controls[:show_rf].value
       elsif key == '4'
-        @show_rr = !@show_rr
+        @controls[:show_rr].value = !@controls[:show_rr].value
       end
       self.draw_overview_display
       self.draw_detail_display

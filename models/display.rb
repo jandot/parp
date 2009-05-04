@@ -6,12 +6,14 @@ class Display
   attr_accessor :origin_x, :origin_y
   attr_accessor :slices, :readpairs
   attr_accessor :length_bp, :scale
+#  attr_accessor :dist_alpha
 
   def initialize(name, origin_x, origin_y)
     @name = name
     @origin_x, @origin_y = origin_x, origin_y
     @slices = Array.new
     @length_bp = 0
+#    @dist_alpha = 255
   end
   
   def draw(b)
@@ -27,7 +29,7 @@ class Display
     end
     @readpairs.flatten!
     @readpairs.uniq!
-    @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < self.class.sketch.qual_cutoff}
+    @readpairs.reject!{|rp| !rp.visible(self) or rp.qual < self.class.sketch.controls[:qual_cutoff].value}
     @copy_numbers.flatten!
     @segdups.flatten!
 
