@@ -150,9 +150,16 @@ class MySketch < Processing::App
     image(@image_controls, 0, height - 20)
 
     #Selections
-    no_stroke
     @displays[:detail].slices.each do |s|
-      pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter*1.1, width/4, height/2, :fill => color(0,0,255,50))
+      if s.stop_degree[@displays[:overview]] - s.start_degree[@displays[:overview]] >= 1
+        no_stroke
+        pline(s.start_degree[@displays[:overview]], s.stop_degree[@displays[:overview]], @diameter*1.1, @displays[:overview].origin_x, @displays[:overview].origin_y, :fill => color(0,0,255,50))
+      else
+        point_on_circle = [cx(s.start_degree[@displays[:overview]],@radius,width/4).to_i, cy(s.start_degree[@displays[:overview]],@radius,height/2).to_i]
+        stroke 0,0,255,50
+        line(@displays[:overview].origin_x, @displays[:overview].origin_y, point_on_circle[0], point_on_circle[1])
+        pline(s.start_degree[@displays[:overview]] - 10, s.start_degree[@displays[:overview]] + 10, 50, point_on_circle[0], point_on_circle[1], :fill => color(0,0,255,50))
+      end
       fill 0
       text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius*1.1+10, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius*1.1+10, height/2))
     end
