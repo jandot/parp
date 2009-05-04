@@ -150,8 +150,17 @@ class MySketch < Processing::App
     end
 
     #Line following mouse
-    stroke 100
-    line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
+    if dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius + 50
+      stroke 100
+      line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius + 50, @origin_y)
+      text_font @big_f
+      fill 255, 200
+      no_stroke
+      rect mouse_x, mouse_y - text_ascent, text_width(@formatted_position) + 10, text_ascent + 10
+      fill 0
+      text @formatted_position, mouse_x + 5, mouse_y + 5
+      text_font @f
+    end
 
     #Selection being drawn (green)
     if @creating_new_selection
@@ -161,15 +170,6 @@ class MySketch < Processing::App
       pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
       fill 0
     end
-
-    text_font @big_f
-    fill 255, 200
-    no_stroke
-    rect mouse_x, mouse_y - text_ascent, text_width(@formatted_position) + 10, text_ascent + 10
-    fill 0
-    text @formatted_position, mouse_x + 5, mouse_y + 5
-    text_font @f
-
   end
 
   def draw_overview_display
