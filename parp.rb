@@ -149,6 +149,15 @@ class MySketch < Processing::App
       text(s.label, cx((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, width/4), cy((s.start_degree[@displays[:overview]]+s.stop_degree[@displays[:overview]]).to_f/2, @radius + 60, height/2))
     end
 
+    #Selection being drawn (green)
+    if @creating_new_selection
+      fill 0,255,0,50
+      no_stroke
+      start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
+      pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
+      fill 0
+    end
+
     #Line following mouse
     if dist(@origin_x, @origin_y, mouse_x, mouse_y) < @radius + 50
       stroke 100
@@ -160,15 +169,6 @@ class MySketch < Processing::App
       fill 0
       text @formatted_position, mouse_x + 5, mouse_y + 5
       text_font @f
-    end
-
-    #Selection being drawn (green)
-    if @creating_new_selection
-      fill 0,255,0,50
-      no_stroke
-      start_degree, stop_degree = [@selection_start_degree, angle(mouse_x, mouse_y, @origin_x, @origin_y)].sort
-      pline(start_degree, stop_degree, @diameter+100, @origin_x, @origin_y, :fill => color(0,255,0,50))
-      fill 0
     end
   end
 
