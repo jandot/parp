@@ -1,4 +1,6 @@
 class Read
+  include IsLocus
+  
   class << self
     attr_accessor :sketch
   end
@@ -31,10 +33,6 @@ class Read
   def self.get_index(value)
     return self.sketch.reads.collect{|r| r.as_string}.bsearch_lower_boundary{|x| x <=> value}
 #    return @sketch.reads.collect{|r| r.as_string}.binary_search(value, direction)
-  end
-
-  def calculate_degree(display)
-    @degree[display] = self.class.sketch.map(@pos, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])
   end
 
   def to_s

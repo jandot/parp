@@ -1,12 +1,14 @@
 class CopyNumber
+  include IsLocus
+  
   class << self
     attr_accessor :sketch
   end
-  attr_accessor :sketch
   attr_accessor :chr, :start, :stop, :original_value, :value
   attr_accessor :as_string
   attr_accessor :start_degree, :stop_degree
   attr_accessor :slices
+  
   def initialize(chr, start, stop, value)
     @chr = chr
     @start, @stop = start.to_i, stop.to_i
@@ -31,11 +33,6 @@ class CopyNumber
 
   def self.get_index(value)
     return self.sketch.copy_numbers.collect{|r| r.as_string}.bsearch_lower_boundary{|x| x <=> value}
-  end
-
-  def calculate_degree(display)
-    @start_degree[display] = [@slices[display].start_degree[display], self.class.sketch.map(@start, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].max
-    @stop_degree[display] = [@slices[display].stop_degree[display], self.class.sketch.map(@stop, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].min
   end
 
   def to_s
