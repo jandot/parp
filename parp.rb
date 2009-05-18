@@ -2,6 +2,8 @@ require 'rubygems'
 require 'ruby-processing'
 require 'yaml'
 require 'bsearch'
+require 'java'
+require '/Users/ja8/sketchbook/normal/code/commons-math-1.2.jar'
 
 WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
@@ -40,6 +42,9 @@ class MySketch < Processing::App
   attr_accessor :controls
 
   def setup
+    n = org.apache.commons.math.distribution.NormalDistributionImpl.new(1,0.1)
+    STDERR.puts n.cumulativeProbability(0.7)
+    
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
     
