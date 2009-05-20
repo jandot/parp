@@ -17,13 +17,17 @@ class Chromosome
     if @name == '1'
       @offset_bp = 0
       @start_degree = 0
-      @stop_degree = @length_degree
     else
       prev_chr = self.class.sketch.chromosomes[(@name.to_i - 1).to_s]
       @offset_bp = prev_chr.offset_bp + prev_chr.length_bp
       @start_degree = @offset_bp*BP_TO_DEGREE_FACTOR
-      @stop_degree = @start_degree + @length_degree
     end
+    @stop_degree = @start_degree + @length_degree
+
+    # Apply lenses
+    @start_degree = @start_degree.to_f.apply_lenses
+    @stop_degree = @stop_degree.to_f.apply_lenses
+    @length_degree = @stop_degree - @start_degree
   end
 
   def fetch_data
@@ -68,7 +72,7 @@ class Chromosome
     else
       self.class.sketch.stroke 150
     end
-    self.class.sketch.pline(@start_degree, @start_degree + @length_degree, self.class.sketch.diameter, 0, 0)
+    self.class.sketch.pline(@start_degree, @stop_degree, self.class.sketch.diameter + self.class.sketch.random(-5, 5), 0, 0)
 
     # b. ... the label
     self.class.sketch.fill 0
@@ -90,6 +94,13 @@ class Chromosome
         self.class.sketch.stroke_weight 0.5
       end
       self.class.sketch.pline(copy_number.start_degree, copy_number.stop_degree, self.class.sketch.diameter - 60 + copy_number.value, 0, 0)
+    end
+
+    self.class.sketch.stroke 0,0,255,5
+    self.class.sketch.stroke_weight 3
+
+    @segdups.each do |segdup|
+      self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 10, 0, 0)
     end
 
 #    @resolution[display] = @length_bp.to_f/@length_degree[display]

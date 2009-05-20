@@ -7,9 +7,10 @@ class Lens
   end
   attr_accessor :n
   attr_accessor :mu, :sigma_squared
+  attr_accessor :focus, :range
 
-  def initialized(mu, sigma_squared)
-    @mu, @sigma_squared = mu, sigma_squared
+  def initialize(focus, range, mu, sigma_squared)
+    @focus, @range, @mu, @sigma_squared = focus, range, mu, sigma_squared
     @n = org.apache.commons.math.distribution.NormalDistributionImpl.new(@mu, @sigma_squared)
   end
 end

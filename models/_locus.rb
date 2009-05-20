@@ -1,35 +1,15 @@
-class Float
-  def adjust_zoom(sketch)
-    new_degree = self
-    if self > (sketch.focus_degree - sketch.range_degree) and self < (sketch.focus_degree + sketch.range_degree)
-#      if ( sketch.mouse_x < sketch.width - 50 )
-        delta_degree = self - sketch.focus_degree
-        input_value = sketch.map(delta_degree, -sketch.range_degree, sketch.range_degree, -5, 5)
-        delta_degree = sketch.n.cumulativeProbability(input_value)
-        delta_degree = sketch.map(delta_degree, sketch.n.cumulativeProbability(-5), sketch.n.cumulativeProbability(5), -sketch.range_degree, sketch.range_degree)
-        new_degree = sketch.focus_degree + delta_degree
-#      end
-    end
-    return new_degree
-  end
-end
-
 module IsLocus
   def calculate_degrees
     if self.respond_to?('degree')
       @degree = (@chr.offset_bp + @pos)*BP_TO_DEGREE_FACTOR
-#      @degree[display] = self.class.sketch.map(@pos, @chr.start_bp, @chr.stop_bp, @chr.start_degree[display], @chr.stop_degree[display])
-#      @degree[display] = @degree[display].adjust_zoom(self.class.sketch)
+
+      @degree = @degree.apply_lenses
     else
       @start_degree = (@chr.offset_bp + @start)*BP_TO_DEGREE_FACTOR
       @stop_degree = (@chr.offset_bp + @stop)*BP_TO_DEGREE_FACTOR
-#      @start_degree[display] = [@slices[display].start_degree[display], self.class.sketch.map(@start, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].max
-#      @stop_degree[display] = [@slices[display].stop_degree[display], self.class.sketch.map(@stop, @slices[display].start_bp, @slices[display].stop_bp, @slices[display].start_degree[display], @slices[display].stop_degree[display])].min
 
-#      old = @start_degree[display]
-#      @start_degree[display] = @start_degree[display].adjust_zoom(self.class.sketch)
-#      @stop_degree[display] = @stop_degree[display].adjust_zoom(self.class.sketch)
-
+      @start_degree = @start_degree.apply_lenses
+      @stop_degree = @stop_degree.apply_lenses
     end
   end
 

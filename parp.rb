@@ -6,12 +6,12 @@ WORKING_DIRECTORY = '/Users/ja8/LocalDocuments/Projects/pARP'
 FILE_CHROMOSOME_METADATA = WORKING_DIRECTORY + '/data/meta_data.tsv'
 #FILE_READPAIRS = WORKING_DIRECTORY + '/data/data.tsv'
 #FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/read_pairs.parsed'
-#FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
-FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
+FILE_READPAIRS = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/read_pairs.parsed'
+#FILE_READPAIRS = WORKING_DIRECTORY + '/data/small_dataset.tsv'
 #FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/NCI-H2171/copy_number_segmented.txt'
 FILE_COPY_NUMBER = '/Users/ja8/LocalDocuments/Projects/parp_data/data_for_Jan/COLO-829/copy_number_segmented.txt'
-#FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
-FILE_SEGDUPS = WORKING_DIRECTORY + '/data/small_features.tsv'
+FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
+#FILE_SEGDUPS = WORKING_DIRECTORY + '/data/small_features.tsv'
 
 #WIDTH = 1200
 #HEIGHT = 600
@@ -24,7 +24,7 @@ GENOME_SIZE = 3_080_419_000
 BP_TO_DEGREE_FACTOR = 360.to_f/GENOME_SIZE.to_f
 DEGREE_TO_BP_FACTOR = 1.to_f/BP_TO_DEGREE_FACTOR
 
-# _locus.rb is preceded by underscore so that it gets loaded first
+# _locus.rb and _extensions.rb are preceded by underscore so that they gets loaded first
 Dir[File.dirname(__FILE__) + '/models/*.rb'].each {|file| require file }
 Dir[File.dirname(__FILE__) + '/sketch_methods/*.rb'].each {|file| require file }
 
@@ -37,8 +37,6 @@ class MySketch < Processing::App
   attr_accessor :lenses
 
   def setup
-    @lenses = Array.new
-    
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
 
@@ -48,12 +46,17 @@ class MySketch < Processing::App
     @f = create_font("Arial", 12)
     @big_f = create_font("Arial", 16)
     text_font @f
+    stroke_cap SQUARE
 
+    Float.sketch = self
     Chromosome.sketch = self
     ReadPair.sketch = self
     Read.sketch = self
     CopyNumber.sketch = self
     SegDup.sketch = self
+
+    @lenses = Array.new
+    @lenses.push Lens.new(44.41, 30, 0, 0.05)
 
     self.load_chromosomes
     self.load_readpairs
@@ -74,7 +77,16 @@ class MySketch < Processing::App
     @chromosomes.values.each do |chr|
       chr.draw
     end
+    @readpairs.each do |readpair|
+      readpair.draw
+    end
     translate(-width/2, -height/2)
+  end
+
+  def key_pressed
+    if key == 's'
+      save('/Users/ja8/LocalDocuments/parp/picture.png')
+    end
   end
 end
 
