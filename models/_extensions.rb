@@ -20,6 +20,46 @@ class Integer
   end
 end
 
+class Float
+  class << self
+    attr_accessor :sketch
+  end
+
+#  # Based on http://www.jasonwaltman.com/thesis/filter-fisheye.html
+#  def apply_lenses
+#    self.class.sketch.lenses.each do |lens|
+#      focus_degree, range_degree = lens.focus, lens.range
+#      w = lens.sigma_squared
+#
+#      if self > (focus_degree - range_degree) and self < (focus_degree + range_degree)
+#        s = range_degree/(Math.log(w*range_degree+1))
+#        delta_degree = s*Math.log(1+w*(focus_degree - self).abs)
+#        new_degree = focus_degree + delta_degree
+#        return new_degree
+#      end
+#    end
+#    return self
+#  end
+
+  # Based on normal distribution
+  def apply_lenses
+    self.class.sketch.lenses.each do |lens|
+      focus_degree, range_degree = lens.focus, lens.range
+
+      if self > (focus_degree - range_degree) and self < (focus_degree + range_degree)
+        delta_degree = self - focus_degree
+        input_value = self.class.sketch.map(delta_degree, -range_degree, range_degree, -5, 5)
+        delta_degree = lens.n.cumulativeProbability(input_value)
+        delta_degree = self.class.sketch.map(delta_degree, lens.n.cumulativeProbability(-5), lens.n.cumulativeProbability(5), -range_degree, range_degree)
+        new_degree = focus_degree + delta_degree
+        return new_degree
+      end
+    end
+    return self
+  end
+
+end
+
 class Array
   # This only works on sorted arrays!
   # Returns the index before (default) or after a certain value
