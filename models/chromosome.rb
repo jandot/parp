@@ -40,26 +40,21 @@ class Chromosome
   def fetch_reads(from_pos_string, to_pos_string)
     @reads = Read.fetch_region(from_pos_string, to_pos_string)
     @reads.each do |read|
-      read.degree = (self.offset_bp + read.pos)*BP_TO_DEGREE_FACTOR
+      read.calculate_degrees
     end
   end
 
   def fetch_copy_numbers(from_pos_string, to_pos_string)
-    STDERR.puts @name + " " + from_pos_string + " " + to_pos_string
     @copy_numbers = CopyNumber.fetch_region(from_pos_string, to_pos_string)
     @copy_numbers.each do |copy_number|
-      copy_number.start_degree = (self.offset_bp + copy_number.start)*BP_TO_DEGREE_FACTOR
-      copy_number.stop_degree = (self.offset_bp + copy_number.stop)*BP_TO_DEGREE_FACTOR
-#      STDERR.puts [self.name, self.offset_bp, copy_number.start, copy_number.start_degree, copy_number.stop_degree].join("\t")
+      copy_number.calculate_degrees
     end
-#    STDERR.puts "NUMBER OF COPY_NUMBER FOR CHR " + @name + ": " + @copy_numbers.length.to_s
   end
 
   def fetch_segdups(from_pos_string, to_pos_string)
     @segdups = SegDup.fetch_region(from_pos_string, to_pos_string)
     @segdups.each do |segdup|
-      segdup.start_degree = (self.offset_bp + segdup.start)*BP_TO_DEGREE_FACTOR
-      segdup.stop_degree = (self.offset_bp + segdup.stop)*BP_TO_DEGREE_FACTOR
+      segdup.calculate_degrees
     end
   end
 
