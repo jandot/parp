@@ -1,16 +1,17 @@
 class MySketch < Processing::App
-  def draw_overview_display
-    buffer_overview = buffer(self.width/2, self.height, JAVA2D) do |b|
+  def draw_zoomed_buffer
+    buffer_zoomed = buffer(self.width, self.height, JAVA2D) do |b|
       b.background 255
-      b.text_font @f
-      b.text_align CENTER
-      b.stroke_cap MySketch::SQUARE
       b.smooth
-
-      b.translate(self.width.to_f/4, self.height.to_f/2)
-      @displays[:overview].draw(b)
-      b.translate(self.width.to_f/4, self.height.to_f/2)
+      b.translate(self.width/2, self.height/2)
+      @chromosomes.values.each do |chr|
+        chr.draw(b)
+      end
+      @readpairs.each do |readpair|
+        readpair.draw(b)
+      end
+      b.translate(-self.width/2, -self.height/2)
     end
-    @image_overview = buffer_overview.get(0, 0, buffer_overview.width, buffer_overview.height)
+    @buffer_images[:zoomed] = buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
   end
 end

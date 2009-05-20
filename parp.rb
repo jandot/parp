@@ -36,6 +36,8 @@ class MySketch < Processing::App
   attr_accessor :displays
   attr_accessor :lenses
 
+  attr_accessor :buffers
+
   def setup
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
@@ -46,7 +48,7 @@ class MySketch < Processing::App
     @f = create_font("Arial", 12)
     @big_f = create_font("Arial", 16)
     text_font @f
-    stroke_cap SQUARE
+#    stroke_cap SQUARE
 
     Float.sketch = self
     Chromosome.sketch = self
@@ -56,7 +58,7 @@ class MySketch < Processing::App
     SegDup.sketch = self
 
     @lenses = Array.new
-    @lenses.push Lens.new(44.41, 30, 0, 0.05)
+#    @lenses.push Lens.new(44.41, 30, 0, 0.05)
 
     self.load_chromosomes
     self.load_readpairs
@@ -67,20 +69,16 @@ class MySketch < Processing::App
       chr.fetch_data
     end
 
+    @buffer_images = Hash.new
+    @buffer_images[:zoomed] = self.draw_zoomed_buffer
+
     smooth
     no_loop
   end
 
   def draw
     background 255
-    translate(width/2, height/2)
-    @chromosomes.values.each do |chr|
-      chr.draw
-    end
-    @readpairs.each do |readpair|
-      readpair.draw
-    end
-    translate(-width/2, -height/2)
+    image(@buffer_images[:zoomed],0,0)
   end
 
   def key_pressed

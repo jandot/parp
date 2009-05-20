@@ -62,42 +62,43 @@ class Chromosome
     end
   end
 
-  def draw
+  def draw(buffer)
     # A. Draw the chromosomes themselves
     # a. ... the segment
-    self.class.sketch.no_fill
-    self.class.sketch.stroke_weight 3
+    buffer.no_fill
+    buffer.stroke_weight 3
     if @name.to_i % 2 == 0
-      self.class.sketch.stroke 0
+      buffer.stroke 0
     else
-      self.class.sketch.stroke 150
+      buffer.stroke 150
     end
-    self.class.sketch.pline(@start_degree, @stop_degree, self.class.sketch.diameter + self.class.sketch.random(-5, 5), 0, 0)
+    self.class.sketch.pline(@start_degree, @stop_degree, self.class.sketch.diameter, 0, 0, :buffer => buffer)
 
     # b. ... the label
-    self.class.sketch.fill 0
-    self.class.sketch.no_fill
-    self.class.sketch.text_align MySketch::CENTER
-    self.class.sketch.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 15))
-    self.class.sketch.text_align MySketch::LEFT
+    buffer.fill 0
+    buffer.no_fill
+    buffer.text_align MySketch::CENTER
+    buffer.text_font self.class.sketch.f
+    buffer.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 15))
+    buffer.text_align MySketch::LEFT
     
     # B. Draw the elements
     @copy_numbers.each do |copy_number|
       if copy_number.original_value < 20
-        self.class.sketch.stroke 255,0,0
-        self.class.sketch.stroke_weight 2
+        buffer.stroke 255,0,0
+        buffer.stroke_weight 2
       elsif copy_number.original_value > 60
-        self.class.sketch.stroke 0,255,0
-        self.class.sketch.stroke_weight 2
+        buffer.stroke 0,255,0
+        buffer.stroke_weight 2
       else
-        self.class.sketch.stroke 0
-        self.class.sketch.stroke_weight 0.5
+        buffer.stroke 0
+        buffer.stroke_weight 0.5
       end
-      self.class.sketch.pline(copy_number.start_degree, copy_number.stop_degree, self.class.sketch.diameter - 60 + copy_number.value, 0, 0)
+      self.class.sketch.pline(copy_number.start_degree, copy_number.stop_degree, self.class.sketch.diameter - 60 + copy_number.value, 0, 0, :buffer => buffer)
     end
 
-    self.class.sketch.stroke 0,0,255,5
-    self.class.sketch.stroke_weight 3
+    buffer.stroke 0,0,255,5
+    buffer.stroke_weight 3
 
     @segdups.each do |segdup|
       self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 10, 0, 0)
