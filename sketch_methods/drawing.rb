@@ -12,6 +12,9 @@ class MySketch < Processing::App
       end
       Lens.draw(b)
       b.translate(-self.width/2, -self.height/2)
+      @lenses.each do |lens|
+        STDERR.puts lens.to_s
+      end
     end
     @buffer_images[:zoomed] = buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
   end

@@ -15,12 +15,20 @@ class Lens
 
   def initialize(focus, range, mu, sigma_squared)
     @focus_degree, @range_degree, @mu, @sigma_squared = focus, range, mu, sigma_squared
-    @focus_pixel = @focus_degree.to_f.degree_to_pixel
-    @range_pixel = @range_degree.to_f.degree_to_pixel
+#    @focus_pixel = @focus_degree.to_f.degree_to_pixel
+#    @range_pixel = @range_degree.to_f.degree_to_pixel
     @n = org.apache.commons.math.distribution.NormalDistributionImpl.new(@mu, @sigma_squared)
     @min_pos = @n.cumulativeProbability(-5)
     @max_pos = @n.cumulativeProbability(5)
 #    self.adjust_matrix
+  end
+
+  def update(focus, factor = 10)
+    @focus_degree = focus
+    @sigma_squared /= factor
+    @n = org.apache.commons.math.distribution.NormalDistributionImpl.new(@mu, @sigma_squared)
+    @min_pos = @n.cumulativeProbability(-5)
+    @max_pos = @n.cumulativeProbability(5)
   end
 
   def self.initialize_matrix
@@ -41,6 +49,10 @@ class Lens
       value = self.sketch.radius + 30 + (degree - degree.to_f.apply_lenses)
       buffer.ellipse(self.sketch.cx(degree, value), self.sketch.cy(degree, value), 1, 1)
     end
+  end
+
+  def to_s
+    return [@focus_degree, @range_degree, @mu, @sigma_squared].join("\t")
   end
 
 #  def adjust_matrix
