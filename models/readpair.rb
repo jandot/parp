@@ -34,14 +34,14 @@ class ReadPair
       distance_from_circle = 80
       bezier_distance = 50
     end
-    buffer.bezier(self.class.sketch.cx(@reads[0].degree, self.class.sketch.radius - distance_from_circle),
-                  self.class.sketch.cy(@reads[0].degree, self.class.sketch.radius - distance_from_circle),
-                  self.class.sketch.cx(@reads[0].degree, self.class.sketch.radius - distance_from_circle - bezier_distance),
-                  self.class.sketch.cy(@reads[0].degree, self.class.sketch.radius - distance_from_circle - bezier_distance),
-                  self.class.sketch.cx(@reads[1].degree, self.class.sketch.radius - distance_from_circle - bezier_distance),
-                  self.class.sketch.cy(@reads[1].degree, self.class.sketch.radius - distance_from_circle - bezier_distance),
-                  self.class.sketch.cx(@reads[1].degree, self.class.sketch.radius - distance_from_circle),
-                  self.class.sketch.cy(@reads[1].degree, self.class.sketch.radius - distance_from_circle))
+    buffer.bezier(self.class.sketch.cx(@reads[0].degree_through_lenses, self.class.sketch.radius - distance_from_circle),
+                  self.class.sketch.cy(@reads[0].degree_through_lenses, self.class.sketch.radius - distance_from_circle),
+                  self.class.sketch.cx(@reads[0].degree_through_lenses, self.class.sketch.radius - distance_from_circle - bezier_distance),
+                  self.class.sketch.cy(@reads[0].degree_through_lenses, self.class.sketch.radius - distance_from_circle - bezier_distance),
+                  self.class.sketch.cx(@reads[1].degree_through_lenses, self.class.sketch.radius - distance_from_circle - bezier_distance),
+                  self.class.sketch.cy(@reads[1].degree_through_lenses, self.class.sketch.radius - distance_from_circle - bezier_distance),
+                  self.class.sketch.cx(@reads[1].degree_through_lenses, self.class.sketch.radius - distance_from_circle),
+                  self.class.sketch.cy(@reads[1].degree_through_lenses, self.class.sketch.radius - distance_from_circle))
   end
 #  def draw(b, display)
 #    if self.visible(display)

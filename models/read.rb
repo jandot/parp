@@ -7,6 +7,8 @@ class Read
 
   attr_accessor :chr, :pos, :readpair
   attr_accessor :degree
+  attr_accessor :degree_through_lenses
+
   attr_accessor :as_string
 
   def initialize(chr, pos, readpair)

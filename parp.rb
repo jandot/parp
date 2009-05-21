@@ -56,9 +56,13 @@ class MySketch < Processing::App
     Read.sketch = self
     CopyNumber.sketch = self
     SegDup.sketch = self
+    Lens.sketch = self
+
+    Lens.initialize_matrix
 
     @lenses = Array.new
 #    @lenses.push Lens.new(44.41, 30, 0, 0.05)
+#    @lenses.push Lens.new(60, 20, 0, 0.05)
 
     self.load_chromosomes
     self.load_readpairs
@@ -79,13 +83,11 @@ class MySketch < Processing::App
   def draw
     background 255
     image(@buffer_images[:zoomed],0,0)
+
+    self.draw_line_following_mouse
+#    STDERR.puts angle(mouse_x, mouse_y, width/2, height/2)
   end
 
-  def key_pressed
-    if key == 's'
-      save('/Users/ja8/LocalDocuments/parp/picture.png')
-    end
-  end
 end
 
 S = MySketch.new :title => "My Sketch", :width => WIDTH, :height => HEIGHT

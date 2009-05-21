@@ -2,16 +2,29 @@ module IsLocus
   def calculate_degrees
     if self.respond_to?('degree')
       @degree = (@chr.offset_bp + @pos)*BP_TO_DEGREE_FACTOR
-
-      @degree = @degree.apply_lenses
     else
       @start_degree = (@chr.offset_bp + @start)*BP_TO_DEGREE_FACTOR
       @stop_degree = (@chr.offset_bp + @stop)*BP_TO_DEGREE_FACTOR
-
-      @start_degree = @start_degree.apply_lenses
-      @stop_degree = @stop_degree.apply_lenses
     end
   end
+
+  def apply_lenses
+    if self.respond_to?('degree')
+      @degree_through_lenses = @degree.apply_lenses
+    else
+      @start_degree_through_lenses = @start_degree.apply_lenses
+      @stop_degree_through_lenses = @stop_degree.apply_lenses
+    end
+  end
+
+#  def apply_lenses
+#    if self.respond_to?('degree')
+#      @degree_through_lenses = Lens.transformation_matrix[@degree.to_f.degree_to_pixel.ceil]
+#    else
+#      @start_degree_through_lenses = Lens.transformation_matrix[@start_degree.to_f.degree_to_pixel.ceil]
+#      @stop_degree_through_lenses = Lens.transformation_matrix[@stop_degree.to_f.degree_to_pixel.ceil]
+#    end
+#  end
 
   def self.included mod
     class << mod

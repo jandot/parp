@@ -6,6 +6,7 @@ class Chromosome
   attr_accessor :reads, :copy_numbers, :segdups
   attr_accessor :offset_bp
   attr_accessor :start_degree, :stop_degree, :length_degree
+  attr_accessor :start_degree_through_lenses, :stop_degree_through_lenses, :length_degree_through_lenses
 
   def initialize(name, length, centromere)
     @name, @length_bp, @centromere = name, length, centromere
@@ -23,11 +24,6 @@ class Chromosome
       @start_degree = @offset_bp*BP_TO_DEGREE_FACTOR
     end
     @stop_degree = @start_degree + @length_degree
-
-    # Apply lenses
-    @start_degree = @start_degree.to_f.apply_lenses
-    @stop_degree = @stop_degree.to_f.apply_lenses
-    @length_degree = @stop_degree - @start_degree
   end
 
   def fetch_data
@@ -63,6 +59,16 @@ class Chromosome
   end
 
   def draw(buffer)
+    # Before doing anything else we have to apply lenses
+    @start_degree_through_lenses = @start_degree.to_f.apply_lenses
+    @stop_degree_through_lenses = @stop_degree.to_f.apply_lenses
+    @length_degree_through_lenses = @stop_degree_through_lenses - @start_degree_through_lenses
+
+#    @start_degree_through_lenses = Lens.transformation_matrix[@start_degree.to_f.degree_to_pixel.ceil]
+#    @stop_degree_through_lenses = Lens.transformation_matrix[@stop_degree.to_f.degree_to_pixel.ceil]
+#    STDERR.puts [@stop_degree, @stop_degree.to_f.degree_to_pixel, @stop_degree_through_lenses].join("\t")
+#    @length_degree_through_lenses = @stop_degree_through_lenses - @start_degree_through_lenses
+
     # A. Draw the chromosomes themselves
     # a. ... the segment
     buffer.no_fill
@@ -72,18 +78,19 @@ class Chromosome
     else
       buffer.stroke 150
     end
-    self.class.sketch.pline(@start_degree, @stop_degree, self.class.sketch.diameter, 0, 0, :buffer => buffer)
+    self.class.sketch.pline(@start_degree_through_lenses, @stop_degree_through_lenses, self.class.sketch.diameter, 0, 0, :buffer => buffer)
 
     # b. ... the label
     buffer.fill 0
     buffer.no_fill
     buffer.text_align MySketch::CENTER
     buffer.text_font self.class.sketch.f
-    buffer.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 15))
+    buffer.text(@name, self.class.sketch.cx(@start_degree_through_lenses + @length_degree_through_lenses/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree_through_lenses + @length_degree_through_lenses/2, self.class.sketch.radius + 15))
     buffer.text_align MySketch::LEFT
     
     # B. Draw the elements
     @copy_numbers.each do |copy_number|
+      copy_number.apply_lenses
       if copy_number.original_value < 20
         buffer.stroke 255,0,0
         buffer.stroke_weight 2
@@ -94,14 +101,19 @@ class Chromosome
         buffer.stroke 0
         buffer.stroke_weight 0.5
       end
-      self.class.sketch.pline(copy_number.start_degree, copy_number.stop_degree, self.class.sketch.diameter - 60 + copy_number.value, 0, 0, :buffer => buffer)
+      self.class.sketch.pline(copy_number.start_degree_through_lenses, copy_number.stop_degree_through_lenses, self.class.sketch.diameter - 60 + copy_number.value, 0, 0, :buffer => buffer)
     end
 
     buffer.stroke 0,0,255,5
     buffer.stroke_weight 3
 
     @segdups.each do |segdup|
-      self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 10, 0, 0)
+      segdup.apply_lenses
+      self.class.sketch.pline(segdup.start_degree_through_lenses, segdup.stop_degree_through_lenses, self.class.sketch.diameter + 10, 0, 0, :buffer => buffer)
+    end
+
+    @reads.each do |read|
+      read.apply_lenses
     end
 
 #    @resolution[display] = @length_bp.to_f/@length_degree[display]
