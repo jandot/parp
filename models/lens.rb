@@ -32,6 +32,17 @@ class Lens
     STDERR.puts "DEBUG: " + self.matrix_size.to_s
   end
 
+  # This draws a line around the display showing which parts are zoomed in
+  def self.draw(buffer)
+    buffer.fill 0
+    buffer.no_stroke
+    (360*4).times do |point|
+      degree = point.to_f/4
+      value = self.sketch.radius + 30 + (degree - degree.to_f.apply_lenses)
+      buffer.ellipse(self.sketch.cx(degree, value), self.sketch.cy(degree, value), 1, 1)
+    end
+  end
+
 #  def adjust_matrix
 #    (self.class.sketch.radius*2*3.141592).ceil.times do |pixel|
 #      if self.covers?(pixel)
