@@ -31,19 +31,18 @@ class Float
 
 #  # Based on http://www.jasonwaltman.com/thesis/filter-fisheye.html
 #  def apply_lenses
-#    value = self
 #    self.class.sketch.lenses.each do |lens|
-#      focus_degree, range_degree = lens.focus_degree, lens.range_degree
+#      focus_degree, range_degree = lens.focus, lens.range
 #      w = lens.sigma_squared
 #
 #      if self > (focus_degree - range_degree) and self < (focus_degree + range_degree)
 #        s = range_degree/(Math.log(w*range_degree+1))
 #        delta_degree = s*Math.log(1+w*(focus_degree - self).abs)
 #        new_degree = focus_degree + delta_degree
-#        value = new_degree
+#        return new_degree
 #      end
 #    end
-#    return value
+#    return self
 #  end
 
   # Based on normal distribution
