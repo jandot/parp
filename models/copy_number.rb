@@ -6,9 +6,11 @@ class CopyNumber
   end
 
   attr_accessor :chr, :start, :stop, :value, :original_value
+#  attr_accessor :start_overall_bp, :stop_overall_bp
   attr_accessor :as_string
   attr_accessor :start_degree, :stop_degree
-  attr_accessor :start_degree_through_lenses, :stop_degree_through_lenses
+  attr_accessor :start_pixel, :stop_pixel
+#  attr_accessor :start_degree_through_lenses, :stop_degree_through_lenses
 
   def initialize(chr, start, stop, value)
     @chr = self.class.sketch.chromosomes[chr]

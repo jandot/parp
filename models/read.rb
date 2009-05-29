@@ -6,8 +6,9 @@ class Read
   end
 
   attr_accessor :chr, :pos, :readpair
+  attr_accessor :pixel
   attr_accessor :degree
-  attr_accessor :degree_through_lenses
+#  attr_accessor :degree_through_lenses
 
   attr_accessor :as_string
 

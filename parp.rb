@@ -18,7 +18,7 @@ FILE_SEGDUPS = WORKING_DIRECTORY + '/data/features.tsv'
 WIDTH = 1280
 HEIGHT = 800
 
-GENOME_SIZE = 3_080_419_000
+GENOME_SIZE = 3_080_587_442
 
 # To go from bp to degree: value*BP_TO_DEGREE_FACTOR
 BP_TO_DEGREE_FACTOR = 360.to_f/GENOME_SIZE.to_f
@@ -31,9 +31,10 @@ Dir[File.dirname(__FILE__) + '/sketch_methods/*.rb'].each {|file| require file }
 class MySketch < Processing::App
   attr_accessor :f, :big_f
   attr_accessor :chromosomes, :readpairs
-  attr_accessor :radius, :diameter
+  attr_accessor :radius, :diameter, :circumference
   attr_accessor :wheel
   attr_accessor :displays
+  attr_accessor :slices
   attr_accessor :lenses
 
   attr_accessor :buffers
@@ -41,6 +42,7 @@ class MySketch < Processing::App
   def setup
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
+    @circumference = 2*3.141592*@radius
 
     @origin_x = width/4
     @origin_y = height/2
@@ -48,7 +50,6 @@ class MySketch < Processing::App
     @f = create_font("Arial", 12)
     @big_f = create_font("Arial", 16)
     text_font @f
-#    stroke_cap SQUARE
 
     Float.sketch = self
     Chromosome.sketch = self
@@ -56,13 +57,11 @@ class MySketch < Processing::App
     Read.sketch = self
     CopyNumber.sketch = self
     SegDup.sketch = self
+    Slice.sketch = self
     Lens.sketch = self
 
-    Lens.initialize_matrix
-
-    @lenses = Array.new
-#    @lenses.push Lens.new(44.41, 30, 0, 0.05)
-#    @lenses.push Lens.new(60, 20, 0, 0.05)
+    @slices = Array.new
+    @slices.push(Slice.new)
 
     self.load_chromosomes
     self.load_readpairs
@@ -85,7 +84,6 @@ class MySketch < Processing::App
     image(@buffer_images[:zoomed],0,0)
 
     self.draw_line_following_mouse
-#    STDERR.puts angle(mouse_x, mouse_y, width/2, height/2)
   end
 
 end

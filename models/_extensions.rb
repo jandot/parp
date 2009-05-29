@@ -26,43 +26,17 @@ class Float
   end
 
   def degree_to_pixel
-    return (self*self.class.sketch.radius).to_f/360.to_f
+    return (self*self.class.sketch.circumference).to_f/360.to_f
   end
 
-#  # Based on http://www.jasonwaltman.com/thesis/filter-fisheye.html
-#  def apply_lenses
-#    self.class.sketch.lenses.each do |lens|
-#      focus_degree, range_degree = lens.focus, lens.range
-#      w = lens.sigma_squared
-#
-#      if self > (focus_degree - range_degree) and self < (focus_degree + range_degree)
-#        s = range_degree/(Math.log(w*range_degree+1))
-#        delta_degree = s*Math.log(1+w*(focus_degree - self).abs)
-#        new_degree = focus_degree + delta_degree
-#        return new_degree
-#      end
-#    end
-#    return self
-#  end
-
-  # Based on normal distribution
-  def apply_lenses
-    value = self
-    self.class.sketch.lenses.each do |lens|
-      focus_degree, range_degree = lens.focus_degree, lens.range_degree
-
-      if lens.covers?(self)
-        delta_degree = self - focus_degree
-        input_value = self.class.sketch.map(delta_degree, -range_degree, range_degree, -5, 5)
-        delta_degree = lens.n.cumulativeProbability(input_value)
-        delta_degree = self.class.sketch.map(delta_degree, lens.min_pos, lens.max_pos, -range_degree, range_degree)
-        new_degree = focus_degree + delta_degree
-        value = new_degree
-      end
-    end
-    return value
+  def pixel_to_degree
+    return (self*360).to_f/self.class.sketch.circumference.to_f
   end
 
+  def bp_to_pixel
+    slice = self.class.sketch.slices.select{|s| s.range_overall_bp.include?(self)}[0]
+    return slice.start_pixel + (self - slice.start_overall_bp).to_f/slice.resolution
+  end
 end
 
 class Array
