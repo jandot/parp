@@ -15,6 +15,27 @@ class Slice
     @stop_pixel = stop_pixel
     @range_overall_pixel = Range.new(@start_pixel, @stop_pixel)
     @resolution = (@stop_overall_bp - @start_overall_bp).to_f/(@stop_pixel - @start_pixel)
-#    STDERR.puts "DEBUG: slice with resolution " + @resolution.to_s
+  end
+
+  def to_s
+    output = Array.new
+    output.push('-----')
+    output.push("START BP=" + @start_overall_bp.to_s)
+    output.push("STOP BP=" + @stop_overall_bp.to_s)
+    output.push("START PIXEL=" + @start_pixel.to_s)
+    output.push("STOP PIXEL=" + @stop_pixel.to_s)
+    output.push("RESOLUTION=" + @resolution.to_s + " bp/pixel")
+    return output.join("\n")
+  end
+
+  # This draws a line around the display showing which parts are zoomed in
+  def draw(buffer)
+    buffer.no_fill
+    buffer.stroke 0
+    start_degree = @start_pixel.to_f.pixel_to_degree
+    stop_degree = @stop_pixel.to_f.pixel_to_degree
+    resolutions = self.class.sketch.slices.collect{|s| s.resolution}
+    value = self.class.sketch.map(@resolution, resolutions.min, resolutions.max, 0, 20)
+    self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 60 - value, 0, 0, :buffer => buffer)
   end
 end

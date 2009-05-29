@@ -10,7 +10,9 @@ class MySketch < Processing::App
       @readpairs.each do |readpair|
         readpair.draw(b)
       end
-#      Lens.draw(b)
+#      @slices.each do |slice|
+#        slice.draw(b)
+#      end
       b.translate(-self.width/2, -self.height/2)
     end
     @buffer_images[:zoomed] = buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
