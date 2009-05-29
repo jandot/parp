@@ -41,8 +41,8 @@ class MySketch < Processing::App
   def find_position_under_mouse
     pixel = angle(mouse_x, mouse_y, @origin_x, @origin_y).to_f.degree_to_pixel
     chromosome_under_mouse = @chromosomes.values.select{|chr| chr.start_pixel <= pixel and chr.stop_pixel >= pixel}[0]
-    slice = @slices.select{|s| s.start_pixel <= pixel}[-1]
-    bp_under_mouse = slice.start_overall_bp + (pixel - slice.start_pixel)*slice.resolution
+    @current_slice = @slices.select{|s| s.start_pixel <= pixel}[-1]
+    bp_under_mouse = @current_slice.start_overall_bp + (pixel - @current_slice.start_pixel)*@current_slice.resolution
     bp_under_mouse -= chromosome_under_mouse.offset_bp
     return [chromosome_under_mouse.name, bp_under_mouse.to_i]
   end

@@ -25,9 +25,10 @@ class MySketch < Processing::App
       text_font @big_f
       fill 255, 200
       no_stroke
-      rect mouse_x, mouse_y - text_ascent, text_width(@formatted_position_under_mouse) + 10, text_ascent + 10
+      rect mouse_x, mouse_y, [text_width(@current_slice.formatted_resolution),text_width(@formatted_position_under_mouse)].max + 10, 2*text_ascent + 10
       fill 0
-      text @formatted_position_under_mouse, mouse_x + 5, mouse_y + 5
+      text @formatted_position_under_mouse, mouse_x + 5, text_ascent + mouse_y + 5
+      text @current_slice.formatted_resolution, mouse_x + 5, mouse_y + 5 + 2*text_ascent
       text_font @f
     end
   end

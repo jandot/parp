@@ -35,6 +35,7 @@ class MySketch < Processing::App
   attr_accessor :wheel
   attr_accessor :displays
   attr_accessor :slices
+  attr_accessor :current_slice
   attr_accessor :lenses
   attr_accessor :formatted_position_under_mouse
 
@@ -63,6 +64,7 @@ class MySketch < Processing::App
 
     @slices = Array.new
     @slices.push(Slice.new)
+    @current_slice = @slices[0]
 #    @slices.push(Slice.new(0,350000000, 0, 50))
 #    @slices.push(Slice.new(350000001, 400000000, 51, 1000))
 #    @slices.push(Slice.new(400000001,GENOME_SIZE, 1001, @circumference))

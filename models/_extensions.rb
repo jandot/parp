@@ -25,6 +25,10 @@ class Float
     attr_accessor :sketch
   end
 
+  def format(decimals = 0)
+    return printf("%.2f", self)
+  end
+
   def degree_to_pixel
     return (self*self.class.sketch.circumference).to_f/360.to_f
   end
