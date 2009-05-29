@@ -8,20 +8,30 @@ class MySketch < Processing::App
     redraw
   end
 
-#  def mouse_clicked
+  def mouse_clicked
+    @slices = Array.new
+    @slices.push(Slice.new(0,350000000, 0, 50))
+    @slices.push(Slice.new(350000001, 400000000, 51, 1000))
+    @slices.push(Slice.new(400000001,GENOME_SIZE, 1001, @circumference))
+
+    STDERR.puts @slices.collect{|s| s.to_s}.join("\n")
+    @buffer_images[:zoomed] = self.draw_zoomed_buffer
+
 #    focus = angle(mouse_x, mouse_y, width/2, height/2)
 #    STDERR.puts "MOUSE IS CLICKED ON " + focus.to_s
 ##    @lenses.push Lens.new(focus, 30, 0, 0.05)
 #    self.draw_zoomed_buffer
 #    STDERR.puts "BUFFER IS FINISHED"
-#    redraw
-#  end
+    redraw
+  end
 
   def key_pressed
     if key == 'r' #reset
-      @lenses = Array.new
-      Lens.initialize_matrix
-      self.draw_zoomed_buffer
+      @slices = Array.new
+      @slices.push(Slice.new)
+
+      STDERR.puts @slices.collect{|s| s.to_s}.join("\n")
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
       redraw
     end
   end

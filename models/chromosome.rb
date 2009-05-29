@@ -54,12 +54,35 @@ class Chromosome
     end
   end
 
-  def draw(buffer)
+  def recalculate_pixels
     @start_pixel = @offset_bp.to_f.bp_to_pixel
     @stop_pixel = (@offset_bp + @length_bp).to_f.bp_to_pixel
     @start_degree = @start_pixel.to_f.pixel_to_degree
     @stop_degree = @stop_pixel.to_f.pixel_to_degree
     @length_degree = @stop_degree - @start_degree
+
+    @copy_numbers.each do |copy_number|
+      copy_number.start_pixel = (copy_number.chr.offset_bp + copy_number.start).to_f.bp_to_pixel
+      copy_number.stop_pixel = (copy_number.chr.offset_bp + copy_number.stop).to_f.bp_to_pixel
+      copy_number.start_degree = copy_number.start_pixel.to_f.pixel_to_degree
+      copy_number.stop_degree = copy_number.stop_pixel.to_f.pixel_to_degree
+    end
+
+    @segdups.each do |segdup|
+      segdup.start_pixel = (segdup.chr.offset_bp + segdup.start).to_f.bp_to_pixel
+      segdup.stop_pixel = (segdup.chr.offset_bp + segdup.stop).to_f.bp_to_pixel
+      segdup.start_degree = segdup.start_pixel.to_f.pixel_to_degree
+      segdup.stop_degree = segdup.stop_pixel.to_f.pixel_to_degree
+    end
+
+    @reads.each do |read|
+      read.pixel = (read.chr.offset_bp + read.pos).to_f.bp_to_pixel
+      read.degree = read.pixel.to_f.pixel_to_degree
+    end
+  end
+
+  def draw(buffer)
+    self.recalculate_pixels
 
     # A. Draw the chromosomes themselves
     # a. ... the segment
@@ -82,11 +105,6 @@ class Chromosome
     
     # B. Draw the elements
     @copy_numbers.each do |copy_number|
-      copy_number.start_pixel = (copy_number.chr.offset_bp + copy_number.start).to_f.bp_to_pixel
-      copy_number.stop_pixel = (copy_number.chr.offset_bp + copy_number.stop).to_f.bp_to_pixel
-      copy_number.start_degree = copy_number.start_pixel.to_f.pixel_to_degree
-      copy_number.stop_degree = copy_number.stop_pixel.to_f.pixel_to_degree
-
       if copy_number.original_value < 20
         buffer.stroke 255,0,0
         buffer.stroke_weight 2
@@ -104,16 +122,7 @@ class Chromosome
     buffer.stroke_weight 3
 
     @segdups.each do |segdup|
-      segdup.start_pixel = (segdup.chr.offset_bp + segdup.start).to_f.bp_to_pixel
-      segdup.stop_pixel = (segdup.chr.offset_bp + segdup.stop).to_f.bp_to_pixel
-      segdup.start_degree = segdup.start_pixel.to_f.pixel_to_degree
-      segdup.stop_degree = segdup.stop_pixel.to_f.pixel_to_degree
       self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 10, 0, 0, :buffer => buffer)
-    end
-
-    @reads.each do |read|
-      read.pixel = (read.chr.offset_bp + read.pos).to_f.bp_to_pixel
-      read.degree = read.pixel.to_f.pixel_to_degree
     end
   end
 end

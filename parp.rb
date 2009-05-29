@@ -62,10 +62,10 @@ class MySketch < Processing::App
     Lens.sketch = self
 
     @slices = Array.new
-#    @slices.push(Slice.new)
-    @slices.push(Slice.new(0,350000000, 0, 50))
-    @slices.push(Slice.new(350000001, 400000000, 51, 1000))
-    @slices.push(Slice.new(400000001,GENOME_SIZE, 1001, @circumference))
+    @slices.push(Slice.new)
+#    @slices.push(Slice.new(0,350000000, 0, 50))
+#    @slices.push(Slice.new(350000001, 400000000, 51, 1000))
+#    @slices.push(Slice.new(400000001,GENOME_SIZE, 1001, @circumference))
 
     @slices.each do |slice|
       STDERR.puts slice.to_s
