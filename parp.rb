@@ -36,6 +36,7 @@ class MySketch < Processing::App
   attr_accessor :displays
   attr_accessor :slices
   attr_accessor :lenses
+  attr_accessor :formatted_position_under_mouse
 
   attr_accessor :buffers
 
@@ -44,7 +45,7 @@ class MySketch < Processing::App
     @radius = @diameter/2
     @circumference = 2*3.141592*@radius
 
-    @origin_x = width/4
+    @origin_x = width/2
     @origin_y = height/2
 
     @f = create_font("Arial", 12)
@@ -81,6 +82,8 @@ class MySketch < Processing::App
 
     @buffer_images = Hash.new
     @buffer_images[:zoomed] = self.draw_zoomed_buffer
+
+    @formatted_position_under_mouse = ''
 
     smooth
     no_loop

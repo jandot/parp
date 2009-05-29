@@ -7,7 +7,6 @@ class Chromosome
   attr_accessor :offset_bp
   attr_accessor :start_degree, :stop_degree, :length_degree
   attr_accessor :start_pixel, :stop_pixel, :length_pixel
-  attr_accessor :start_degree_through_lenses, :stop_degree_through_lenses, :length_degree_through_lenses
 
   def initialize(name, length, centromere)
     @name, @length_bp, @centromere = name, length, centromere
@@ -15,16 +14,12 @@ class Chromosome
     @copy_numbers = Array.new
     @segdups = Array.new
 
-#    @length_pixel = @length_bp*BP_TO_DEGREE_FACTOR
     if @name == '1'
       @offset_bp = 0
-#      @start_pixel = 0
     else
       prev_chr = self.class.sketch.chromosomes[(@name.to_i - 1).to_s]
       @offset_bp = prev_chr.offset_bp + prev_chr.length_bp
-#      @start_pixel = @offset_bp*BP_TO_DEGREE_FACTOR
     end
-#    @stop_pixel = @start_degree + @length_pixel
   end
 
   def fetch_data
