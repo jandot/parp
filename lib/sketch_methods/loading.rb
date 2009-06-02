@@ -1,7 +1,7 @@
 class MySketch < Processing::App
   def load_chromosomes
     @chromosomes = Hash.new
-    File.open(FILE_CHROMOSOME_METADATA).each do |line|
+    File.open(@data_directory + '/meta_data.tsv').each do |line|
       chr, len, centr_start, centr_stop = line.chomp.split("\t")
       @chromosomes[chr] = Chromosome.new(chr, len.to_i, centr_start.to_i)
     end
@@ -9,7 +9,7 @@ class MySketch < Processing::App
 
   def load_readpairs
     @readpairs = Array.new
-    File.open(FILE_READPAIRS).each do |line|
+    File.open(@data_directory + '/read_pairs.txt').each do |line|
       from_chr, from_pos, to_chr, to_pos, code, qual = line.chomp.split("\t")
       @readpairs.push(ReadPair.new(from_chr, from_pos, to_chr, to_pos, code, qual))
     end
@@ -23,7 +23,7 @@ class MySketch < Processing::App
   end
 
   def load_copy_numbers
-    File.open(FILE_COPY_NUMBER).each do |line|
+    File.open(@data_directory + '/copy_number.txt').each do |line|
       chr, start, stop, value = line.chomp.split("\t")
       CopyNumber.new(chr, start, stop, value)
     end
@@ -34,7 +34,7 @@ class MySketch < Processing::App
   end
 
   def load_segdups
-    File.open(FILE_SEGDUPS).each do |line|
+    File.open(@data_directory + '/segdups.txt').each do |line|
       chr, start, stop = line.chomp.split("\t")
       SegDup.new(chr, start, stop)
     end
