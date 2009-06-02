@@ -14,9 +14,33 @@ class String
   end
 end
 
-class Integer
+class Fixnum
+  class << self
+    attr_accessor :sketch
+  end
+
   def format
     return self.to_s.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+  end
+
+  def degree_to_pixel
+    return self.to_f.degree_to_pixel
+  end
+
+  def pixel_to_degree
+    return self.to_f.pixel_to_degree
+  end
+
+  def pixel_to_cumulative_bp
+    return self.to_f.pixel_to_cumulative_bp
+  end
+
+  def cumulative_bp_to_pixel
+    return self.to_f.cumulative_bp_to_pixel
+  end
+
+  def cumulative_bp_to_chr_bp
+    return self.to_f.cumulative_bp_to_chr_bp
   end
 end
 
@@ -37,9 +61,19 @@ class Float
     return (self*360).to_f/self.class.sketch.circumference.to_f
   end
 
-  def bp_to_pixel
-    slice = self.class.sketch.slices.select{|s| s.range_overall_bp.include?(self)}[0]
-    return slice.start_pixel + (self - slice.start_overall_bp).to_f/slice.resolution
+  def pixel_to_cumulative_bp
+    slice = self.class.sketch.slices.select{|s| s.start_pixel <= self}[-1]
+    return (slice.start_cumulative_bp - 1) + ((self - (slice.start_pixel - 1))*slice.resolution)
+  end
+
+  def cumulative_bp_to_pixel
+    slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= self}[-1]
+    return (slice.start_pixel - 1) + ((self - (slice.start_cumulative_bp - 1)).to_f/slice.resolution)
+  end
+
+  def cumulative_bp_to_chr_bp
+    chr = self.class.sketch.chromosomes.values.select{|c| c.offset_bp <= self}[-1]
+    return [chr, self - chr.offset_bp]
   end
 end
 
