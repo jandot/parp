@@ -5,7 +5,6 @@ class MySketch < Processing::App
       b.smooth
 
       b.translate(@origin_x, @origin_y)
-#      b.translate(self.width/2, self.height/2)
       @chromosomes.values.each do |chr|
         chr.draw(b)
       end
@@ -16,7 +15,6 @@ class MySketch < Processing::App
         slice.draw(b)
       end
       b.translate(-@origin_x, -@origin_y)
-#      b.translate(-self.width/2, -self.height/2)
     end
     @buffer_images[:zoomed] = buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
   end
