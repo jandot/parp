@@ -4,7 +4,7 @@ class Chromosome
   end
   attr_accessor :name, :length_bp, :centromere
   attr_accessor :reads, :copy_numbers, :segdups
-  attr_accessor :offset_bp
+  attr_accessor :start_cumulative_bp
   attr_accessor :start_degree, :stop_degree, :length_degree
   attr_accessor :start_pixel, :stop_pixel, :length_pixel
 
@@ -15,11 +15,13 @@ class Chromosome
     @segdups = Array.new
 
     if @name == '1'
-      @offset_bp = 0
+      @start_cumulative_bp = 1
     else
       prev_chr = self.class.sketch.chromosomes[(@name.to_i - 1).to_s]
-      @offset_bp = prev_chr.offset_bp + prev_chr.length_bp
+      @start_cumulative_bp = prev_chr.start_cumulative_bp + prev_chr.length_bp + 1
     end
+
+#    STDERR.puts "CHROMOSOME " + @name.to_s + " OFFSET = " + @start_cumulative_bp.to_s + " bp"
   end
 
   def fetch_data
@@ -55,28 +57,31 @@ class Chromosome
   end
 
   def recalculate_pixels
-    @start_pixel = @offset_bp.to_f.bp_to_pixel
-    @stop_pixel = (@offset_bp + @length_bp).to_f.bp_to_pixel
+    start_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= @start_cumulative_bp}[-1]
+    stop_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= (@start_cumulative_bp + @length_bp)}[-1]
+    @start_pixel = @start_cumulative_bp.to_f.cumulative_bp_to_pixel
+    @stop_pixel = (@start_cumulative_bp + @length_bp).to_f.cumulative_bp_to_pixel
     @start_degree = @start_pixel.to_f.pixel_to_degree
     @stop_degree = @stop_pixel.to_f.pixel_to_degree
     @length_degree = @stop_degree - @start_degree
+#    STDERR.puts ["CHROMOSOME:",@name, start_slice.start_pixel, stop_slice.start_pixel,@start_pixel, @stop_pixel].join("\t")
 
     @copy_numbers.each do |copy_number|
-      copy_number.start_pixel = (copy_number.chr.offset_bp + copy_number.start).to_f.bp_to_pixel
-      copy_number.stop_pixel = (copy_number.chr.offset_bp + copy_number.stop).to_f.bp_to_pixel
+      copy_number.start_pixel = (copy_number.chr.start_cumulative_bp + copy_number.start).to_f.cumulative_bp_to_pixel
+      copy_number.stop_pixel = (copy_number.chr.start_cumulative_bp + copy_number.stop).to_f.cumulative_bp_to_pixel
       copy_number.start_degree = copy_number.start_pixel.to_f.pixel_to_degree
       copy_number.stop_degree = copy_number.stop_pixel.to_f.pixel_to_degree
     end
 
     @segdups.each do |segdup|
-      segdup.start_pixel = (segdup.chr.offset_bp + segdup.start).to_f.bp_to_pixel
-      segdup.stop_pixel = (segdup.chr.offset_bp + segdup.stop).to_f.bp_to_pixel
+      segdup.start_pixel = (segdup.chr.start_cumulative_bp + segdup.start).to_f.cumulative_bp_to_pixel
+      segdup.stop_pixel = (segdup.chr.start_cumulative_bp + segdup.stop).to_f.cumulative_bp_to_pixel
       segdup.start_degree = segdup.start_pixel.to_f.pixel_to_degree
       segdup.stop_degree = segdup.stop_pixel.to_f.pixel_to_degree
     end
 
     @reads.each do |read|
-      read.pixel = (read.chr.offset_bp + read.pos).to_f.bp_to_pixel
+      read.pixel = (read.chr.start_cumulative_bp + read.pos).to_f.cumulative_bp_to_pixel
       read.degree = read.pixel.to_f.pixel_to_degree
     end
   end
@@ -87,7 +92,8 @@ class Chromosome
     # A. Draw the chromosomes themselves
     # a. ... the segment
     buffer.no_fill
-    buffer.stroke_weight 3
+    buffer.stroke_weight 5
+    buffer.stroke_cap MySketch::SQUARE
     if @name.to_i % 2 == 0
       buffer.stroke 0
     else
@@ -100,7 +106,7 @@ class Chromosome
     buffer.no_fill
     buffer.text_align MySketch::CENTER
     buffer.text_font self.class.sketch.f
-    buffer.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 15), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 15))
+    buffer.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 25), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 25))
     buffer.text_align MySketch::LEFT
     
     # B. Draw the elements
@@ -122,7 +128,7 @@ class Chromosome
     buffer.stroke_weight 3
 
     @segdups.each do |segdup|
-      self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 10, 0, 0, :buffer => buffer)
+      self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
     end
   end
 end
