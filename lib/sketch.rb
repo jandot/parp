@@ -32,9 +32,7 @@ class MySketch < Processing::App
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
     @circumference = (2*3.141592*@radius).ceil
-    STDERR.puts "DEBUG:" + @circumference.to_s
 
-#    @origin_x = width/2
     @origin_x = @radius + 50
     @origin_y = height/2
 
