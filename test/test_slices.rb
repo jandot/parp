@@ -91,6 +91,24 @@ class HardCodedZoom < Test::Unit::TestCase
     assert_equal(156_250, S.slices[1].resolution.round)
     assert_equal(3_503_675, S.slices[2].resolution.round)
   end
+
+  def test_positions_bp_to_pixel
+    feature_before_bp = 1_500_000_000
+    feature_within_bp = 2_255_000_000
+    feature_after_bp = 2_800_000_000
+    assert_equal(431, feature_before_bp.cumulative_bp_to_pixel.round)
+    assert_equal(735, feature_within_bp.cumulative_bp_to_pixel.round)
+    assert_equal(926, feature_after_bp.cumulative_bp_to_pixel.round)
+  end
+
+  def test_positions_pixel_to_bp
+    feature_before_pixel = 400
+    feature_within_pixel = 700
+    feature_after_pixel = 900
+    assert_equal(1_391_756_152, feature_before_pixel.pixel_to_cumulative_bp.round)
+    assert_equal(2_249_477_404, feature_within_pixel.pixel_to_cumulative_bp.round)
+    assert_equal(2_709_197_852, feature_after_pixel.pixel_to_cumulative_bp.round)
+  end
 end
 
 #class AutomaticZoom < Test::Unit::TestCase
