@@ -16,7 +16,7 @@ class MySketch < Processing::App
       end
       b.translate(-@origin_x, -@origin_y)
     end
-    @buffer_images[:zoomed] = buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
+    return buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
   end
 
   def draw_line_following_mouse
