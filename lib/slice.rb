@@ -31,7 +31,7 @@ class Slice
   def name
     return [@start_pixel, @stop_pixel, @start_cumulative_bp, @stop_cumulative_bp].join('_')
   end
-  
+
   def self.add(center_bp, length_bp, new_length_pixel = (self.sketch.circumference.to_f/8).floor)#, resolution = 10_000)
     slice_containing_center = self.sketch.slices.select{|s| s.start_pixel <= center_bp}[-1]
 
@@ -87,6 +87,20 @@ class Slice
     output.push("LENGTH PIXEL=" + @length_pixel.to_s)
     output.push("RESOLUTION=" + @resolution.to_s + " bp/pixel")
     return output.join("\n")
+  end
+
+  #Lets you change the pixel boundaries but not the basepair boundaries
+  def zoom
+
+  end
+
+  def pan
+    
+  end
+
+  #Lets you cram in more or less bp into the slice without changing the pixel boundaries
+  def change_contents
+
   end
 
   # This draws a line around the display showing which parts are zoomed in
