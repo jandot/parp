@@ -64,6 +64,7 @@ class MySketch < Processing::App
 
     @buffer_images = Hash.new
     @buffer_images[:zoomed] = self.draw_zoomed_buffer
+    @buffer_images[:information_panel] = self.draw_information_panel
 
     @formatted_position_under_mouse = ''
 
@@ -74,6 +75,7 @@ class MySketch < Processing::App
   def draw
     background 255
     image(@buffer_images[:zoomed],0,0)
+    image(@buffer_images[:information_panel],width - 550,0)
 
     self.draw_line_following_mouse
   end

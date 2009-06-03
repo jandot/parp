@@ -21,6 +21,7 @@ class MySketch < Processing::App
 #    STDERR.puts "==================="
 #    STDERR.puts @slices.sort_by{|s| s.start_cumulative_bp}.collect{|s| s.to_s}.join("\n")
     @buffer_images[:zoomed] = self.draw_zoomed_buffer
+    @buffer_images[:information_panel] = self.draw_information_panel
 
 #    focus = angle(mouse_x, mouse_y, width/2, height/2)
 #    STDERR.puts "MOUSE IS CLICKED ON " + focus.to_s
@@ -37,6 +38,7 @@ class MySketch < Processing::App
 
 #      STDERR.puts @slices.collect{|s| s.to_s}.join("\n")
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
       redraw
     end
   end
