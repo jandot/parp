@@ -72,8 +72,8 @@ class Float
   end
 
   def cumulative_bp_to_chr_bp
-    chr = self.class.sketch.chromosomes.values.select{|c| c.offset_bp <= self}[-1]
-    return [chr, self - chr.offset_bp]
+    chr = self.class.sketch.chromosomes.values.select{|c| c.start_cumulative_bp <= self}[-1]
+    return [chr, self.round - chr.start_cumulative_bp]
   end
 end
 
