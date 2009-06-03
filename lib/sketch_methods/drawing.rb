@@ -47,15 +47,15 @@ class MySketch < Processing::App
         b.text "Slice", x, y
         x += 5
         y += text_ascent + 3
-        b.text "Locus " + start_text + '-' + stop_text, x, y
+        b.text "Locus = " + start_text + '-' + stop_text, x, y
         y += text_ascent + 3
         b.text  "Length (bp) = " + slice.length_bp.format, x, y
         y += text_ascent + 3
-        b.text  "Pixel range =" + slice.start_pixel.format + '-' + slice.stop_pixel.format, x, y
+        b.text  "Pixel range = " + slice.start_pixel.format + '-' + slice.stop_pixel.format, x, y
         y += text_ascent + 3
-        b.text  "Length (pixel) =" + slice.length_pixel.format, x, y
+        b.text  "Length (pixel) = " + slice.length_pixel.format, x, y
         y += text_ascent + 3
-        b.text  "Resolution" + slice.formatted_resolution, x, y
+        b.text  "Resolution = " + slice.formatted_resolution, x, y
         x -= 5
       end
     end
