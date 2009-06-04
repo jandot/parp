@@ -32,8 +32,13 @@ class Slice
     return [@start_pixel, @stop_pixel, @start_cumulative_bp, @stop_cumulative_bp].join('_')
   end
 
+  # Fetches the slice that covers a given position
+  def self.fetch_by_bp(position)
+    return self.sketch.slices.select{|s| s.start_cumulative_bp <= position}[-1]
+  end
+
   def self.add(center_bp, length_bp, new_length_pixel = (self.sketch.circumference.to_f/8).floor)#, resolution = 10_000)
-    slice_containing_center = self.sketch.slices.select{|s| s.start_pixel <= center_bp}[-1]
+    slice_containing_center = self.fetch_by_bp(center_bp)
 
     start_bp = (center_bp - length_bp.to_f/2 + 1).round
     stop_bp = (center_bp + length_bp.to_f/2).round
