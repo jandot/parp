@@ -66,11 +66,18 @@ class Slice
       old_length_pixels = slice.length_bp.to_f/slice.resolution
       proportion_of_rest_of_genome = slice.length_bp.to_f/(GENOME_SIZE - length_bp + 1)
       slice.length_pixel = (old_length_pixels - proportion_of_rest_of_genome*pixels_not_available_for_other_slices).round
+      
+      # We have to check that the slice is not smaller than 1 pixel (i.e. 0 pixels) because that'll give
+      # a divide-by-zero. In that case we set the length_pixel to 0.00001
+      if slice.length_pixel == 0
+        slice.length_pixel = 0.00001
+      end
       slice.resolution = slice.length_bp/slice.length_pixel
     end
 
     self.sketch.slices.push(new_slice)
 
+    # Sort slices on position
     self.sketch.slices = self.sketch.slices.sort_by{|s| s.start_cumulative_bp}
 
     # This is when we can set start_pixel and stop_pixel
