@@ -63,6 +63,7 @@ class Slice
     self.sketch.slices.push(three_prime_slice)
 
     self.sketch.slices.each do |slice|
+      slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
       old_length_pixels = slice.length_bp.to_f/slice.resolution
       proportion_of_rest_of_genome = slice.length_bp.to_f/(GENOME_SIZE - length_bp + 1)
       slice.length_pixel = (old_length_pixels - proportion_of_rest_of_genome*pixels_not_available_for_other_slices).round
@@ -85,6 +86,7 @@ class Slice
       previous_slice_stop_pixel = ( i == 0 ) ? 0 : self.sketch.slices[i-1].stop_pixel
       slice.start_pixel = previous_slice_stop_pixel + 1
       slice.stop_pixel = slice.start_pixel + slice.length_pixel - 1
+      slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
     end
   end
 
