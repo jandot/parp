@@ -57,8 +57,6 @@ class Chromosome
   end
 
   def recalculate_pixels
-    start_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= @start_cumulative_bp}[-1]
-    stop_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= (@start_cumulative_bp + @length_bp)}[-1]
     @start_pixel = @start_cumulative_bp.to_f.cumulative_bp_to_pixel
     @stop_pixel = (@start_cumulative_bp + @length_bp).to_f.cumulative_bp_to_pixel
     @start_degree = @start_pixel.to_f.pixel_to_degree
