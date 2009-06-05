@@ -16,7 +16,7 @@ class MySketch < Processing::App
 #    @slices.push(Slice.new(400000001,GENOME_SIZE, 1001, @circumference))
 
 #    Slice.add(105, 100000000)
-    Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5000000)
+    Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5_000_000)
 
 #    STDERR.puts "==================="
 #    STDERR.puts @slices.sort_by{|s| s.start_cumulative_bp}.collect{|s| s.to_s}.join("\n")
@@ -37,6 +37,16 @@ class MySketch < Processing::App
       @slices.push(Slice.new)
 
 #      STDERR.puts @slices.collect{|s| s.to_s}.join("\n")
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
+    elsif key == 'j'
+      @current_slice.pan(10)
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
+    elsif key == 'k'
+      @current_slice.pan(10, :right)
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
       @buffer_images[:information_panel] = self.draw_information_panel
       redraw
