@@ -103,9 +103,78 @@ class Slice
     return output.join("\n")
   end
 
-  #Lets you change the pixel boundaries but not the basepair boundaries
-  def zoom
+  #Lets you change the basepair boundaries but not the pixel boundaries
+  # To zoom out, use a number < 1 (e.g. 0.2 to zoom out 5X)
+  def zoom(factor = 5)
+    STDERR.puts "CURRENT SLICE STARTS AT " + @start_pixel.to_s
+    upstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}
+    downstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}
 
+    center_bp = (@start_cumulative_bp + @length_bp.to_f/2).round
+    old_start_bp = @start_cumulative_bp
+    old_stop_bp = @stop_cumulative_bp
+
+    @length_bp = (@length_bp.to_f/factor).round
+    @start_cumulative_bp = (center_bp - @length_bp.to_f/2 + 1).round
+    @stop_cumulative_bp = (center_bp + @length_bp.to_f/2).round
+    @resolution = @length_bp.to_f/@length_pixel
+
+    pixels_to_be_crammed_in_upstream_slices = @start_cumulative_bp - old_start_bp
+    pixels_to_be_crammed_in_downstream_slices = old_stop_bp - @stop_cumulative_bp
+
+    upstream_slices.each_with_index do |upstream_slice, i|
+      proportion_of_upstream_sequence = upstream_slice.length_bp.to_f/@start_cumulative_bp
+      STDERR.puts '+++++'
+      STDERR.puts "UPSTREAM STARTING AT " + upstream_slice.start_cumulative_bp.to_s
+      STDERR.puts "LENGTH BP = " + upstream_slice.length_bp.to_s
+      STDERR.puts "ORIGINAL LENGTH PIXEL = " + upstream_slice.length_pixel.to_s
+      if factor > 1
+        STDERR.puts "a " + proportion_of_upstream_sequence.to_s
+        STDERR.puts "b " + pixels_to_be_crammed_in_upstream_slices.to_s
+        upstream_slice.length_bp -= (proportion_of_upstream_sequence*pixels_to_be_crammed_in_upstream_slices).round
+      else
+        upstream_slice.length_bp += (proportion_of_upstream_sequence*pixels_to_be_crammed_in_upstream_slices).round
+      end
+      upstream_slice.resolution = upstream_slice.length_bp.to_f/upstream_slice.length_pixel
+
+      STDERR.puts "PROPORTION = " + proportion_of_upstream_sequence.to_s
+      STDERR.puts "NEW PIXEL LENGTH = " + upstream_slice.length_pixel.to_s
+      if i == 0 # looking at the slice that's at the start
+        upstream_slice.start_cumulative_bp = 1
+      else
+        upstream_slice.start_cumulative_bp = upstream_slices[i-1].stop_cumulative_bp + 1
+      end
+      upstream_slice.stop_cumulative_bp = upstream_slice.start_cumulative_bp + upstream_slice.length_bp - 1
+    end
+
+    downstream_slices.each_with_index do |downstream_slice, i|
+      STDERR.puts '+++++'
+      STDERR.puts "DOWNSTREAM STARTING AT " + downstream_slice.start_cumulative_bp.to_s
+      STDERR.puts "LENGTH BP = " + downstream_slice.length_bp.to_s
+      STDERR.puts "ORIGINAL LENGTH PIXEL = " + downstream_slice.length_pixel.to_s
+      proportion_of_downstream_sequence = downstream_slice.length_bp.to_f/(GENOME_SIZE - @stop_cumulative_bp)
+      if factor > 1
+        downstream_slice.length_bp += (proportion_of_downstream_sequence*pixels_to_be_crammed_in_downstream_slices).round
+      else
+        downstream_slice.length_bp -= (proportion_of_downstream_sequence*pixels_to_be_crammed_in_downstream_slices).round
+      end
+      downstream_slice.resolution = downstream_slice.length_bp.to_f/downstream_slice.length_pixel
+
+      STDERR.puts "PROPORTION = " + proportion_of_downstream_sequence.to_s
+      STDERR.puts "NEW PIXEL LENGTH = " + downstream_slice.length_pixel.to_s
+
+      if i == 0 # looking at the slice that's next downstream of slice under focus
+        downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+      else
+        downstream_slice.start_cumulative_bp = downstream_slices[i-1].stop_cumulative_bp + 1
+      end
+      downstream_slice.stop_cumulative_bp = downstream_slice.start_cumulative_bp + downstream_slice.length_bp - 1
+    end
+
+    self.class.sketch.slices.each do |slice|
+      slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
+      slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+    end
   end
 
   def pan(distance_pixel = 10, direction = :left)
@@ -179,11 +248,6 @@ class Slice
       slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
     end
-  end
-
-  #Lets you cram in more or less bp into the slice without changing the pixel boundaries
-  def change_contents
-
   end
 
   # This draws a line around the display showing which parts are zoomed in

@@ -50,6 +50,26 @@ class MySketch < Processing::App
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
       @buffer_images[:information_panel] = self.draw_information_panel
       redraw
+    elsif key == 'n'
+      @current_slice.pan(50)
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
+    elsif key == 'm'
+      @current_slice.pan(50, :right)
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
+    elsif key == 'u'
+      @current_slice.zoom(5)
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
+    elsif key == 'i'
+      @current_slice.zoom(0.2)
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
     end
   end
 end
