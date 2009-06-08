@@ -103,136 +103,61 @@ class Slice
     return output.join("\n")
   end
 
-  #Lets you change the basepair boundaries but not the pixel boundaries
+  # Lets you change the basepair boundaries but not the pixel boundaries
   # To zoom out, use a number < 1 (e.g. 0.2 to zoom out 5X)
+  # Only the bp content of the neighbouring slices is changed as well. Content
+  # of slices further away stays the same.
   def zoom(factor = 5)
     STDERR.puts "CURRENT SLICE STARTS AT " + @start_pixel.to_s
-    upstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}
-    downstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}
+    upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
+    downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[0]
 
     center_bp = (@start_cumulative_bp + @length_bp.to_f/2).round
-    old_start_bp = @start_cumulative_bp
-    old_stop_bp = @stop_cumulative_bp
 
     @length_bp = (@length_bp.to_f/factor).round
     @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
     @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
     @resolution = @length_bp.to_f/@length_pixel
 
-    pixels_to_be_crammed_in_upstream_slices = @start_cumulative_bp - old_start_bp
-    pixels_to_be_crammed_in_downstream_slices = old_stop_bp - @stop_cumulative_bp
-
-    upstream_slices.each_with_index do |upstream_slice, i|
-      proportion_of_upstream_sequence = upstream_slice.length_bp.to_f/old_start_bp
-      if factor > 1
-        upstream_slice.length_bp += (proportion_of_upstream_sequence*pixels_to_be_crammed_in_upstream_slices).round
-
-      else
-        upstream_slice.length_bp -= (proportion_of_upstream_sequence*pixels_to_be_crammed_in_upstream_slices).round
-      end
-      upstream_slice.resolution = upstream_slice.length_bp.to_f/upstream_slice.length_pixel
-
-      if i == 0 # looking at the slice that's at the start
-        upstream_slice.start_cumulative_bp = 1
-      else
-        upstream_slice.start_cumulative_bp = upstream_slices[i-1].stop_cumulative_bp + 1
-      end
-      upstream_slice.stop_cumulative_bp = upstream_slice.start_cumulative_bp + upstream_slice.length_bp - 1
-    end
-
-    downstream_slices.each_with_index do |downstream_slice, i|
-      proportion_of_downstream_sequence = downstream_slice.length_bp.to_f/(GENOME_SIZE - old_stop_bp)
-      if factor > 1
-        downstream_slice.length_bp += (proportion_of_downstream_sequence*pixels_to_be_crammed_in_downstream_slices).round
-      else
-        downstream_slice.length_bp -= (proportion_of_downstream_sequence*pixels_to_be_crammed_in_downstream_slices).round
-      end
-      downstream_slice.resolution = downstream_slice.length_bp.to_f/downstream_slice.length_pixel
-
-      if i == 0 # looking at the slice that's next downstream of slice under focus
-        downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
-      else
-        downstream_slice.start_cumulative_bp = downstream_slices[i-1].stop_cumulative_bp + 1
-      end
-      downstream_slice.stop_cumulative_bp = downstream_slice.start_cumulative_bp + downstream_slice.length_bp - 1
-    end
-
-    self.class.sketch.slices.each do |slice|
-      slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
-      slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+    upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
+    downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+    [upstream_slice, downstream_slice].each do |s|
+      s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
+      s.resolution = s.length_bp.to_f/s.length_pixel
+      s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+      s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
     end
   end
 
+  # Panning moves the slice window left or right by a given number of pixels. This will also change
+  # the bp contents of the slice.
+  # When panning left, the bp boundary is moved so the basepairs upstream of the original boundary
+  # are shown. As a result, the slice just upstream of the active slice will loose those basepairs.
+  # Slices that are
   def pan(distance_pixel = 10, direction = :left)
-    STDERR.puts "CURRENT SLICE STARTS AT " + @start_pixel.to_s
-    upstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}
-    downstream_slices = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}
-    
+    upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
+    downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.stop_cumulative_bp}[0]
+
+    #Just so we can always add the distance_pixel
     if direction == :left
-      distance_pixel = ( @start_pixel - distance_pixel < 1 ) ? distance_pixel - @start_pixel : distance_pixel
-      @start_pixel -= distance_pixel
-      @stop_pixel -= distance_pixel
-      @start_cumulative_bp -= (@resolution*distance_pixel).round
-      @stop_cumulative_bp -= (@resolution*distance_pixel).round
-    else
-      distance_pixel = ( @stop_pixel + distance_pixel > self.class.sketch.circumference ) ? self.class.sketch.circumference - @stop_pixel : distance_pixel
-      @start_pixel += distance_pixel
-      @stop_pixel += distance_pixel
-      @start_cumulative_bp += (@resolution*distance_pixel).round
-      @stop_cumulative_bp += (@resolution*distance_pixel).round
-    end
-    STDERR.puts "DISTANCE PIXEL = " + distance_pixel.to_s
-
-    upstream_slices.each_with_index do |upstream_slice, i|
-      proportion_of_upstream_sequence = upstream_slice.length_bp.to_f/@start_cumulative_bp
-      STDERR.puts '+++++'
-      STDERR.puts "UPSTREAM STARTING AT " + upstream_slice.start_cumulative_bp.to_s
-      STDERR.puts "LENGTH BP = " + upstream_slice.length_bp.to_s
-      STDERR.puts "ORIGINAL LENGTH PIXEL = " + upstream_slice.length_pixel.to_s
-      if direction == :left
-        upstream_slice.length_pixel -= (proportion_of_upstream_sequence*distance_pixel).round
-      else
-        upstream_slice.length_pixel += (proportion_of_upstream_sequence*distance_pixel).round
-      end
-      upstream_slice.resolution = upstream_slice.length_bp.to_f/upstream_slice.length_pixel
-
-      STDERR.puts "PROPORTION = " + proportion_of_upstream_sequence.to_s
-      STDERR.puts "NEW PIXEL LENGTH = " + upstream_slice.length_pixel.to_s
-      if i == 0 # looking at the slice that's at the start
-        upstream_slice.start_pixel = 1
-      else
-        upstream_slice.start_pixel = upstream_slices[i-1].stop_pixel + 1
-      end
-      upstream_slice.stop_pixel = upstream_slice.start_pixel + upstream_slice.length_pixel - 1
+      distance_pixel = -distance_pixel
     end
 
-    downstream_slices.each_with_index do |downstream_slice, i|
-      STDERR.puts '+++++'
-      STDERR.puts "DOWNSTREAM STARTING AT " + downstream_slice.start_cumulative_bp.to_s
-      STDERR.puts "LENGTH BP = " + downstream_slice.length_bp.to_s
-      STDERR.puts "ORIGINAL LENGTH PIXEL = " + downstream_slice.length_pixel.to_s
-      proportion_of_downstream_sequence = downstream_slice.length_bp.to_f/(GENOME_SIZE - @stop_cumulative_bp)
-      if direction == :left
-        downstream_slice.length_pixel += (proportion_of_downstream_sequence*distance_pixel).round
-      else
-        downstream_slice.length_pixel -= (proportion_of_downstream_sequence*distance_pixel).round
-      end
-      downstream_slice.resolution = downstream_slice.length_bp.to_f/downstream_slice.length_pixel
+    @start_pixel += distance_pixel
+    @stop_pixel += distance_pixel
+    @start_cumulative_bp += (@resolution*distance_pixel).round
+    @stop_cumulative_bp += (@resolution*distance_pixel).round
 
-      STDERR.puts "PROPORTION = " + proportion_of_downstream_sequence.to_s
-      STDERR.puts "NEW PIXEL LENGTH = " + downstream_slice.length_pixel.to_s
-
-      if i == 0 # looking at the slice that's next downstream of slice under focus
-        downstream_slice.start_pixel = @stop_pixel + 1
-      else
-        downstream_slice.start_pixel = downstream_slices[i-1].stop_pixel + 1
-      end
-      downstream_slice.stop_pixel = downstream_slice.start_pixel + downstream_slice.length_pixel - 1
-    end
-
-    self.class.sketch.slices.each do |slice|
-      slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
-      slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+    upstream_slice.stop_pixel = @start_pixel - 1
+    upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
+    downstream_slice.start_pixel = @stop_pixel + 1
+    downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+    [upstream_slice, downstream_slice].each do |s|
+      s.length_pixel = s.stop_pixel - s.start_pixel + 1
+      s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
+      s.resolution = s.length_bp.to_f/s.length_pixel
+      s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+      s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
     end
   end
 

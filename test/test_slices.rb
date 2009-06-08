@@ -179,51 +179,108 @@ sleep 3
 #  end
 #end
 
-class ZoomInOut < Test::Unit::TestCase
+#class ZoomIn < Test::Unit::TestCase
+#  def setup
+#    S.slices = Array.new
+#    S.slices.push(Slice.new(1,2_240_727_404, 1, 644))
+#    S.slices.push(Slice.new(2_240_727_405, 2_260_727_404, 645, 772))
+#    S.slices.push(Slice.new(2_260_727_405, GENOME_SIZE, 773, S.circumference))
+#
+#    S.slices[1].zoom(10)
+#
+#    sleep 3
+#  end
+#
+#  def test_bp_sizes
+#    assert_equal(2_249_727_404, S.slices[0].length_bp.round)
+#    assert_equal(2_000_000, S.slices[1].length_bp.round)
+#    assert_equal(828_860_038, S.slices[2].length_bp.round)
+#  end
+#
+#  def test_bp_boundaries
+#    assert_equal(1, S.slices[0].start_cumulative_bp)
+#    assert_equal(2_249_727_404, S.slices[0].stop_cumulative_bp)
+#    assert_equal(2_249_727_405, S.slices[1].start_cumulative_bp)
+#    assert_equal(2_251_727_404, S.slices[1].stop_cumulative_bp)
+#    assert_equal(2_251_727_405, S.slices[2].start_cumulative_bp)
+#    assert_equal(GENOME_SIZE, S.slices[2].stop_cumulative_bp)
+#  end
+#
+#  def test_pixel_sizes
+#    assert_equal(644, S.slices[0].length_pixel.round)
+#    assert_equal(128, S.slices[1].length_pixel.round)
+#    assert_equal(234, S.slices[2].length_pixel.round)
+#  end
+#
+#  def test_pixel_boundaries
+#    assert_equal(1, S.slices[0].start_pixel)
+#    assert_equal(644, S.slices[0].stop_pixel)
+#    assert_equal(645, S.slices[1].start_pixel)
+#    assert_equal(772, S.slices[1].stop_pixel)
+#    assert_equal(773, S.slices[2].start_pixel)
+#    assert_equal(1006, S.slices[2].stop_pixel)
+#  end
+#
+#  def test_resolution
+#    assert_equal(3_493_366, S.slices[0].resolution.round)
+#    assert_equal(15_625, S.slices[1].resolution.round)
+#    assert_equal(3_542_137, S.slices[2].resolution.round)
+#  end
+#end
+
+#class ZoomOut < Test::Unit::TestCase
+#  #TODO
+#end
+
+class PanLeft < Test::Unit::TestCase
   def setup
     S.slices = Array.new
     S.slices.push(Slice.new(1,2_240_727_404, 1, 644))
     S.slices.push(Slice.new(2_240_727_405, 2_260_727_404, 645, 772))
     S.slices.push(Slice.new(2_260_727_405, GENOME_SIZE, 773, S.circumference))
 
-    S.slices[1].zoom(10)
+    S.slices[1].pan((S.slices[1].length_pixel.to_f/10).floor, :left) # should be 12 pixels
 
     sleep 3
   end
 
   def test_bp_sizes
-    assert_equal(2_249_727_404, S.slices[0].length_bp.round)
-    assert_equal(2_000_000, S.slices[1].length_bp.round)
-    assert_equal(828_860_038, S.slices[2].length_bp.round)
+    assert_equal(2_238_852_404, S.slices[0].length_bp.round)
+    assert_equal(20_000_000, S.slices[1].length_bp.round)
+    assert_equal(821_735_038, S.slices[2].length_bp.round)
   end
 
   def test_bp_boundaries
     assert_equal(1, S.slices[0].start_cumulative_bp)
-    assert_equal(2_249_727_404, S.slices[0].stop_cumulative_bp)
-    assert_equal(2_249_727_405, S.slices[1].start_cumulative_bp)
-    assert_equal(2_251_727_404, S.slices[1].stop_cumulative_bp)
-    assert_equal(2_251_727_405, S.slices[2].start_cumulative_bp)
+    assert_equal(2_238_852_404, S.slices[0].stop_cumulative_bp)
+    assert_equal(2_238_852_405, S.slices[1].start_cumulative_bp)
+    assert_equal(2_258_852_404, S.slices[1].stop_cumulative_bp)
+    assert_equal(2_258_852_405, S.slices[2].start_cumulative_bp)
     assert_equal(GENOME_SIZE, S.slices[2].stop_cumulative_bp)
   end
 
   def test_pixel_sizes
-    assert_equal(644, S.slices[0].length_pixel.round)
+    assert_equal(632, S.slices[0].length_pixel.round)
     assert_equal(128, S.slices[1].length_pixel.round)
-    assert_equal(234, S.slices[2].length_pixel.round)
+    assert_equal(246, S.slices[2].length_pixel.round)
   end
 
   def test_pixel_boundaries
     assert_equal(1, S.slices[0].start_pixel)
-    assert_equal(644, S.slices[0].stop_pixel)
-    assert_equal(645, S.slices[1].start_pixel)
-    assert_equal(772, S.slices[1].stop_pixel)
-    assert_equal(773, S.slices[2].start_pixel)
+    assert_equal(632, S.slices[0].stop_pixel)
+    assert_equal(633, S.slices[1].start_pixel)
+    assert_equal(760, S.slices[1].stop_pixel)
+    assert_equal(761, S.slices[2].start_pixel)
     assert_equal(1006, S.slices[2].stop_pixel)
   end
-  
+
   def test_resolution
-    assert_equal(3_493_366, S.slices[0].resolution.round)
-    assert_equal(15_625, S.slices[1].resolution.round)
-    assert_equal(3_542_137, S.slices[2].resolution.round)
+    assert_equal(3_542_488, S.slices[0].resolution.round)
+    assert_equal(156_250, S.slices[1].resolution.round)
+    assert_equal(3_340_386, S.slices[2].resolution.round)
   end
 end
+
+#class PanRight < Test::Unit::TestCase
+#  #TODO
+#end
