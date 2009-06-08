@@ -19,13 +19,7 @@ class Slice
     @length_pixel = @stop_pixel - @start_pixel + 1
     @resolution = @length_bp.to_f/@length_pixel
     @formatted_resolution = ''
-    if @resolution < 1000
-      @formatted_resolution = sprintf("%.2f", @resolution) + ' bp/pixel'
-    elsif @resolution < 1_000_000
-      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1000)) + ' kb/pixel'
-    else
-      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1_000_000)) + ' Mb/pixel'
-    end
+    self.format_resolution
   end
 
   def name
@@ -35,6 +29,16 @@ class Slice
   # Fetches the slice that covers a given position
   def self.fetch_by_bp(position)
     return self.sketch.slices.select{|s| s.start_cumulative_bp <= position}[-1]
+  end
+
+  def format_resolution
+    if @resolution < 1000
+      @formatted_resolution = sprintf("%.2f", @resolution) + ' bp/pixel'
+    elsif @resolution < 1_000_000
+      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1000)) + ' kb/pixel'
+    else
+      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1_000_000)) + ' Mb/pixel'
+    end
   end
 
   def self.add(center_bp, length_bp, new_length_pixel = (self.sketch.circumference.to_f/8).floor)#, resolution = 10_000)
@@ -108,7 +112,6 @@ class Slice
   # Only the bp content of the neighbouring slices is changed as well. Content
   # of slices further away stays the same.
   def zoom(factor = 5)
-    STDERR.puts "CURRENT SLICE STARTS AT " + @start_pixel.to_s
     upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
     downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[0]
 
@@ -127,6 +130,7 @@ class Slice
       s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
       s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
     end
+    self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
   # Panning moves the slice window left or right by a given number of pixels. This will also change
@@ -159,6 +163,7 @@ class Slice
       s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
       s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
     end
+    self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
   # This draws a line around the display showing which parts are zoomed in
