@@ -45,6 +45,9 @@ class MySketch < Processing::App
 
         y += text_ascent + 5
         b.text "Slice", x, y
+        b.fill slice.colour
+        b.rect(x + text_width("Slice "), y - text_ascent, text_ascent, text_ascent)
+        b.fill 0
         x += 5
         y += text_ascent + 3
         b.text "Locus = " + start_text + '-' + stop_text, x, y

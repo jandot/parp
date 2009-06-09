@@ -7,6 +7,7 @@ class Slice
   attr_accessor :start_pixel, :stop_pixel, :range_pixel, :length_pixel
   attr_accessor :resolution #in bp/pixel
   attr_accessor :formatted_resolution
+  attr_accessor :colour
 
   def initialize(start_cumulative_bp = 1, stop_cumulative_bp = GENOME_SIZE, start_pixel = 1, stop_pixel = self.class.sketch.circumference)
     @start_cumulative_bp = start_cumulative_bp
@@ -20,6 +21,7 @@ class Slice
     @resolution = @length_bp.to_f/@length_pixel
     @formatted_resolution = ''
     self.format_resolution
+    @colour = self.class.sketch.color(self.class.sketch.random(0,255),self.class.sketch.random(0,255),self.class.sketch.random(0,255))
   end
 
   def name
@@ -62,6 +64,9 @@ class Slice
     three_prime_slice = Marshal::load(Marshal.dump(slice_containing_center)) #deep copy
     three_prime_slice.start_cumulative_bp = new_slice.stop_cumulative_bp + 1
     three_prime_slice.length_bp = three_prime_slice.stop_cumulative_bp - three_prime_slice.start_cumulative_bp + 1
+    
+    five_prime_slice.colour = self.sketch.color(self.sketch.random(0,255),self.sketch.random(0,255),self.sketch.random(0,255))
+    three_prime_slice.colour = self.sketch.color(self.sketch.random(0,255),self.sketch.random(0,255),self.sketch.random(0,255))
 
     self.sketch.slices.push(five_prime_slice)
     self.sketch.slices.push(three_prime_slice)
@@ -173,6 +178,11 @@ class Slice
 
     start_degree = @start_pixel.to_f.pixel_to_degree
     stop_degree = @stop_pixel.to_f.pixel_to_degree
+    buffer.stroke @colour
+    buffer.stroke_weight 5
+    self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+    buffer.stroke 0
+    buffer.stroke_weight 1
     resolutions = self.class.sketch.slices.collect{|s| s.resolution}
     value = self.class.sketch.map(@resolution, resolutions.min, resolutions.max, 0, 20)
     self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 60 - value, 0, 0, :buffer => buffer)
