@@ -12,6 +12,10 @@ class ReadPair
     @code, @qual = code, qual.to_i
   end
 
+  def to_s
+    return [@reads[0].to_s, @reads[1].to_s].join(' -> ')
+  end
+
   def draw(buffer)
     buffer.no_fill
     buffer.stroke 200

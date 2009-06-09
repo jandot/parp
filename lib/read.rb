@@ -19,4 +19,8 @@ class Read
     self.class.sketch.chromosomes[chr].reads.push(self)
   end
 
+  def to_s
+    return [@chr.name, @pos].join(":")
+  end
+
 end
