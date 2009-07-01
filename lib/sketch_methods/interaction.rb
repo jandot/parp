@@ -40,36 +40,38 @@ class MySketch < Processing::App
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
       @buffer_images[:information_panel] = self.draw_information_panel
       redraw
-    elsif key == 'j'
-      @current_slice.pan(10)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
-    elsif key == 'k'
-      @current_slice.pan(10, :right)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
-    elsif key == 'n'
-      @current_slice.pan(50)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
-    elsif key == 'm'
-      @current_slice.pan(50, :right)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
-    elsif key == 'u'
-      @current_slice.zoom(5)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
-    elsif key == 'i'
-      @current_slice.zoom(0.2)
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
-      redraw
+    elsif key_code
+      if key_code == LEFT #key == 'j'
+        @current_slice.pan(10)
+        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+        @buffer_images[:information_panel] = self.draw_information_panel
+        redraw
+      elsif key_code == RIGHT #key == 'k'
+        @current_slice.pan(10, :right)
+        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+        @buffer_images[:information_panel] = self.draw_information_panel
+        redraw
+#      elsif key == 'n'
+#        @current_slice.pan(50)
+#        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+#        @buffer_images[:information_panel] = self.draw_information_panel
+#        redraw
+#      elsif key == 'm'
+#        @current_slice.pan(50, :right)
+#        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+#        @buffer_images[:information_panel] = self.draw_information_panel
+#        redraw
+      elsif key_code == UP #key == 'u'
+        @current_slice.zoom(5)
+        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+        @buffer_images[:information_panel] = self.draw_information_panel
+        redraw
+      elsif key_code == DOWN #key == 'i'
+        @current_slice.zoom(0.2)
+        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+        @buffer_images[:information_panel] = self.draw_information_panel
+        redraw
+      end
     end
   end
 end
