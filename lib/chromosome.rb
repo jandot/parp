@@ -62,7 +62,6 @@ class Chromosome
     @start_degree = @start_pixel.to_f.pixel_to_degree
     @stop_degree = @stop_pixel.to_f.pixel_to_degree
     @length_degree = @stop_degree - @start_degree
-#    STDERR.puts ["CHROMOSOME:",@name, start_slice.start_pixel, stop_slice.start_pixel,@start_pixel, @stop_pixel].join("\t")
 
     @copy_numbers.each do |copy_number|
       copy_number.start_pixel = (copy_number.chr.start_cumulative_bp + copy_number.start).to_f.cumulative_bp_to_pixel
