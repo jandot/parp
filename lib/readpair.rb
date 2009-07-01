@@ -26,7 +26,7 @@ class ReadPair
     elsif @code == 'RF'
       buffer.stroke 0,255,0,200
     end
-    buffer.stroke_weight 0.5
+    buffer.stroke_weight 1
 
     distance_from_circle = nil
     bezier_distance = nil
