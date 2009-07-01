@@ -43,7 +43,7 @@ class Slice
     end
   end
 
-  def self.add(center_bp, length_bp, new_length_pixel = (self.sketch.circumference.to_f/8).floor)#, resolution = 10_000)
+  def self.add(center_bp, length_bp, new_length_pixel = (self.sketch.circumference.to_f/4).floor)#, resolution = 10_000)
     slice_containing_center = self.fetch_by_bp(center_bp)
 
     start_bp = (center_bp - length_bp.to_f/2 + 1).round
