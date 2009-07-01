@@ -75,7 +75,7 @@ class MySketch < Processing::App
   def draw
     background 255
     image(@buffer_images[:zoomed],0,0)
-    image(@buffer_images[:information_panel],width - 550,0)
+    image(@buffer_images[:information_panel],width - 350,0)
 
     self.draw_line_following_mouse
   end
