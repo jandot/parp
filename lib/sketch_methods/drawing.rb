@@ -20,7 +20,7 @@ class MySketch < Processing::App
   end
 
   def draw_information_panel
-    buffer_information_panel = buffer(500, self.height, JAVA2D) do |b|
+    buffer_information_panel = buffer(300, self.height, JAVA2D) do |b|
       b.background 255
       b.smooth
 
