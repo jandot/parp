@@ -24,6 +24,16 @@ class MySketch < Processing::App
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
       @buffer_images[:information_panel] = self.draw_information_panel
       redraw
+    elsif key == 'b' #back
+      if @history.length > 1
+        @history.pop
+        @slices = Array.new
+        @slices = @history.pop
+
+        @buffer_images[:zoomed] = self.draw_zoomed_buffer
+        @buffer_images[:information_panel] = self.draw_information_panel
+        redraw
+      end
     elsif key_code
       if key_code == LEFT
         @current_slice.pan(10)
@@ -46,6 +56,10 @@ class MySketch < Processing::App
         @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       end
+    end
+
+    if @history.length == 20
+      @history.shift
     end
   end
 end

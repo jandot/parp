@@ -1,5 +1,14 @@
 class MySketch < Processing::App
   def draw_zoomed_buffer
+    # We're adding the existing slices to the history here.
+    # For some reason we can't do @history.push(@slices), or even
+    # a @history.push(@slices.clone). We have to loop over all current slices
+    # individually.
+    @history.push(Array.new)
+    @slices.each do |slice|
+      @history[-1].push(slice.clone)
+    end
+
     buffer_zoomed = buffer(self.width, self.height, JAVA2D) do |b|
       b.background 255
       b.smooth

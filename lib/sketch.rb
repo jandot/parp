@@ -20,6 +20,7 @@ class MySketch < Processing::App
   attr_accessor :current_slice
   attr_accessor :lenses
   attr_accessor :formatted_position_under_mouse
+  attr_accessor :history
 
   attr_accessor :buffers
 
@@ -52,6 +53,8 @@ class MySketch < Processing::App
     @slices = Array.new
     @slices.push(Slice.new)
     @current_slice = @slices[0]
+
+    @history = Array.new
 
     self.load_chromosomes
     self.load_readpairs
