@@ -170,4 +170,16 @@ class Slice
     end
     self.class.sketch.slices.each{|s| s.format_resolution}
   end
+
+  # This draws a line around the display showing which parts are zoomed in
+  def draw(buffer)
+    buffer.no_fill
+    buffer.stroke 0
+
+    start_degree = @start_pixel.to_f.pixel_to_degree
+    stop_degree = @stop_pixel.to_f.pixel_to_degree
+    buffer.stroke @colour
+    buffer.stroke_weight 5
+    self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+  end
 end
