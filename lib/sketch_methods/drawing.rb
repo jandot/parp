@@ -11,11 +11,9 @@ class MySketch < Processing::App
       @readpairs.each do |readpair|
         readpair.draw(b)
       end
-      @slices.sort_by{|s| s.start_cumulative_bp}.each do |slice|
-        slice.draw(b)
-      end
       b.translate(-@origin_x, -@origin_y)
     end
+
     return buffer_zoomed.get(0, 0, buffer_zoomed.width, buffer_zoomed.height)
   end
 
