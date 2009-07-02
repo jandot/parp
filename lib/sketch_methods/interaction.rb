@@ -1,9 +1,8 @@
 class MySketch < Processing::App
   def mouse_moved
-
     @current_slice = @slices.sort_by{|s| s.start_pixel}.select{|s| s.start_pixel <= self.pixel_under_mouse}[-1]
     @chromosome_under_mouse, @base_under_mouse = self.find_position_under_mouse
-    @formatted_position_under_mouse = @current_slice.nil? ? '' : [@chromosome_under_mouse, @base_under_mouse.format].join(':')
+    @formatted_position_under_mouse = @chromosome_under_mouse.nil? ? '' : [@chromosome_under_mouse, @base_under_mouse.format].join(':')
     redraw
   end
 
