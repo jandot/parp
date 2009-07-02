@@ -69,6 +69,8 @@ class MySketch < Processing::App
         b.text  "Length (pixel) = " + slice.length_pixel.format, x, y
         y += text_ascent + 3
         b.text  "Resolution = " + slice.formatted_resolution, x, y
+        y += text_ascent + 3
+        b.text "Fixed? = " + slice.fixed.to_s, x, y
         x -= 5
       end
     end

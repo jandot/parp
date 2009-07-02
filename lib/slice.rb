@@ -8,6 +8,7 @@ class Slice
   attr_accessor :resolution #in pixel/bp => high resolution = zoomed in
   attr_accessor :formatted_resolution
   attr_accessor :colour
+  attr_accessor :fixed
 
   def initialize(start_cumulative_bp = 1, stop_cumulative_bp = GENOME_SIZE, start_pixel = 1, stop_pixel = self.class.sketch.circumference)
     @start_cumulative_bp = start_cumulative_bp
@@ -19,6 +20,7 @@ class Slice
     @range_pixel = Range.new(@start_pixel, @stop_pixel)
     @length_pixel = @stop_pixel - @start_pixel + 1
     @resolution = @length_pixel.to_f/@length_bp
+    @fixed = false
     @formatted_resolution = ''
     self.format_resolution
   end
@@ -110,6 +112,7 @@ class Slice
     output.push("STOP PIXEL=" + @stop_pixel.to_s)
     output.push("LENGTH PIXEL=" + @length_pixel.to_s)
     output.push("RESOLUTION=" + 1.to_f/@resolution.to_s + " bp/pixel")
+    output.push("FIXED?=" + @fixed.to_s)
     return output.join("\n")
   end
 

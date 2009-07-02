@@ -34,6 +34,10 @@ class MySketch < Processing::App
         @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       end
+    elsif key == 'f' #toggle fixed
+      @current_slice.fixed = !@current_slice.fixed
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
     elsif key_code
       if key_code == LEFT
         @current_slice.pan(10)
