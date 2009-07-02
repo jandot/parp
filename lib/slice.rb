@@ -24,7 +24,7 @@ class Slice
   end
 
   def set_colour
-    red = self.class.sketch.class.map(@resolution, 1E-10, 1, 0, 255)
+    red = self.class.sketch.class.map(Math.log(@resolution), Math.log(1E-6), Math.log(1), 0, 255)
     @colour = self.class.sketch.color(red,0,0)
   end
 
