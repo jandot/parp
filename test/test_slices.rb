@@ -38,7 +38,7 @@ class NoZoom < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_062_214, S.slices[0].resolution.round)
+    assert_equal("3.2656", sprintf("%.4f", S.slices[0].resolution*1E7))
   end
 
   def test_positions
@@ -87,9 +87,9 @@ class HardCodedZoom < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_479_390, S.slices[0].resolution.round)
-    assert_equal(156_250, S.slices[1].resolution.round)
-    assert_equal(3_503_675, S.slices[2].resolution.round)
+    assert_equal("2.8741", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.0000064, S.slices[1].resolution)
+    assert_equal("2.8541", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -155,9 +155,9 @@ class ZoomByClick < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_484_801, S.slices[0].resolution.round)
-    assert_equal(156_250, S.slices[1].resolution.round)
-    assert_equal(3_488_766, S.slices[2].resolution.round)
+    assert_equal("2.8696", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.0000064, S.slices[1].resolution)
+    assert_equal("2.8663", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -173,8 +173,8 @@ class ZoomByClick < Test::Unit::TestCase
     feature_before_pixel = 400
     feature_within_pixel = 700
     feature_after_pixel = 900
-    assert_equal(1_393_920_400, feature_before_pixel.pixel_to_cumulative_bp.round)
+    assert_equal(1_393_920_625, feature_before_pixel.pixel_to_cumulative_bp.round)
     assert_equal(2_249_633_654, feature_within_pixel.pixel_to_cumulative_bp.round)
-    assert_equal(2_710_778_218, feature_after_pixel.pixel_to_cumulative_bp.round)
+    assert_equal(2_710_778_233, feature_after_pixel.pixel_to_cumulative_bp.round)
   end
 end
