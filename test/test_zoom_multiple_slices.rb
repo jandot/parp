@@ -80,13 +80,13 @@ class ZoomIn < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(2_933_893, S.slices[0].resolution.round) # 2933892.8000
-    assert_equal(22_004_196, S.slices[1].resolution.round)
-    assert_equal(3_385_261, S.slices[2].resolution.round) # 3385260.9231
-    assert_equal(2_552_487, S.slices[3].resolution.round) # 2552486.7360
-    assert_equal(440_084, S.slices[4].resolution.round) # 440083.920
-    assert_equal(4_254_145, S.slices[5].resolution.round) # 4254144.5600
-    assert_equal(2_136_330, S.slices[6].resolution.round) # 2136329.7185
+    assert_equal("3.4084", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal("4.5446", sprintf("%.4f", S.slices[1].resolution*1E8))
+    assert_equal("2.9540", sprintf("%.4f", S.slices[2].resolution*1E7))
+    assert_equal("3.9177", sprintf("%.4f", S.slices[3].resolution*1E7))
+    assert_equal("2.2723", sprintf("%.4f", S.slices[4].resolution*1E6))
+    assert_equal("2.3506", sprintf("%.4f", S.slices[5].resolution*1E7))
+    assert_equal("4.6809", sprintf("%.4f", S.slices[6].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -195,13 +195,13 @@ class PanLeft < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(2_933_893, S.slices[0].resolution.round) # 2933892.8000
-    assert_equal(22_004_196, S.slices[1].resolution.round)
-    assert_equal(3_385_261, S.slices[2].resolution.round) # 3385260.9231
-    assert_equal(1_650_315, S.slices[3].resolution.round) # 1650314.7
-    assert_equal(4_400_839, S.slices[4].resolution.round) # 4400839.2
-    assert_equal(3_025_577, S.slices[5].resolution.round) # 3025576.95
-    assert_equal(2_136_330, S.slices[6].resolution.round) # 2136329.7185
+    assert_equal("3.4084", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal("4.5446", sprintf("%.4f", S.slices[1].resolution*1E8))
+    assert_equal("2.9540", sprintf("%.4f", S.slices[2].resolution*1E7))
+    assert_equal("6.0595", sprintf("%.4f", S.slices[3].resolution*1E7))
+    assert_equal("2.2723", sprintf("%.4f", S.slices[4].resolution*1E7))
+    assert_equal("3.3052", sprintf("%.4f", S.slices[5].resolution*1E7))
+    assert_equal("4.6809", sprintf("%.4f", S.slices[6].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel

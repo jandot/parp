@@ -51,9 +51,9 @@ class ZoomIn < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_493_366, S.slices[0].resolution.round)
-    assert_equal(15_625, S.slices[1].resolution.round)
-    assert_equal(3_542_137, S.slices[2].resolution.round) #3542136.91453
+    assert_equal("2.8626", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.000064, S.slices[1].resolution)
+    assert_equal("2.8232", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -118,9 +118,9 @@ class ZoomOut < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_339_639, S.slices[0].resolution.round) # 3339638.8261
-    assert_equal(1_562_500, S.slices[1].resolution.round) # 1562500
-    assert_equal(3_119_060, S.slices[2].resolution.round) # 3119059.9915
+    assert_equal("2.9943", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.00000064, S.slices[1].resolution) # 1562500
+    assert_equal("3.2061", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -185,9 +185,9 @@ class PanLeft < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_542_488, S.slices[0].resolution.round) # 3542487.9810
-    assert_equal(156_250, S.slices[1].resolution.round) # 156250
-    assert_equal(3_340_386, S.slices[2].resolution.round) # 3340386.3333
+    assert_equal("2.8229", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.0000064, S.slices[1].resolution) # 1562500
+    assert_equal("2.9937", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
@@ -252,9 +252,9 @@ class PanRight < Test::Unit::TestCase
   end
 
   def test_resolution
-    assert_equal(3_418_601, S.slices[0].resolution.round) # 3418601.2256
-    assert_equal(156_250, S.slices[1].resolution.round) # 156250
-    assert_equal(3_684_617, S.slices[2].resolution.round) # 3684617.2883
+    assert_equal("2.9252", sprintf("%.4f", S.slices[0].resolution*1E7))
+    assert_equal(0.0000064, S.slices[1].resolution) # 1562500
+    assert_equal("2.7140", sprintf("%.4f", S.slices[2].resolution*1E7))
   end
 
   def test_positions_bp_to_pixel
