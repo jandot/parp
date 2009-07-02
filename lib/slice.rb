@@ -21,7 +21,11 @@ class Slice
     @resolution = @length_bp.to_f/@length_pixel
     @formatted_resolution = ''
     self.format_resolution
-    @colour = self.class.sketch.color(self.class.sketch.random(0,255),self.class.sketch.random(0,255),self.class.sketch.random(0,255))
+  end
+
+  def set_colour
+    red = self.class.sketch.class.map(@resolution, 1, 5000000, 255, 0)
+    @colour = self.class.sketch.color(red,0,0)
   end
 
   def name
@@ -65,9 +69,6 @@ class Slice
     three_prime_slice.start_cumulative_bp = new_slice.stop_cumulative_bp + 1
     three_prime_slice.length_bp = three_prime_slice.stop_cumulative_bp - three_prime_slice.start_cumulative_bp + 1
     
-    five_prime_slice.colour = self.sketch.color(self.sketch.random(0,255),self.sketch.random(0,255),self.sketch.random(0,255))
-    three_prime_slice.colour = self.sketch.color(self.sketch.random(0,255),self.sketch.random(0,255),self.sketch.random(0,255))
-
     self.sketch.slices.push(five_prime_slice)
     self.sketch.slices.push(three_prime_slice)
 
@@ -173,6 +174,7 @@ class Slice
 
   # This draws a line around the display showing which parts are zoomed in
   def draw(buffer)
+    @colour = self.set_colour
     buffer.no_fill
     buffer.stroke 0
 
