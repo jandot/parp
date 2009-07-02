@@ -177,6 +177,37 @@ class Slice
     self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
+  # This will collapse the slice to 5 pixels (default). The space that becomes
+  # available is then evenly distributed over the other slices.
+  def collapse(length_pixel = 5)
+    original_length_pixel = @length_pixel
+    @length_pixel = length_pixel
+
+    STDERR.puts "BEFORE:"
+    self.class.sketch.slices.each do |slice|
+      STDERR.puts slice.name + "\t" + slice.formatted_resolution
+    end
+    STDERR.puts "AFTER:"
+
+    # Distribute the pixels that became available of the other slices
+    new_pixels_available = original_length_pixel - @length_pixel
+    self.class.sketch.slices.reject{|s| s == self}.each do |slice|
+      slice.length_pixel += (new_pixels_available.to_f/(self.class.sketch.slices.length - 1)).round
+    end
+    self.class.sketch.slices.each_with_index do |slice, i|
+      if i == 0
+        slice.start_pixel = 1
+      else
+        slice.start_pixel = self.class.sketch.slices[i-1].stop_pixel + 1
+      end
+      slice.stop_pixel = slice.start_pixel + slice.length_pixel - 1
+      slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+      slice.resolution = slice.length_pixel.to_f/slice.length_bp
+      slice.format_resolution
+      STDERR.puts slice.name + "\t" + slice.formatted_resolution
+    end
+  end
+
   # This draws a line around the display showing which parts are zoomed in
   def draw(buffer)
     @colour = self.set_colour

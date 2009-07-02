@@ -38,6 +38,11 @@ class MySketch < Processing::App
       @current_slice.fixed = !@current_slice.fixed
       @buffer_images[:information_panel] = self.draw_information_panel
       redraw
+    elsif key == 'c' #collapse
+      @current_slice.collapse
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
     elsif key_code
       if key_code == LEFT
         @current_slice.pan(10)
