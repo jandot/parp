@@ -63,12 +63,12 @@ class Float
 
   def pixel_to_cumulative_bp
     slice = self.class.sketch.slices.select{|s| s.start_pixel <= self}[-1]
-    return (slice.start_cumulative_bp - 1) + ((self - slice.start_pixel + 1)*slice.resolution)
+    return (slice.start_cumulative_bp - 1) + ((self - slice.start_pixel + 1).to_f/slice.resolution)
   end
 
   def cumulative_bp_to_pixel
     slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp <= self}[-1]
-    return (slice.start_pixel - 1) + ((self - slice.start_cumulative_bp + 1).to_f/slice.resolution)
+    return (slice.start_pixel - 1) + ((self - slice.start_cumulative_bp + 1)*slice.resolution)
   end
 
   def cumulative_bp_to_chr_bp

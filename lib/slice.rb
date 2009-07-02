@@ -5,7 +5,7 @@ class Slice
 #  attr_accessor :start_chr, :start_bp, :stop_chr, :stop_bp
   attr_accessor :start_cumulative_bp, :stop_cumulative_bp, :range_cumulative_bp, :length_bp #counting over the whole genome
   attr_accessor :start_pixel, :stop_pixel, :range_pixel, :length_pixel
-  attr_accessor :resolution #in bp/pixel
+  attr_accessor :resolution #in pixel/bp => high resolution = zoomed in
   attr_accessor :formatted_resolution
   attr_accessor :colour
 
@@ -18,13 +18,13 @@ class Slice
     @stop_pixel = stop_pixel
     @range_pixel = Range.new(@start_pixel, @stop_pixel)
     @length_pixel = @stop_pixel - @start_pixel + 1
-    @resolution = @length_bp.to_f/@length_pixel
+    @resolution = @length_pixel.to_f/@length_bp
     @formatted_resolution = ''
     self.format_resolution
   end
 
   def set_colour
-    red = self.class.sketch.class.map(@resolution, 1, 5000000, 255, 0)
+    red = self.class.sketch.class.map(@resolution, 1E-10, 1, 0, 255)
     @colour = self.class.sketch.color(red,0,0)
   end
 
@@ -38,12 +38,12 @@ class Slice
   end
 
   def format_resolution
-    if @resolution < 1000
-      @formatted_resolution = sprintf("%.2f", @resolution) + ' bp/pixel'
-    elsif @resolution < 1_000_000
-      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1000)) + ' kb/pixel'
+    if @resolution > 0.001
+      @formatted_resolution = sprintf("%.2f", 1.to_f/@resolution) + ' bp/pixel'
+    elsif @resolution > 0.000001
+      @formatted_resolution = sprintf("%.2f", 1.to_f/(1000*@resolution)) + ' kb/pixel'
     else
-      @formatted_resolution = sprintf("%.2f", (@resolution.to_f/1_000_000)) + ' Mb/pixel'
+      @formatted_resolution = sprintf("%.2f", 1.to_f/(1_000_000*@resolution)) + ' Mb/pixel'
     end
   end
 
@@ -54,9 +54,9 @@ class Slice
     stop_bp = (center_bp + length_bp.to_f/2).round
     new_slice = Slice.new(start_bp, stop_bp)
     new_slice.length_pixel = new_length_pixel
-    new_slice.resolution = new_slice.length_bp.to_f/new_slice.length_pixel
+    new_slice.resolution = new_slice.length_pixel.to_f/new_slice.length_bp
 
-    original_length_pixel = length_bp.to_f/slice_containing_center.resolution
+    original_length_pixel = length_bp*slice_containing_center.resolution
     pixels_not_available_for_other_slices = new_length_pixel - original_length_pixel
 
     # First calculate resolutions for all slices
@@ -74,7 +74,7 @@ class Slice
 
     self.sketch.slices.each do |slice|
       slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
-      old_length_pixels = slice.length_bp.to_f/slice.resolution
+      old_length_pixels = slice.length_bp*slice.resolution
       proportion_of_rest_of_genome = slice.length_bp.to_f/(GENOME_SIZE - length_bp + 1)
       slice.length_pixel = (old_length_pixels - proportion_of_rest_of_genome*pixels_not_available_for_other_slices).round
       
@@ -83,7 +83,7 @@ class Slice
       if slice.length_pixel == 0
         slice.length_pixel = 0.00001
       end
-      slice.resolution = slice.length_bp/slice.length_pixel
+      slice.resolution = slice.length_pixel.to_f/slice.length_bp
     end
 
     self.sketch.slices.push(new_slice)
@@ -109,7 +109,7 @@ class Slice
     output.push("START PIXEL=" + @start_pixel.to_s)
     output.push("STOP PIXEL=" + @stop_pixel.to_s)
     output.push("LENGTH PIXEL=" + @length_pixel.to_s)
-    output.push("RESOLUTION=" + @resolution.to_s + " bp/pixel")
+    output.push("RESOLUTION=" + 1.to_f/@resolution.to_s + " bp/pixel")
     return output.join("\n")
   end
 
@@ -123,20 +123,22 @@ class Slice
 
     center_bp = (@start_cumulative_bp + @length_bp.to_f/2).round
 
-    @length_bp = (@length_bp.to_f/factor).round
-    @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
-    @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
-    @resolution = @length_bp.to_f/@length_pixel
+    if (@length_bp.to_f/factor).round > 1
+      @length_bp = (@length_bp.to_f/factor).round
+      @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
+      @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
+      @resolution = @length_pixel.to_f/@length_bp
 
-    upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
-    downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
-    [upstream_slice, downstream_slice].each do |s|
-      s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
-      s.resolution = s.length_bp.to_f/s.length_pixel
-      s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
-      s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
+      upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
+      downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+      [upstream_slice, downstream_slice].each do |s|
+        s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
+        s.resolution = s.length_pixel.to_f/s.length_bp
+        s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+        s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
+      end
+      self.class.sketch.slices.each{|s| s.format_resolution}
     end
-    self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
   # Panning moves the slice window left or right by a given number of pixels. This will also change
@@ -155,8 +157,8 @@ class Slice
 
     @start_pixel += distance_pixel
     @stop_pixel += distance_pixel
-    @start_cumulative_bp += (@resolution*distance_pixel).round
-    @stop_cumulative_bp += (@resolution*distance_pixel).round
+    @start_cumulative_bp += (distance_pixel.to_f/@resolution).round
+    @stop_cumulative_bp += (distance_pixel.to_f/@resolution).round
 
     upstream_slice.stop_pixel = @start_pixel - 1
     upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
@@ -165,7 +167,7 @@ class Slice
     [upstream_slice, downstream_slice].each do |s|
       s.length_pixel = s.stop_pixel - s.start_pixel + 1
       s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
-      s.resolution = s.length_bp.to_f/s.length_pixel
+      s.resolution = s.length_pixel.to_f/s.length_bp
       s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
       s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
     end

@@ -45,7 +45,7 @@ class MySketch < Processing::App
   def find_position_under_mouse(pixel = self.pixel_under_mouse)
     return '' if @current_slice.nil?
     chromosome_under_mouse = @chromosomes.values.select{|chr| chr.start_pixel <= pixel and chr.stop_pixel >= pixel}[0]
-    bp_under_mouse = @current_slice.start_cumulative_bp + (pixel - @current_slice.start_pixel)*@current_slice.resolution
+    bp_under_mouse = @current_slice.start_cumulative_bp + (pixel - @current_slice.start_pixel).to_f/@current_slice.resolution
     bp_under_mouse -= chromosome_under_mouse.start_cumulative_bp
     return [chromosome_under_mouse.name, bp_under_mouse.floor]
   end
