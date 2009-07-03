@@ -49,6 +49,7 @@ class MySketch < Processing::App
     Read.sketch = self
     CopyNumber.sketch = self
     SegDup.sketch = self
+    Gene.sketch = self
     Slice.sketch = self
     Lens.sketch = self
 
@@ -62,6 +63,7 @@ class MySketch < Processing::App
     self.load_readpairs
     self.load_copy_numbers
     self.load_segdups
+    self.load_genes
 
     @chromosomes.values.each do |chr|
       chr.fetch_data

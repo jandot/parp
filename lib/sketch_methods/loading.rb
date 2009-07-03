@@ -43,4 +43,15 @@ class MySketch < Processing::App
       chr.segdups = chr.segdups.sort_by{|sd| sd.as_string}
     end
   end
+
+  def load_genes
+    File.open(@data_directory + '/genes.tsv').each do |line|
+      name, chr, start, stop = line.chomp.split("\t")
+      Gene.new(name, chr, start, stop)
+    end
+
+    @chromosomes.values.each do |chr|
+      chr.genes = chr.genes.sort_by{|sd| sd.as_string}
+    end
+  end
 end

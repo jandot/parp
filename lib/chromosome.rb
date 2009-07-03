@@ -3,7 +3,7 @@ class Chromosome
     attr_accessor :sketch
   end
   attr_accessor :name, :length_bp, :centromere
-  attr_accessor :reads, :copy_numbers, :segdups
+  attr_accessor :reads, :copy_numbers, :segdups, :genes
   attr_accessor :start_cumulative_bp
   attr_accessor :start_degree, :stop_degree, :length_degree
   attr_accessor :start_pixel, :stop_pixel, :length_pixel
@@ -13,6 +13,7 @@ class Chromosome
     @reads = Array.new
     @copy_numbers = Array.new
     @segdups = Array.new
+    @genes = Array.new
 
     if @name == '1'
       @start_cumulative_bp = 1
@@ -56,6 +57,13 @@ class Chromosome
     end
   end
 
+  def fetch_genes(from_pos_string, to_pos_string)
+    @genes = Gene.fetch_region(from_pos_string, to_pos_string)
+    @genes.each do |gene|
+      gene.calculate_degrees
+    end
+  end
+
   def recalculate_pixels
     @start_pixel = @start_cumulative_bp.to_f.cumulative_bp_to_pixel
     @stop_pixel = (@start_cumulative_bp + @length_bp).to_f.cumulative_bp_to_pixel
@@ -75,6 +83,13 @@ class Chromosome
       segdup.stop_pixel = (segdup.chr.start_cumulative_bp + segdup.stop).to_f.cumulative_bp_to_pixel
       segdup.start_degree = segdup.start_pixel.to_f.pixel_to_degree
       segdup.stop_degree = segdup.stop_pixel.to_f.pixel_to_degree
+    end
+
+    @genes.each do |gene|
+      gene.start_pixel = (gene.chr.start_cumulative_bp + gene.start).to_f.cumulative_bp_to_pixel
+      gene.stop_pixel = (gene.chr.start_cumulative_bp + gene.stop).to_f.cumulative_bp_to_pixel
+      gene.start_degree = gene.start_pixel.to_f.pixel_to_degree
+      gene.stop_degree = gene.stop_pixel.to_f.pixel_to_degree
     end
 
     @reads.each do |read|
@@ -126,6 +141,13 @@ class Chromosome
 
     @segdups.each do |segdup|
       self.class.sketch.pline(segdup.start_degree, segdup.stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+    end
+
+    buffer.stroke 0,0,255
+    buffer.stroke_weight 3
+
+    @genes.each do |gene|
+      self.class.sketch.pline(gene.start_degree, gene.stop_degree, self.class.sketch.diameter - 20, 0, 0, :buffer => buffer)
     end
   end
 end
