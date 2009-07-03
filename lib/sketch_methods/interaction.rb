@@ -8,10 +8,6 @@ class MySketch < Processing::App
 
   def mouse_clicked
     Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5_000_000)
-
-    @buffer_images[:zoomed] = self.draw_zoomed_buffer
-    @buffer_images[:information_panel] = self.draw_information_panel
-
     redraw
   end
 
@@ -39,29 +35,19 @@ class MySketch < Processing::App
       redraw
     elsif key == 'c' #collapse
       @current_slice.collapse
-      @buffer_images[:zoomed] = self.draw_zoomed_buffer
-      @buffer_images[:information_panel] = self.draw_information_panel
       redraw
     elsif key_code
       if key_code == LEFT
         @current_slice.pan(10)
-        @buffer_images[:zoomed] = self.draw_zoomed_buffer
-        @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       elsif key_code == RIGHT
         @current_slice.pan(10, :right)
-        @buffer_images[:zoomed] = self.draw_zoomed_buffer
-        @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       elsif key_code == UP
         @current_slice.zoom(5)
-        @buffer_images[:zoomed] = self.draw_zoomed_buffer
-        @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       elsif key_code == DOWN
         @current_slice.zoom(0.2)
-        @buffer_images[:zoomed] = self.draw_zoomed_buffer
-        @buffer_images[:information_panel] = self.draw_information_panel
         redraw
       end
     end

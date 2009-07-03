@@ -21,12 +21,14 @@ class MySketch < Processing::App
   attr_accessor :lenses
   attr_accessor :formatted_position_under_mouse
   attr_accessor :history
+  attr_accessor :initialized
 
-  attr_accessor :buffers
+  attr_accessor :buffers, :buffer_images
 
   def initialize(opts)
     super
     @data_directory = opts[:data_directory]
+    @initialized = false
   end
 
   def setup
@@ -73,6 +75,8 @@ class MySketch < Processing::App
 
     smooth
     no_loop
+
+    @initialized = true
   end
 
   def draw

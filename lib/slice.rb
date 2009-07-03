@@ -107,6 +107,9 @@ class Slice
       slice.stop_pixel = slice.start_pixel + slice.length_pixel - 1
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
     end
+
+    self.sketch.buffer_images[:zoomed] = self.sketch.draw_zoomed_buffer
+    self.sketch.buffer_images[:information_panel] = self.sketch.draw_information_panel
   end
 
   def to_s
@@ -146,6 +149,9 @@ class Slice
       s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
     end
     self.class.sketch.slices.each{|s| s.format_resolution}
+
+    self.class.sketch.buffer_images[:zoomed] = self.class.sketch.draw_zoomed_buffer
+    self.class.sketch.buffer_images[:information_panel] = self.class.sketch.draw_information_panel
   end
 
   # Panning moves the slice window left or right by a given number of pixels. This will also change
@@ -184,6 +190,9 @@ class Slice
         s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
       end
       self.class.sketch.slices.each{|s| s.format_resolution}
+
+      self.class.sketch.buffer_images[:zoomed] = self.class.sketch.draw_zoomed_buffer
+      self.class.sketch.buffer_images[:information_panel] = self.class.sketch.draw_information_panel
     end
   end
 
@@ -208,6 +217,9 @@ class Slice
       slice.resolution = slice.length_pixel.to_f/slice.length_bp
       slice.format_resolution
     end
+
+    self.class.sketch.buffer_images[:zoomed] = self.class.sketch.draw_zoomed_buffer
+    self.class.sketch.buffer_images[:information_panel] = self.class.sketch.draw_information_panel
   end
 
   # This draws a line around the display showing which parts are zoomed in
