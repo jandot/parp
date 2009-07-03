@@ -160,28 +160,34 @@ class Slice
     upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
     downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.stop_cumulative_bp}[0]
 
-    #Just so we can always add the distance_pixel
-    if direction == :left
-      distance_pixel = -distance_pixel
-    end
+    #Check if we actually _can_ pan. Can't do that if the slice in the panned
+    #direction is already completely compressed (i.e. let's say 3 pixels)
+    if ( direction == :left and upstream_slice.length_pixel > distance_pixel ) or
+       ( direction == :right and downstream_slice.length_pixel > distance_pixel )
 
-    @start_pixel += distance_pixel
-    @stop_pixel += distance_pixel
-    @start_cumulative_bp += (distance_pixel.to_f/@resolution).round
-    @stop_cumulative_bp += (distance_pixel.to_f/@resolution).round
+      #Just so we can always add the distance_pixel
+      if direction == :left
+        distance_pixel = -distance_pixel
+      end
 
-    upstream_slice.stop_pixel = @start_pixel - 1
-    upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
-    downstream_slice.start_pixel = @stop_pixel + 1
-    downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
-    [upstream_slice, downstream_slice].each do |s|
-      s.length_pixel = s.stop_pixel - s.start_pixel + 1
-      s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
-      s.resolution = s.length_pixel.to_f/s.length_bp
-      s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
-      s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
+      @start_pixel += distance_pixel
+      @stop_pixel += distance_pixel
+      @start_cumulative_bp += (distance_pixel.to_f/@resolution).round
+      @stop_cumulative_bp += (distance_pixel.to_f/@resolution).round
+
+      upstream_slice.stop_pixel = @start_pixel - 1
+      upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
+      downstream_slice.start_pixel = @stop_pixel + 1
+      downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+      [upstream_slice, downstream_slice].each do |s|
+        s.length_pixel = s.stop_pixel - s.start_pixel + 1
+        s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
+        s.resolution = s.length_pixel.to_f/s.length_bp
+        s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+        s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
+      end
+      self.class.sketch.slices.each{|s| s.format_resolution}
     end
-    self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
   # This will collapse the slice to 5 pixels (default). The space that becomes
@@ -204,7 +210,6 @@ class Slice
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
       slice.resolution = slice.length_pixel.to_f/slice.length_bp
       slice.format_resolution
-      STDERR.puts slice.name + "\t" + slice.formatted_resolution
     end
   end
 
