@@ -133,21 +133,19 @@ class Slice
 
     center_bp = (@start_cumulative_bp + @length_bp.to_f/2).round
 
-    if (@length_bp.to_f/factor).round > 1
-      @length_bp = (@length_bp.to_f/factor).round
-      @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
-      @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
-      @resolution = @length_pixel.to_f/@length_bp
+    @length_bp = (@length_bp.to_f/factor).round
+    @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
+    @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
+    @resolution = @length_pixel.to_f/@length_bp
 
-      upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
-      downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
-      [upstream_slice, downstream_slice].each do |s|
-        s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
-        s.resolution = s.length_pixel.to_f/s.length_bp
-        s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
-      end
-      self.class.sketch.slices.each{|s| s.format_resolution}
+    upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
+    downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
+    [upstream_slice, downstream_slice].each do |s|
+      s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
+      s.resolution = s.length_pixel.to_f/s.length_bp
+      s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
     end
+    self.class.sketch.slices.each{|s| s.format_resolution}
   end
 
   # Panning moves the slice window left or right by a given number of pixels. This will also change
