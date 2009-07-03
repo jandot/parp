@@ -42,12 +42,22 @@ class MySketch < Processing::App
     return angle(mouse_x, mouse_y, @origin_x, @origin_y).to_f.degree_to_pixel.floor
   end
 
+  # The bp position under the mouse is the first bp within that pixel
+  # Suppose resolution of 1 pixel per 3062214 bp. Pixel 1 therefore contains
+  # basepairs 1 - 3062214; pixel 2 contains basepairs 3062215 - 6124428. The
+  # value returned is the lower boundary: the "position_under_mouse" for
+  # pixel 2 therefore is chr1:3062215.
+  # Another example: with this resolution, pixel 81 contains part of chr1 and
+  # part of chr2 (cumulative_bp from 244977121 to 248039344). The "position_under_mouse"
+  # for that pixel is chr1:244977133. The next pixel (82) has the position_under_mouse
+  # of chr2:789,627.
   def find_position_under_mouse(pixel = self.pixel_under_mouse)
     return [nil, nil] if @current_slice.nil?
     return [nil, nil] if @current_slice.resolution < 1E-7
-    chromosome_under_mouse = @chromosomes.values.select{|chr| chr.start_pixel <= pixel and chr.stop_pixel >= pixel}[0]
+    chromosome_under_mouse = @chromosomes.values.select{|chr| chr.stop_pixel.ceil >= pixel}.sort_by{|c| c.start_cumulative_bp}[0]
     bp_under_mouse = @current_slice.start_cumulative_bp + (pixel - @current_slice.start_pixel).to_f/@current_slice.resolution
-    bp_under_mouse -= chromosome_under_mouse.start_cumulative_bp
+    bp_under_mouse -= chromosome_under_mouse.start_cumulative_bp - 1
+
     return [chromosome_under_mouse.name, bp_under_mouse.floor]
   end
 end
