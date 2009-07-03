@@ -145,7 +145,6 @@ class Slice
         s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
         s.resolution = s.length_pixel.to_f/s.length_bp
         s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
-        s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
       end
       self.class.sketch.slices.each{|s| s.format_resolution}
     end
