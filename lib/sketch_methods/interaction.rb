@@ -7,8 +7,10 @@ class MySketch < Processing::App
   end
 
   def mouse_clicked
-    Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5_000_000)
-    redraw
+    if (@radius..@radius+10).include?(dist(mouse_x, mouse_y, @origin_x, @origin_y))
+      Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5_000_000)
+      redraw
+    end
   end
 
   def key_pressed
@@ -54,6 +56,37 @@ class MySketch < Processing::App
 
     if @history.length == 20
       @history.shift
+    end
+  end
+
+  def mouse_pressed
+    @dragged_slice = nil
+    if (@radius+15..@radius+25).include?(dist(mouse_x, mouse_y, @origin_x, @origin_y))
+      @slices.reject{|s| s.start_pixel == 1}.each do |slice| # We want to disable this for the first slice
+#        STDERR.puts [slice.name, slice.start_pixel, pixel_under_mouse].join("\t")
+        if (pixel_under_mouse - slice.start_pixel).abs <= 3
+          @dragged_slice = slice
+#          STDERR.puts "Clicked on slice " + slice.name
+        end
+      end
+    end
+  end
+
+  def mouse_released
+    unless @dragged_slice.nil?
+      previous_slice = @slices.select{|s| s.stop_pixel < @dragged_slice.start_pixel}.sort_by{|s| s.start_pixel}[-1]
+      @dragged_slice.start_pixel = pixel_under_mouse
+      previous_slice.stop_pixel = pixel_under_mouse - 1
+      [@dragged_slice, previous_slice].each do |slice|
+        slice.length_pixel = slice.stop_pixel - slice.start_pixel + 1
+        slice.resolution = slice.length_pixel.to_f/slice.length_bp
+        slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+      end
+      @dragged_slice = nil
+
+      @buffer_images[:zoomed] = self.draw_zoomed_buffer
+      @buffer_images[:information_panel] = self.draw_information_panel
+      redraw
     end
   end
 end

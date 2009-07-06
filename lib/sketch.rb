@@ -10,7 +10,7 @@ DEGREE_TO_BP_FACTOR = 1.to_f/BP_TO_DEGREE_FACTOR
 
 class MySketch < Processing::App
   attr_accessor :data_directory
-  
+
   attr_accessor :f, :big_f
   attr_accessor :chromosomes, :readpairs
   attr_accessor :radius, :diameter, :circumference
@@ -19,6 +19,7 @@ class MySketch < Processing::App
   attr_accessor :formatted_position_under_mouse
   attr_accessor :history
   attr_accessor :initialized
+  attr_accessor :dragged_slice
 
   attr_accessor :buffers, :buffer_images
 
