@@ -20,6 +20,13 @@ class MySketch < Processing::App
     end
   end
 
+  def pixel2xy(pixel, r = @radius, origin_x = @origin_x, origin_y = @origin_y)
+    degree = map(pixel, 0, @circumference, 0, 360)
+    x = cx(degree, r, origin_x)
+    y = cy(degree, r, origin_y)
+    return [x,y]
+  end
+
   def angle(x = mouse_x, y = mouse_y, origin_x = 0, origin_y = 0)
     alpha = 0
     if ( x <= origin_x ) and ( y > origin_y )# II
