@@ -117,7 +117,7 @@ class Chromosome
     buffer.fill 0
     buffer.no_fill
     buffer.text_align MySketch::CENTER
-    buffer.text_font self.class.sketch.f
+    buffer.text_font self.class.sketch.f12
     buffer.text(@name, self.class.sketch.cx(@start_degree + @length_degree/2, self.class.sketch.radius + 25), self.class.sketch.cy(@start_degree + @length_degree/2, self.class.sketch.radius + 25))
     buffer.text_align MySketch::LEFT
     

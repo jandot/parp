@@ -9,6 +9,7 @@ class Slice
   attr_accessor :formatted_resolution
   attr_accessor :colour
   attr_accessor :fixed
+  attr_accessor :label
 
   def initialize(start_cumulative_bp = 1, stop_cumulative_bp = GENOME_SIZE, start_pixel = 1, stop_pixel = self.class.sketch.circumference)
     @start_cumulative_bp = start_cumulative_bp
@@ -22,6 +23,7 @@ class Slice
     @resolution = @length_pixel.to_f/@length_bp
     @fixed = false
     @formatted_resolution = ''
+    @label = nil
     self.format_resolution
   end
 
@@ -106,6 +108,15 @@ class Slice
       slice.start_pixel = previous_slice_stop_pixel + 1
       slice.stop_pixel = slice.start_pixel + slice.length_pixel - 1
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+    end
+
+    sorted_slices = self.sketch.slices.sort_by{|s| s.start_pixel}
+    sorted_slices.each_with_index do |slice, i|
+      if i == 0
+        slice.label = 'A'
+      else
+        slice.label = sorted_slices[i-1].label.succ
+      end
     end
 
     self.sketch.buffer_images[:zoomed] = self.sketch.draw_zoomed_buffer
@@ -227,7 +238,19 @@ class Slice
     buffer.stroke @colour
     buffer.stroke_weight 5
     self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
-    
+
+    # Label
+    unless @label.nil?
+      buffer.fill 0
+      buffer.no_fill
+      buffer.text_align MySketch::CENTER
+      buffer.text_font self.class.sketch.f24
+      x, y = self.class.sketch.pixel2xy(@start_pixel + @length_pixel.to_f/2, self.class.sketch.radius + 40, 0, 0)
+      buffer.text @label, x, y
+      buffer.text_font self.class.sketch.f12
+      buffer.text_align MySketch::LEFT
+    end
+
     # Handles for dragging
     buffer.no_stroke
     buffer.fill 0,0,255

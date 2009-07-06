@@ -40,12 +40,12 @@ class MySketch < Processing::App
 
       x = 20
       y = 20
-      b.text_font @big_f
+      b.text_font @f16
       b.fill 0
       y += text_ascent
       b.text "Slices:", x, y
       b.line x, y+3, x+text_width("Slices:"), y+3
-      b.text_font @f
+      b.text_font @f12
       x += 10
       @slices.each do |slice|
         start_chr, start_pos = slice.start_cumulative_bp.cumulative_bp_to_chr_bp
@@ -82,7 +82,7 @@ class MySketch < Processing::App
       stroke 100
       line @origin_x, @origin_y, cx(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius*1.1, @origin_x), cy(angle(mouse_x, mouse_y, @origin_x, @origin_y), @radius*1.1, @origin_y)
       unless @current_slice.nil?
-        text_font @big_f
+        text_font @f16
         fill 255, 200
         no_stroke
         rect mouse_x, mouse_y, [text_width(@current_slice.formatted_resolution),text_width(@formatted_position_under_mouse)].max + 10, 2*text_ascent + 10
@@ -91,7 +91,7 @@ class MySketch < Processing::App
         text @current_slice.formatted_resolution, mouse_x + 5, mouse_y + 5 + 2*text_ascent
 #        text "pixel: " + self.pixel_under_mouse.to_s, mouse_x + 5, mouse_y + 5 + 3*text_ascent
 #        text "cumul bp: " + self.pixel_under_mouse.to_f.pixel_to_cumulative_bp.to_s, mouse_x + 5, mouse_y + 5 + 4*text_ascent
-        text_font @f
+        text_font @f12
       end
     end
   end
