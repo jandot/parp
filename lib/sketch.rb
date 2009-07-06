@@ -14,11 +14,8 @@ class MySketch < Processing::App
   attr_accessor :f, :big_f
   attr_accessor :chromosomes, :readpairs
   attr_accessor :radius, :diameter, :circumference
-  attr_accessor :wheel
-  attr_accessor :displays
   attr_accessor :slices
   attr_accessor :current_slice
-  attr_accessor :lenses
   attr_accessor :formatted_position_under_mouse
   attr_accessor :history
   attr_accessor :initialized
@@ -51,7 +48,6 @@ class MySketch < Processing::App
     SegDup.sketch = self
     Gene.sketch = self
     Slice.sketch = self
-    Lens.sketch = self
 
     @slices = Array.new
     @slices.push(Slice.new)
