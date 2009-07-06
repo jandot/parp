@@ -27,8 +27,8 @@ class MySketch < Processing::App
     return [x,y]
   end
 
-  def xy2pixel(x, y, r = @radius, origin_x = @origin_x, origin_y = @origin_y)
-    return angle(mouse_x, mouse_y, @origin_x, @origin_y).to_f.degree_to_pixel.floor
+  def xy2pixel(x, y, origin_x = @origin_x, origin_y = @origin_y)
+    return angle(x, y, origin_x, origin_y).to_f.degree_to_pixel.floor
   end
 
   def angle(x = mouse_x, y = mouse_y, origin_x = 0, origin_y = 0)
@@ -50,7 +50,7 @@ class MySketch < Processing::App
   end
 
   def pixel_under_mouse
-    return xy2pixel(mouse_x, mouse_y, @radius, @origin_x, @origin_y)
+    return xy2pixel(mouse_x, mouse_y, @origin_x, @origin_y)
 #    return angle(mouse_x, mouse_y, @origin_x, @origin_y).to_f.degree_to_pixel.floor
   end
 
