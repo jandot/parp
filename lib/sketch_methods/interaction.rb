@@ -66,6 +66,7 @@ class MySketch < Processing::App
 #        STDERR.puts [slice.name, slice.start_pixel, pixel_under_mouse].join("\t")
         if (pixel_under_mouse - slice.start_pixel).abs <= 3
           @dragged_slice = slice
+          loop
 #          STDERR.puts "Clicked on slice " + slice.name
         end
       end
@@ -83,6 +84,7 @@ class MySketch < Processing::App
         slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
       end
       @dragged_slice = nil
+      no_loop
 
       @buffer_images[:zoomed] = self.draw_zoomed_buffer
       @buffer_images[:information_panel] = self.draw_information_panel

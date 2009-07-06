@@ -84,6 +84,14 @@ class MySketch < Processing::App
     image(@buffer_images[:information_panel],width - 350,0)
 
     self.draw_line_following_mouse
+
+    unless @dragged_slice.nil?
+      no_stroke
+      fill 0,0,255
+      pixel_on_circle = xy2pixel(mouse_x, mouse_y)
+      x, y = pixel2xy(pixel_on_circle, @radius + 20)
+      ellipse x, y, 10, 10
+    end
   end
 
 end
