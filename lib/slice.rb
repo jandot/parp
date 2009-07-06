@@ -159,8 +159,6 @@ class Slice
   # When panning left, the bp boundary is moved so the basepairs upstream of the original boundary
   # are shown. As a result, the slice just upstream of the active slice will loose those basepairs.
   # Slices that are
-  # TODO: panning should be in bp instead of pixels. Pixel boundaries should not
-  # change.
   def pan(direction = :left, distance_bp = (self.length_bp.to_f/5).round)
     upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
     downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.stop_cumulative_bp}[0]
