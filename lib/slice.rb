@@ -227,5 +227,11 @@ class Slice
     buffer.stroke @colour
     buffer.stroke_weight 5
     self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+    
+    # Handles for dragging
+    buffer.no_stroke
+    buffer.fill 0,0,255
+    x,y = self.class.sketch.pixel2xy(@start_pixel, self.class.sketch.radius + 20, 0,0)
+    buffer.ellipse x, y, 10, 10
   end
 end
