@@ -45,7 +45,7 @@ class MySketch < Processing::App
   end
 
   def load_genes
-    File.open(@data_directory + '/genes.tsv').each do |line|
+    File.open(@data_directory + '/genes.txt').each do |line|
       name, chr, start, stop = line.chomp.split("\t")
       Gene.new(name, chr, start, stop)
     end
