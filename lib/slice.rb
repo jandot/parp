@@ -154,42 +154,36 @@ class Slice
     self.class.sketch.buffer_images[:information_panel] = self.class.sketch.draw_information_panel
   end
 
-  # Panning moves the slice window left or right by a given number of pixels. This will also change
-  # the bp contents of the slice.
+  # Panning moves the slice window left or right by a given number of basepairs.
+  # Pixel boundaries do not change.
   # When panning left, the bp boundary is moved so the basepairs upstream of the original boundary
   # are shown. As a result, the slice just upstream of the active slice will loose those basepairs.
   # Slices that are
   # TODO: panning should be in bp instead of pixels. Pixel boundaries should not
   # change.
-  def pan(distance_pixel = 10, direction = :left)
+  def pan(direction = :left, distance_bp = (self.length_bp.to_f/5).round)
     upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
     downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.stop_cumulative_bp}[0]
 
     #Check if we actually _can_ pan. Can't do that if the slice in the panned
-    #direction is already completely compressed (i.e. let's say 3 pixels)
-    if ( direction == :left and upstream_slice.length_pixel > distance_pixel ) or
-       ( direction == :right and downstream_slice.length_pixel > distance_pixel )
+    #direction has less basepairs than what we want to add to our slice in focus
+    if ( direction == :left and upstream_slice.length_bp > distance_bp ) or
+       ( direction == :right and downstream_slice.length_bp > distance_bp )
 
       #Just so we can always add the distance_pixel
       if direction == :left
-        distance_pixel = -distance_pixel
+        distance_bp = -distance_bp
       end
 
-      @start_pixel += distance_pixel
-      @stop_pixel += distance_pixel
-      @start_cumulative_bp += (distance_pixel.to_f/@resolution).round
-      @stop_cumulative_bp += (distance_pixel.to_f/@resolution).round
+      @start_cumulative_bp += distance_bp
+      @stop_cumulative_bp += distance_bp
 
-      upstream_slice.stop_pixel = @start_pixel - 1
       upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
-      downstream_slice.start_pixel = @stop_pixel + 1
       downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
       [upstream_slice, downstream_slice].each do |s|
-        s.length_pixel = s.stop_pixel - s.start_pixel + 1
         s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
         s.resolution = s.length_pixel.to_f/s.length_bp
         s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
-        s.range_pixel = Range.new(s.start_pixel, s.stop_pixel)
       end
       self.class.sketch.slices.each{|s| s.format_resolution}
 

@@ -38,10 +38,10 @@ class MySketch < Processing::App
       redraw
     elsif key_code
       if key_code == LEFT
-        @current_slice.pan(10)
+        @current_slice.pan(:left)
         redraw
       elsif key_code == RIGHT
-        @current_slice.pan(10, :right)
+        @current_slice.pan(:right)
         redraw
       elsif key_code == UP
         @current_slice.zoom(5)
