@@ -98,7 +98,7 @@ class MySketch < Processing::App
       start_bar = width.to_f/2
       no_fill
       255.times do |number|
-        stroke 255-number, 0, 0
+        stroke 255, number, number
         line start_bar + number, height - 50, start_bar + number, height - 20
       end
       no_stroke
