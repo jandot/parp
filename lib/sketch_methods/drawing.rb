@@ -36,41 +36,34 @@ class MySketch < Processing::App
 
       b.fill 250
       b.no_stroke
-      b.rect 20,20,b.width-40,b.height-40
+      b.rect 10,10,b.width-20,b.height-20
 
       x = 20
       y = 20
-      b.text_font @f16
       b.fill 0
-      y += text_ascent
-      b.text "Slices:", x, y
-      b.line x, y+3, x+text_width("Slices:"), y+3
-      b.text_font @f12
-      x += 10
       @slices.each do |slice|
         start_chr, start_pos = slice.start_cumulative_bp.cumulative_bp_to_chr_bp
         start_text = start_chr.name + ':' + start_pos.format
         stop_chr, stop_pos = slice.stop_cumulative_bp.cumulative_bp_to_chr_bp
         stop_text = stop_chr.name + ':' + stop_pos.format
 
+        b.text_font @f24
+        b.text slice.label, x, y + 50 unless slice.label.nil?
+        b.text_font @f12
         y += text_ascent + 5
-        b.text "Slice", x, y
-        b.fill slice.colour
-        b.rect(x + text_width("Slice "), y - text_ascent, text_ascent, text_ascent)
-        b.fill 0
         x += 5
         y += text_ascent + 3
-        b.text "Locus = " + start_text + '-' + stop_text, x, y
+        b.text "Locus = " + start_text + '-' + stop_text, x+20, y
         y += text_ascent + 3
-        b.text  "Length (bp) = " + slice.length_bp.format, x, y
+        b.text  "Length (bp) = " + slice.length_bp.format, x+20, y
         y += text_ascent + 3
-        b.text  "Pixel range = " + slice.start_pixel.format + '-' + slice.stop_pixel.format, x, y
+        b.text  "Pixel range = " + slice.start_pixel.format + '-' + slice.stop_pixel.format, x+20, y
         y += text_ascent + 3
-        b.text  "Length (pixel) = " + slice.length_pixel.format, x, y
+        b.text  "Length (pixel) = " + slice.length_pixel.format, x+20, y
         y += text_ascent + 3
-        b.text  "Resolution = " + slice.formatted_resolution, x, y
+        b.text  "Resolution = " + slice.formatted_resolution, x+20, y
         y += text_ascent + 3
-        b.text "Fixed? = " + slice.fixed.to_s, x, y
+        b.text "Fixed? = " + slice.fixed.to_s, x+20, y
         x -= 5
       end
     end
