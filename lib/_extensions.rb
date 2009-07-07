@@ -1,4 +1,4 @@
-require 'bsearch'
+require File.dirname(__FILE__) + '/../vendor/bsearch'
 
 class String
   def pad(filler, len)

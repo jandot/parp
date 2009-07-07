@@ -23,13 +23,9 @@ class MySketch < Processing::App
 
   attr_accessor :buffers, :buffer_images
 
-  def initialize(opts)
-    super
-    @data_directory = opts[:data_directory]
-    @initialized = false
-  end
-
   def setup
+    @initialized = false
+
     @diameter = [(@height*0.80).to_i, (@width*0.4).to_i].min
     @radius = @diameter/2
     @circumference = (2*3.141592*@radius).ceil

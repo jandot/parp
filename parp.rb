@@ -1,7 +1,10 @@
 require 'rubygems'
-require 'ruby-processing'
+#require '/Users/ja8/LocalDocuments/Projects/ruby-processing/lib/ruby-processing.rb'
+#require 'ruby-processing'
 require 'yaml'
 
+class MySketch < Processing::App
+end
 require File.dirname(__FILE__) + '/lib/sketch.rb'
 
 CONFIG_FILE = File.dirname(__FILE__) + '/config.yml'
