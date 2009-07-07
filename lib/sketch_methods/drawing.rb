@@ -30,7 +30,7 @@ class MySketch < Processing::App
   end
 
   def draw_information_panel
-    buffer_information_panel = buffer(300, self.height, JAVA2D) do |b|
+    buffer_information_panel = buffer(500, self.height, JAVA2D) do |b|
       b.background 255
       b.smooth
 
@@ -38,8 +38,36 @@ class MySketch < Processing::App
       b.no_stroke
       b.rect 10,10,b.width-20,b.height-20
 
-      x = 20
-      y = 20
+      b.text_font @f12
+      x = 80
+      y = (b.height.to_f/2 - 255).floor
+      b.no_fill
+      510.times do |number|
+        b.stroke 255, number.to_f/2, number.to_f/2
+        b.line x, y + number, x + 10, y + number
+      end
+      b.no_stroke
+      b.fill 0
+      b.text_align RIGHT
+      x = 75
+      y = map(Math.log(1), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "1bp/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-1), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "10bp/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-2), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "100bp/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-3), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "1kb/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-4), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "10kb/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-5), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text "100kb/pixel", x, y + text_ascent.to_f/2
+      y = map(Math.log(1E-6), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+      b.text ">1Mb/pixel", x, y + text_ascent.to_f/2
+
+      b.text_align LEFT
+      x = 200
+      slice_start_y = 20
       b.fill 0
       @slices.each do |slice|
         start_chr, start_pos = slice.start_cumulative_bp.cumulative_bp_to_chr_bp
@@ -47,6 +75,7 @@ class MySketch < Processing::App
         stop_chr, stop_pos = slice.stop_cumulative_bp.cumulative_bp_to_chr_bp
         stop_text = stop_chr.name + ':' + stop_pos.format
 
+        y = slice_start_y
         b.text_font @f24
         b.text slice.label, x, y + 50 unless slice.label.nil?
         b.text_font @f12
@@ -64,9 +93,29 @@ class MySketch < Processing::App
         b.text  "Resolution = " + slice.formatted_resolution, x+20, y
         y += text_ascent + 3
         b.text "Fixed? = " + slice.fixed.to_s, x+20, y
+
+        # Draw line from slice description to zoom scale
+        y_on_scale = nil
+        if slice.resolution < 1E-6
+          y_on_scale = b.height.to_f/2 + 255
+        elsif slice.resolution > 1
+          y_on_scale = b.height.to_f/2 - 255
+        else
+          y_on_scale = map(Math.log(slice.resolution), Math.log(1E-6), Math.log(1), b.height.to_f/2 + 255, b.height.to_f/2 - 255)
+        end
+        b.ellipse x, slice_start_y + 60, 3, 3
+        b.ellipse 100, y_on_scale, 3, 3
+        b.no_fill
+        b.stroke rand(200)
+        b.bezier x, slice_start_y + 60, x-50, slice_start_y + 60, 150, y_on_scale, 100, y_on_scale
+        b.no_stroke
+        b.fill 0
+
         x -= 5
+        slice_start_y += 7*text_ascent + 23
       end
     end
+    
     return buffer_information_panel.get(0,0,buffer_information_panel.width, buffer_information_panel.height)
   end
 

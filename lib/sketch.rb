@@ -78,7 +78,7 @@ class MySketch < Processing::App
   def draw
     background 255
     image(@buffer_images[:zoomed],0,0)
-    image(@buffer_images[:information_panel],width - 350,0)
+    image(@buffer_images[:information_panel],width - 550,0)
 
     self.draw_line_following_mouse
 
@@ -90,36 +90,6 @@ class MySketch < Processing::App
       ellipse x, y, 10, 10
     end
 
-    unless @slices.length == 1
-      start_bar = width.to_f/2
-      no_fill
-      255.times do |number|
-        stroke 255, number, number
-        line start_bar + number, height - 50, start_bar + number, height - 20
-      end
-      no_stroke
-      fill 0
-      text "1bp/pixel", start_bar - text_width("1bp/pixel") - 5, height - 35
-      text ">1Mb/pixel", start_bar + 255 + 5, height - 35
-      
-      @slices.each do |slice|
-        x = nil
-        if slice.resolution < 1E-6
-          x = start_bar + 255
-        elsif slice.resolution > 1
-          x = start_bar
-        else
-          x = map(Math.log(slice.resolution), Math.log(1E-6), Math.log(1), start_bar + 255, start_bar)
-        end
-
-        no_fill
-        stroke 0
-        line x, height - 60, x, height - 50
-        no_stroke
-        fill 0
-        text slice.label, x, height - 60
-      end
-    end
   end
 
 end
