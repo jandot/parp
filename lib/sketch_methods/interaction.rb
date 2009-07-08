@@ -7,8 +7,9 @@ class MySketch < Processing::App
   end
 
   def mouse_clicked
-    if (@radius..@radius+10).include?(dist(mouse_x, mouse_y, @origin_x, @origin_y))
-      Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, 5_000_000)
+    if (@radius-10..@radius+10).include?(dist(mouse_x, mouse_y, @origin_x, @origin_y))
+      length_bp =(@current_slice.length_bp.to_f/100).round
+      Slice.add(self.pixel_under_mouse.pixel_to_cumulative_bp, length_bp)
       redraw
     end
   end
