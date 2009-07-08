@@ -37,7 +37,7 @@ class MySketch < Processing::App
     @seq_colour = Hash.new
     @seq_colour['A'] = color(0,255,0)
     @seq_colour['C'] = color(0,0,255)
-    @seq_colour['G'] = color(0)
+    @seq_colour['G'] = color(255,255,0)
     @seq_colour['T'] = color(255,0,0)
 
     @f12 = create_font("Arial", 12)
