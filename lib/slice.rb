@@ -10,6 +10,7 @@ class Slice
   attr_accessor :colour
   attr_accessor :fixed
   attr_accessor :label
+  attr_accessor :sequence
 
   def initialize(start_cumulative_bp = 1, stop_cumulative_bp = GENOME_SIZE, start_pixel = 1, stop_pixel = self.class.sketch.circumference)
     @start_cumulative_bp = start_cumulative_bp
@@ -25,6 +26,30 @@ class Slice
     @formatted_resolution = ''
     @label = nil
     self.format_resolution
+    self.fetch_sequence
+  end
+
+  def fetch_sequence
+    @sequence = nil
+    if @resolution > 1
+      start_chr = self.class.sketch.chromosomes.values.select{|c| c.start_cumulative_bp <= @start_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[-1]
+#      stop_chr = self.class.sketch.chromosomes.values.select{|c| c.stop_cumulative_bp >= @stop_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[0]
+#      if start_chr.name == stop_chr.name
+        start_bp = @start_cumulative_bp - start_chr.start_cumulative_bp
+        stop_bp = @stop_cumulative_bp - start_chr.start_cumulative_bp
+        locus_string = start_chr.name + ':' + start_bp.to_s + '-' + stop_bp.to_s
+        query = "http://www.ensembl.org/Homo_sapiens/Location/Export?output=fasta;r=#{locus_string};strand=1;genomic=unmasked;_format=Text"
+        seq = ''
+        open(query) do |f|
+          f.each_line do |line|
+            next if line =~ /^>/
+            seq.concat(line.chomp)
+          end
+        end
+        @sequence = seq
+#      end
+    end
+    return @sequence
   end
 
   def set_colour
@@ -108,6 +133,7 @@ class Slice
       slice.start_pixel = previous_slice_stop_pixel + 1
       slice.stop_pixel = slice.start_pixel + slice.length_pixel - 1
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
+      slice.fetch_sequence
     end
 
     sorted_slices = self.sketch.slices.sort_by{|s| s.start_pixel}
@@ -151,6 +177,7 @@ class Slice
     @start_cumulative_bp = (center_bp - @length_bp.to_f/2).round
     @stop_cumulative_bp = (center_bp + @length_bp.to_f/2 - 1).round
     @resolution = @length_pixel.to_f/@length_bp
+    self.fetch_sequence
 
     upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
     downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
@@ -158,6 +185,7 @@ class Slice
       s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
       s.resolution = s.length_pixel.to_f/s.length_bp
       s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+      s.fetch_sequence
     end
     self.class.sketch.slices.each{|s| s.format_resolution}
 
@@ -186,6 +214,7 @@ class Slice
 
       @start_cumulative_bp += distance_bp
       @stop_cumulative_bp += distance_bp
+      self.fetch_sequence
 
       upstream_slice.stop_cumulative_bp = @start_cumulative_bp - 1
       downstream_slice.start_cumulative_bp = @stop_cumulative_bp + 1
@@ -193,6 +222,7 @@ class Slice
         s.length_bp = s.stop_cumulative_bp - s.start_cumulative_bp + 1
         s.resolution = s.length_pixel.to_f/s.length_bp
         s.range_cumulative_bp = Range.new(s.start_cumulative_bp, s.stop_cumulative_bp)
+        s.fetch_sequence
       end
       self.class.sketch.slices.each{|s| s.format_resolution}
 
@@ -221,6 +251,7 @@ class Slice
       slice.range_pixel = Range.new(slice.start_pixel, slice.stop_pixel)
       slice.resolution = slice.length_pixel.to_f/slice.length_bp
       slice.format_resolution
+      slice.fetch_sequence
     end
 
     self.class.sketch.buffer_images[:zoomed] = self.class.sketch.draw_zoomed_buffer
@@ -235,9 +266,22 @@ class Slice
 
     start_degree = @start_pixel.to_f.pixel_to_degree
     stop_degree = @stop_pixel.to_f.pixel_to_degree
-    buffer.stroke @colour
-    buffer.stroke_weight 5
-    self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+    if @sequence.nil?
+      buffer.stroke @colour
+      buffer.stroke_weight 5
+      self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter + 20, 0, 0, :buffer => buffer)
+    else
+      pixels_per_base = @length_pixel.to_f/@sequence.length
+      pixel = @start_pixel
+      buffer.no_fill
+      @sequence.split(//).each do |base|
+        start_degree = [@start_pixel,pixel].max.to_f.pixel_to_degree
+        stop_degree = [@stop_pixel,pixel + pixels_per_base].min.to_f.pixel_to_degree
+        buffer.stroke self.class.sketch.seq_colour[base]
+        self.class.sketch.pline(start_degree, stop_degree, self.class.sketch.diameter, 0, 0, :buffer => buffer)
+        pixel += pixels_per_base
+      end
+    end
 
     # Label
     unless @label.nil?

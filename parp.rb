@@ -2,6 +2,7 @@ require 'rubygems'
 #require '/Users/ja8/LocalDocuments/Projects/ruby-processing/lib/ruby-processing.rb'
 #require 'ruby-processing'
 require 'yaml'
+require 'open-uri'
 
 class MySketch < Processing::App
 end

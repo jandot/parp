@@ -137,4 +137,25 @@ class MySketch < Processing::App
       end
     end
   end
+
+  def draw_sequence_colour_scheme
+    buffer_sequence_colour_scheme = buffer(100, 100, JAVA2D) do |b|
+      b.background 255
+      b.smooth
+
+      b.no_stroke
+      b.text_font @f12
+      x = 10
+      y = 10
+      @seq_colour.keys.sort.each do |base|
+        b.fill @seq_colour[base]
+        b.rect x, y, 10, 10
+        b.fill 0
+        b.text base, x+15, y + text_ascent
+        y += 15
+      end
+    end
+
+    return buffer_sequence_colour_scheme.get(0,0,buffer_sequence_colour_scheme.width, buffer_sequence_colour_scheme.height)
+  end
 end

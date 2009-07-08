@@ -20,6 +20,7 @@ class MySketch < Processing::App
   attr_accessor :history
   attr_accessor :initialized
   attr_accessor :dragged_slice
+  attr_accessor :seq_colour
 
   attr_accessor :buffers, :buffer_images
 
@@ -32,6 +33,12 @@ class MySketch < Processing::App
 
     @origin_x = @radius + 50
     @origin_y = height/2
+
+    @seq_colour = Hash.new
+    @seq_colour['A'] = color(0,255,0)
+    @seq_colour['C'] = color(0,0,255)
+    @seq_colour['G'] = color(0)
+    @seq_colour['T'] = color(255,0,0)
 
     @f12 = create_font("Arial", 12)
     @f16 = create_font("Arial", 16)
@@ -47,10 +54,6 @@ class MySketch < Processing::App
     Gene.sketch = self
     Slice.sketch = self
 
-    @slices = Array.new
-    @slices.push(Slice.new)
-    @current_slice = @slices[0]
-
     @history = Array.new
 
     self.load_chromosomes
@@ -63,9 +66,14 @@ class MySketch < Processing::App
       chr.fetch_data
     end
 
+    @slices = Array.new
+    @slices.push(Slice.new)
+    @current_slice = @slices[0]
+
     @buffer_images = Hash.new
     @buffer_images[:zoomed] = self.draw_zoomed_buffer
     @buffer_images[:information_panel] = self.draw_information_panel
+    @buffer_images[:sequence_colour_scheme] = self.draw_sequence_colour_scheme
 
     @formatted_position_under_mouse = ''
 
@@ -79,6 +87,7 @@ class MySketch < Processing::App
     background 255
     image(@buffer_images[:zoomed],0,0)
     image(@buffer_images[:information_panel],width - 550,0)
+    image(@buffer_images[:sequence_colour_scheme], 20, height - 100)
 
     self.draw_line_following_mouse
 
@@ -89,7 +98,6 @@ class MySketch < Processing::App
       x, y = pixel2xy(pixel_on_circle, @radius + 20)
       ellipse x, y, 10, 10
     end
-
   end
 
 end
