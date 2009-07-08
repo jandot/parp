@@ -1,7 +1,7 @@
 ---
 width: 1280
 height: 800
-data_directory: 'data/development'
+data_directory: 'data/example'
 loci:
   - chromosome: 2
     start: 132_500_000
