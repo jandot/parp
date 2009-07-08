@@ -1,0 +1,3 @@
+
+org.jruby.Main lib/ruby-processing/runners/run.rb lib/parp.rb
+core/jruby-complete.jar
