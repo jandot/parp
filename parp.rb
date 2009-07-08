@@ -1,6 +1,3 @@
-require 'rubygems'
-#require '/Users/ja8/LocalDocuments/Projects/ruby-processing/lib/ruby-processing.rb'
-#require 'ruby-processing'
 require 'yaml'
 require 'open-uri'
 
@@ -8,7 +5,7 @@ class MySketch < Processing::App
 end
 require File.dirname(__FILE__) + '/lib/sketch.rb'
 
-CONFIG_FILE = File.dirname(__FILE__) + '/config.yml'
+CONFIG_FILE = File.dirname(__FILE__) + '/data/config.yml'
 
 config = YAML::load(File.open(CONFIG_FILE))
 
