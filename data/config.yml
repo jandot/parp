@@ -3,12 +3,6 @@ width: 1280
 height: 800
 data_directory: 'data/example'
 loci:
-#  - chromosome: 2
-#    start: 132_500_000
-#    stop: 133_000_000
-#  - chromosome: 16
-#    start: 33_650_000
-#    stop: 34_000_000
   - chromosome: 8
     start: 55812601
     stop: 70841329
