@@ -139,7 +139,7 @@ class MySketch < Processing::App
   end
 
   def draw_sequence_colour_scheme
-    buffer_sequence_colour_scheme = buffer(100, 100, JAVA2D) do |b|
+    buffer_sequence_colour_scheme = buffer(200, 100, JAVA2D) do |b|
       b.background 255
       b.smooth
 
@@ -154,6 +154,9 @@ class MySketch < Processing::App
         b.text base, x+15, y + text_ascent
         y += 15
       end
+
+      directions = "LEFT => clockwise\nRIGHT => counterclockwise"
+      b.text directions, 50, 50
     end
 
     return buffer_sequence_colour_scheme.get(0,0,buffer_sequence_colour_scheme.width, buffer_sequence_colour_scheme.height)
