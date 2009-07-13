@@ -32,22 +32,26 @@ class Slice
   def fetch_sequence
     @sequence = nil
     if @resolution > 1
-      start_chr = self.class.sketch.chromosomes.values.select{|c| c.start_cumulative_bp <= @start_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[-1]
-#      stop_chr = self.class.sketch.chromosomes.values.select{|c| c.stop_cumulative_bp >= @stop_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[0]
-#      if start_chr.name == stop_chr.name
-        start_bp = @start_cumulative_bp - start_chr.start_cumulative_bp
-        stop_bp = @stop_cumulative_bp - start_chr.start_cumulative_bp
-        locus_string = start_chr.name + ':' + start_bp.to_s + '-' + stop_bp.to_s
-        query = "http://www.ensembl.org/Homo_sapiens/Location/Export?output=fasta;r=#{locus_string};strand=1;genomic=unmasked;_format=Text"
-        seq = ''
-        open(query) do |f|
-          f.each_line do |line|
-            next if line =~ /^>/
-            seq.concat(line.chomp)
+      begin
+        start_chr = self.class.sketch.chromosomes.values.select{|c| c.start_cumulative_bp <= @start_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[-1]
+  #      stop_chr = self.class.sketch.chromosomes.values.select{|c| c.stop_cumulative_bp >= @stop_cumulative_bp}.sort_by{|c| c.start_cumulative_bp}[0]
+  #      if start_chr.name == stop_chr.name
+          start_bp = @start_cumulative_bp - start_chr.start_cumulative_bp
+          stop_bp = @stop_cumulative_bp - start_chr.start_cumulative_bp
+          locus_string = start_chr.name + ':' + start_bp.to_s + '-' + stop_bp.to_s
+          query = "http://www.ensembl.org/Homo_sapiens/Location/Export?output=fasta;r=#{locus_string};strand=1;genomic=unmasked;_format=Text"
+          seq = ''
+          open(query) do |f|
+            f.each_line do |line|
+              next if line =~ /^>/
+              seq.concat(line.chomp)
+            end
           end
-        end
-        @sequence = seq
-#      end
+          @sequence = seq
+  #      end
+      rescue
+        STDERR.puts "WARNING: Couldn't fetch sequence"
+      end
     end
     return @sequence
   end
