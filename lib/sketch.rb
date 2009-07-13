@@ -21,8 +21,12 @@ class MySketch < Processing::App
   attr_accessor :initialized
   attr_accessor :dragged_slice
   attr_accessor :seq_colour
+  attr_accessor :right_mouse_click_menu_visible
+  attr_accessor :selected_pixel
 
   attr_accessor :buffers, :buffer_images
+
+  attr_accessor :user_action
 
   def setup
     @initialized = false
@@ -74,12 +78,16 @@ class MySketch < Processing::App
     @buffer_images[:zoomed] = self.draw_zoomed_buffer
     @buffer_images[:information_panel] = self.draw_information_panel
     @buffer_images[:sequence_colour_scheme] = self.draw_sequence_colour_scheme
+    @buffer_images[:right_mouse_click_menu] = self.draw_right_mouse_click_menu
 
     @formatted_position_under_mouse = ''
+    @right_mouse_click_menu_visible = false
+    @selected_pixel = nil
 
     smooth
     no_loop
 
+    @user_action = nil
     @initialized = true
   end
 
@@ -89,15 +97,18 @@ class MySketch < Processing::App
     image(@buffer_images[:information_panel],width - 550,0)
     image(@buffer_images[:sequence_colour_scheme], 20, height - 100)
 
-    self.draw_line_following_mouse
-
-    unless @dragged_slice.nil?
+    if @user_action == :moving_slice_boundary
       no_stroke
       fill 0,0,255
       pixel_on_circle = xy2pixel(mouse_x, mouse_y)
       x, y = pixel2xy(pixel_on_circle, @radius + 20)
       ellipse x, y, 10, 10
     end
-  end
 
+    # Show right mouse click menu
+    if @right_mouse_click_menu_visible
+      image(@buffer_images[:right_mouse_click_menu], 100, 100)
+    else
+      self.draw_line_following_mouse
+    end
 end

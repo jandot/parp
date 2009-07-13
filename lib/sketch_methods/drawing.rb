@@ -161,4 +161,21 @@ class MySketch < Processing::App
 
     return buffer_sequence_colour_scheme.get(0,0,buffer_sequence_colour_scheme.width, buffer_sequence_colour_scheme.height)
   end
+
+  def draw_right_mouse_click_menu
+    b = create_graphics 400, 400, JAVA2D
+    b.begin_draw
+      b.background 255, 200
+      b.smooth
+      b.stroke 255, 0, 0
+      b.stroke_weight 3
+      b.no_fill
+      b.rect 20, 20, 380, 380
+      b.fill 0
+      b.text_font @f12
+      b.text "Test text", 100, 100
+      b.text "Test text", 300, 300
+    b.end_draw
+    return b
+  end
 end

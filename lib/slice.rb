@@ -158,7 +158,7 @@ class Slice
     output.push("START PIXEL=" + @start_pixel.to_s)
     output.push("STOP PIXEL=" + @stop_pixel.to_s)
     output.push("LENGTH PIXEL=" + @length_pixel.to_s)
-    output.push("RESOLUTION=" + 1.to_f/@resolution.to_s + " bp/pixel")
+    output.push("RESOLUTION=" + (1.to_f/@resolution).to_s + " bp/pixel")
     output.push("FIXED?=" + @fixed.to_s)
     return output.join("\n")
   end
@@ -199,6 +199,7 @@ class Slice
   # are shown. As a result, the slice just upstream of the active slice will loose those basepairs.
   # Slices that are
   def pan(direction = :left, distance_bp = (self.length_bp.to_f/5).round)
+    distance_bp = distance_bp.round
     upstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp < @start_cumulative_bp}.sort_by{|s| s.start_cumulative_bp}[-1]
     downstream_slice = self.class.sketch.slices.select{|s| s.start_cumulative_bp > @start_cumulative_bp}.sort_by{|s| s.stop_cumulative_bp}[0]
 
