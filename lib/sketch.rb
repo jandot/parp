@@ -111,4 +111,5 @@ class MySketch < Processing::App
     else
       self.draw_line_following_mouse
     end
+  end
 end
