@@ -1,9 +1,11 @@
 class MySketch < Processing::App
   def load_chromosomes
+    @genome_size = 0
     @chromosomes = Hash.new
     File.open(@data_directory + '/meta_data.tsv').each do |line|
-      chr, len, centr_start, centr_stop = line.chomp.split("\t")
-      @chromosomes[chr] = Chromosome.new(chr, len.to_i, centr_start.to_i)
+      chr, len = line.chomp.split("\t")
+      @chromosomes[chr] = Chromosome.new(chr, len.to_i)
+      @genome_size += len.to_i
     end
   end
 

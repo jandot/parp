@@ -2,14 +2,14 @@ class Chromosome
   class << self
     attr_accessor :sketch
   end
-  attr_accessor :name, :length_bp, :centromere
+  attr_accessor :name, :length_bp
   attr_accessor :reads, :copy_numbers, :segdups, :genes
   attr_accessor :start_cumulative_bp
   attr_accessor :start_degree, :stop_degree, :length_degree
   attr_accessor :start_pixel, :stop_pixel, :length_pixel
 
-  def initialize(name, length, centromere)
-    @name, @length_bp, @centromere = name, length, centromere
+  def initialize(name, length)
+    @name, @length_bp = name, length
     @reads = Array.new
     @copy_numbers = Array.new
     @segdups = Array.new
@@ -21,8 +21,6 @@ class Chromosome
       prev_chr = self.class.sketch.chromosomes[(@name.to_i - 1).to_s]
       @start_cumulative_bp = prev_chr.start_cumulative_bp + prev_chr.length_bp + 1
     end
-
-#    STDERR.puts "CHROMOSOME " + @name.to_s + " OFFSET = " + @start_cumulative_bp.to_s + " bp"
   end
 
   def fetch_data

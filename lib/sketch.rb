@@ -2,15 +2,11 @@
 Dir[File.dirname(__FILE__) + '/*.rb'].each {|file| require file unless file == __FILE__}
 Dir[File.dirname(__FILE__) + '/sketch_methods/*.rb'].each {|file| require file }
 
-GENOME_SIZE = 3_080_587_442
-
-# To go from bp to degree: value*BP_TO_DEGREE_FACTOR
-BP_TO_DEGREE_FACTOR = 360.to_f/GENOME_SIZE.to_f
-DEGREE_TO_BP_FACTOR = 1.to_f/BP_TO_DEGREE_FACTOR
-
 class MySketch < Processing::App
   attr_accessor :data_directory
 
+  attr_accessor :genome_size
+  attr_accessor :bp_to_degree_factor, :degree_to_bp_factor
   attr_accessor :f12, :f16, :f24
   attr_accessor :chromosomes, :readpairs
   attr_accessor :radius, :diameter, :circumference
@@ -65,6 +61,9 @@ class MySketch < Processing::App
     self.load_copy_numbers
     self.load_segdups
     self.load_genes
+
+    @bp_to_degree_factor = 360.to_f/@genome_size
+    @degree_to_bp_factor = 1.to_f/@bp_to_degree_factor
 
     @chromosomes.values.each do |chr|
       chr.fetch_data

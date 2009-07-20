@@ -1,10 +1,10 @@
 module IsLocus
   def calculate_degrees
     if self.respond_to?('degree')
-      @degree = (@chr.start_cumulative_bp + @pos)*BP_TO_DEGREE_FACTOR
+      @degree = (@chr.start_cumulative_bp + @pos)*self.class.sketch.bp_to_degree_factor
     else
-      @start_degree = (@chr.start_cumulative_bp + @start)*BP_TO_DEGREE_FACTOR
-      @stop_degree = (@chr.start_cumulative_bp + @stop)*BP_TO_DEGREE_FACTOR
+      @start_degree = (@chr.start_cumulative_bp + @start)*self.class.sketch.bp_to_degree_factor
+      @stop_degree = (@chr.start_cumulative_bp + @stop)*self.class.sketch.bp_to_degree_factor
     end
   end
 
