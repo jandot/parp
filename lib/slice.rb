@@ -115,7 +115,7 @@ class Slice
     self.sketch.slices.each do |slice|
       slice.range_cumulative_bp = Range.new(slice.start_cumulative_bp, slice.stop_cumulative_bp)
       old_length_pixels = slice.length_bp*slice.resolution
-      proportion_of_rest_of_genome = slice.length_bp.to_f/(self.class.sketch.genome_size - length_bp + 1)
+      proportion_of_rest_of_genome = slice.length_bp.to_f/(self.sketch.genome_size - length_bp + 1)
       slice.length_pixel = (old_length_pixels - proportion_of_rest_of_genome*pixels_not_available_for_other_slices).round
       
       # We have to check that the slice is not smaller than 1 pixel (i.e. 0 pixels) because that'll give
